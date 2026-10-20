@@ -124,7 +124,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   width: calc(32px * var(--s));
   height: calc(32px * var(--s));
   background:
-    url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(320px * var(--s)) calc(96px * var(--s)) no-repeat,
+    url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(480px * var(--s)) calc(96px * var(--s)) no-repeat,
     linear-gradient(#8fd3ff 70%, #3f9b3a 70%); /* palette sky + grass: a day game */
   border: 2px solid var(--navy);
   border-radius: 4px;
@@ -262,7 +262,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   .base-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
-/* Runner: 32×32 frames from public/game/runner.png (10 frames × 3 uniforms, see runner.json) at 2×.
+/* Runner: 32×32 frames from public/game/runner.png (15 frames × 3 uniforms, see runner.json) at --fs.
    idle = frames 0–1, run = 2–5, swing = 6–9. --s = scale (the big batter on the Start screen uses the same frames). */
 .runner {
   --s: var(--fs);
@@ -273,7 +273,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   width: calc(32px * var(--s));
   height: calc(32px * var(--s));
   transform: translate(-50%, calc(-100% + 3px * var(--s)));
-  background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(320px * var(--s)) calc(96px * var(--s)) no-repeat;
+  background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(480px * var(--s)) calc(96px * var(--s)) no-repeat;
   image-rendering: pixelated;
   pointer-events: none;
   animation: idle 1s steps(2, jump-none) infinite;

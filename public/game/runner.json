@@ -219,6 +219,116 @@
         "h": 32
       },
       "duration": 110
+    },
+    {
+      "filename": "runner 10.aseprite",
+      "frame": {
+        "x": 320,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 400
+    },
+    {
+      "filename": "runner 11.aseprite",
+      "frame": {
+        "x": 352,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 200
+    },
+    {
+      "filename": "runner 12.aseprite",
+      "frame": {
+        "x": 384,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 200
+    },
+    {
+      "filename": "runner 13.aseprite",
+      "frame": {
+        "x": 416,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
+    },
+    {
+      "filename": "runner 14.aseprite",
+      "frame": {
+        "x": 448,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      },
+      "duration": 250
     }
   ],
   "meta": {
@@ -226,7 +336,7 @@
     "image": "runner.png",
     "format": "RGBA8888",
     "size": {
-      "w": 320,
+      "w": 480,
       "h": 96
     },
     "scale": "1",
@@ -247,6 +357,24 @@
         "name": "swing",
         "from": 6,
         "to": 9,
+        "direction": "forward"
+      },
+      {
+        "name": "highfive",
+        "from": 10,
+        "to": 10,
+        "direction": "forward"
+      },
+      {
+        "name": "cheer",
+        "from": 11,
+        "to": 12,
+        "direction": "forward"
+      },
+      {
+        "name": "wave",
+        "from": 13,
+        "to": 14,
         "direction": "forward"
       }
     ]

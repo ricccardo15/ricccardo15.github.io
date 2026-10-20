@@ -1,15 +1,16 @@
-// Riccardo as a 32×32 pixel player, facing right, in 10 frames on one sprite sheet:
-//   idle 0–1 · run 2–5 · swing 6–9   (same order as the tags in runner.json)
+// Riccardo as a 32×32 pixel player, facing right, in 15 frames on one sprite sheet:
+//   idle 0–1 · run 2–5 · swing 6–9 · high five 10 · cheer 11–12 · wave 13–14   (same order as the tags in runner.json)
 // One row per uniform (src/uniforms.js): Researcher, Designer, Maker = palette swap + accessory.
 // Look taken from his reference photo (docs/reference/, private): navy helmet and jersey, dark curly hair,
 // stubble, black earring, white pants and batting gloves, black wristbands. The photo itself is never used.
+// drawPlayer() is shared with scripts/art/crew.js (coaches, teammates, pitcher).
 import { writeFile } from 'node:fs/promises';
 import { canvas } from './canvas.js';
 import { UNIFORMS } from '../../src/uniforms.js';
 
-const SIZE = 32;
+export const SIZE = 32;
 
-const HEAD = `
+export const HEAD = `
 .....NNNNNN....
 ...NNNNNNNNNN..
 ..DNNNNNNNNNNN.
@@ -31,12 +32,14 @@ const TORSO = `
 ..NNNNNNN.
 ..KKKKKKK.
 ..WWWWWWW.`;
-const torsoKey = (u) => ({ N: u.colors.jersey, R: u.colors.number, K: 'black', W: 'white' });
+export const torsoKey = (jersey, number, pants = 'white') => ({ N: jersey, R: number, K: 'black', W: pants });
 
 // A pose: knee/ankle of each leg, elbow/hand of each arm (sprite pixels), body bob, optional bat end.
-const legs = {
+// `prop: false` = hands busy (high five, cheer, wave): no lens or wrench in the hand.
+export const legs = {
   stand: { back: [[15, 23], [15, 28]], front: [[19, 23], [19, 28]] },
   wide: { back: [[13, 23], [11, 28]], front: [[21, 23], [23, 28]] },
+  jump: { back: [[14, 22], [13, 26]], front: [[20, 22], [21, 26]] },
 };
 const POSES = [
   // idle: standing, a small breath on the second frame
@@ -52,11 +55,22 @@ const POSES = [
   { ...legs.wide, armBack: [[12, 15], [12, 13]], armFront: [[16, 15], [12, 13]], bat: [[12, 13], [5, 5]], bob: 1 },
   { back: legs.wide.back, front: [[22, 23], [24, 28]], armBack: [[18, 15], [22, 16]], armFront: [[21, 15], [22, 16]], bat: [[19, 16], [30, 15]], bob: 0 },
   { ...legs.wide, armBack: [[17, 14], [13, 11]], armFront: [[19, 13], [13, 11]], bat: [[13, 11], [4, 15]], bob: 0 },
+  // high five: front hand up and forward
+  { ...legs.stand, armBack: [[14, 15], [14, 18]], armFront: [[23, 10], [26, 6]], bob: 0, prop: false },
+  // cheer: both arms up, then a little jump
+  { ...legs.stand, armBack: [[10, 10], [6, 6]], armFront: [[23, 9], [25, 5]], bob: 0, prop: false },
+  { ...legs.jump, armBack: [[10, 8], [6, 3]], armFront: [[23, 7], [25, 2]], bob: -2, prop: false },
+  // wave: front hand up, then out to the side
+  { ...legs.stand, armBack: [[14, 15], [14, 18]], armFront: [[22, 10], [22, 6]], bob: 0, prop: false },
+  { ...legs.stand, armBack: [[14, 15], [14, 18]], armFront: [[22, 10], [25, 7]], bob: 0, prop: false },
 ];
 export const TAGS = [
   { name: 'idle', from: 0, to: 1, duration: 500 },
   { name: 'run', from: 2, to: 5, duration: 100 },
   { name: 'swing', from: 6, to: 9, duration: 110 },
+  { name: 'highfive', from: 10, to: 10, duration: 400 },
+  { name: 'cheer', from: 11, to: 12, duration: 200 },
+  { name: 'wave', from: 13, to: 14, duration: 250 },
 ];
 
 function leg(c, ox, oy, hip, [knee, ankle], color) {
@@ -65,14 +79,16 @@ function leg(c, ox, oy, hip, [knee, ankle], color) {
   c.rect(ox + ankle[0] - 1, oy + ankle[1] + 1, 4, 2, 'black'); // cleat, toe to the right
 }
 
-function arm(c, ox, oy, shoulder, [elbow, hand], sleeve) {
+function arm(c, ox, oy, shoulder, [elbow, hand], { sleeve, skin, glove }) {
   c.line(ox + shoulder[0], oy + shoulder[1], ox + elbow[0], oy + elbow[1], sleeve, 2);
-  c.line(ox + elbow[0], oy + elbow[1], ox + hand[0], oy + hand[1], 'skin', 2);
-  c.set(ox + hand[0], oy + hand[1] - 1, 'black'); // wristband
-  c.rect(ox + hand[0], oy + hand[1], 2, 2, 'white'); // batting glove
+  c.line(ox + elbow[0], oy + elbow[1], ox + hand[0], oy + hand[1], skin, 2);
+  if (glove) {
+    c.set(ox + hand[0], oy + hand[1] - 1, 'black'); // wristband
+    c.rect(ox + hand[0], oy + hand[1], 2, 2, glove); // batting glove
+  }
 }
 
-// Accessory of the uniform, shown when the player has no bat (idle and run frames).
+// Accessory of the uniform, shown when the hands are free (idle and run frames); the pencil always shows.
 function accessory(c, ox, oy, b, [hx, hy], kind) {
   if (kind === 'lens') { // magnifying glass held up in the front hand
     c.line(ox + hx + 1, oy + hy, ox + hx + 2, oy + hy - 2, 'black');
@@ -89,50 +105,66 @@ function accessory(c, ox, oy, b, [hx, hy], kind) {
   }
 }
 
-function frame(c, i, pose, u) {
-  const ox = i * SIZE;
-  const oy = u.row * SIZE;
+// One player in one 32×32 cell. `look`: head map + key, torso key, arm colours, pants (far leg, near leg).
+export function drawPlayer(c, ox, oy, pose, look) {
   const b = pose.bob;
-  arm(c, ox, oy, [14, 12 + b], pose.armBack, u.colors.jersey);
-  leg(c, ox, oy, [15, 19 + b], pose.back, 'skyLight'); // the far leg is in shadow
-  c.map(ox + 11, oy + 11 + b, TORSO, torsoKey(u));
-  leg(c, ox, oy, [18, 19 + b], pose.front, 'white');
-  c.map(ox + 8, oy + 1 + b, HEAD, headKey(u));
+  const arms = { sleeve: look.sleeve, skin: look.skin ?? 'skin', glove: look.glove };
+  arm(c, ox, oy, [14, 12 + b], pose.armBack, arms);
+  leg(c, ox, oy, [15, 19 + b], pose.back, look.pants[0]); // the far leg is in shadow
+  c.map(ox + 11, oy + 11 + b, TORSO, look.torso);
+  leg(c, ox, oy, [18, 19 + b], pose.front, look.pants[1]);
+  c.map(ox + 8, oy + 1 + b, look.head, look.headKey);
   if (pose.bat) {
     const [[x0, y0], [x1, y1]] = pose.bat;
     c.line(ox + x0, oy + y0, ox + x1, oy + y1, 'dirtDark', 2);
     c.set(ox + x1, oy + y1, 'black'); // end cap
   }
-  arm(c, ox, oy, [19, 12 + b], pose.armFront, u.colors.jersey);
-  if (!pose.bat) accessory(c, ox, oy, b, pose.armFront[1], u.accessory);
+  arm(c, ox, oy, [19, 12 + b], pose.armFront, arms);
+  if (look.accessory === 'pencil' || (look.accessory && !pose.bat && pose.prop !== false)) {
+    accessory(c, ox, oy, b, pose.armFront[1], look.accessory);
+  }
   c.outline('navyDark', { x: ox, y: oy, w: SIZE, h: SIZE });
 }
 
-export async function runner(out) {
-  const c = canvas(SIZE * POSES.length, SIZE * UNIFORMS.length);
-  for (const u of UNIFORMS) POSES.forEach((pose, i) => frame(c, i, pose, u));
-  await c.png(out('runner.png'));
-
-  // Aseprite-style JSON (array format): open runner.png + runner.json in Aseprite to edit the frames.
-  const frames = POSES.map((_, i) => ({
-    filename: `runner ${i}.aseprite`,
+// Aseprite-style JSON (array format) for a sheet: open the PNG + JSON in Aseprite to edit the frames.
+export function sheetJson(name, columns, rows, tags) {
+  const frames = Array.from({ length: columns }, (_, i) => ({
+    filename: `${name} ${i}.aseprite`,
     frame: { x: i * SIZE, y: 0, w: SIZE, h: SIZE },
     rotated: false,
     trimmed: false,
     spriteSourceSize: { x: 0, y: 0, w: SIZE, h: SIZE },
     sourceSize: { w: SIZE, h: SIZE },
-    duration: TAGS.find((t) => i >= t.from && i <= t.to).duration,
+    duration: tags.find((t) => i >= t.from && i <= t.to).duration,
   }));
   const json = {
     frames,
     meta: {
-      app: 'scripts/art/runner.js',
-      image: 'runner.png',
+      app: `scripts/art/${name}.js`,
+      image: `${name}.png`,
       format: 'RGBA8888',
-      size: { w: SIZE * POSES.length, h: SIZE * UNIFORMS.length },
+      size: { w: SIZE * columns, h: SIZE * rows },
       scale: '1',
-      frameTags: TAGS.map(({ name, from, to }) => ({ name, from, to, direction: 'forward' })),
+      frameTags: tags.map(({ name: tag, from, to }) => ({ name: tag, from, to, direction: 'forward' })),
     },
   };
-  await writeFile(out('runner.json'), `${JSON.stringify(json, null, 2)}\n`);
+  return `${JSON.stringify(json, null, 2)}\n`;
+}
+
+export async function runner(out) {
+  const c = canvas(SIZE * POSES.length, SIZE * UNIFORMS.length);
+  for (const u of UNIFORMS) {
+    const look = {
+      head: HEAD,
+      headKey: headKey(u),
+      torso: torsoKey(u.colors.jersey, u.colors.number),
+      sleeve: u.colors.jersey,
+      glove: 'white',
+      pants: ['skyLight', 'white'],
+      accessory: u.accessory,
+    };
+    POSES.forEach((pose, i) => drawPlayer(c, i * SIZE, u.row * SIZE, pose, look));
+  }
+  await c.png(out('runner.png'));
+  await writeFile(out('runner.json'), sheetJson('runner', POSES.length, UNIFORMS.length, TAGS));
 }
