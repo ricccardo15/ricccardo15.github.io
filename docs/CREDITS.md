@@ -1,0 +1,14 @@
+# Credits
+
+## Pixel art (public/game/)
+All original, drawn in code by `npm run art` (scripts/art/) for this portfolio: no third-party sprites, fonts or packs.
+- Field, crowd, dugout, base icons: original.
+- Player sprite: original, inspired by Riccardo's look (navy uniform, helmet, curly hair). The reference photos in `docs/reference/` are private and never published or copied.
+- Pixel title font (5×7, A–Z): original, in scripts/art/title.js.
+- Palette: 16 colours in src/palette.js.
+
+## Case-study images (public/assets/)
+From Riccardo's own projects; group work credits the whole team on each case page. Levante persona portraits are AI-generated (labelled on the page).
+
+## Code libraries
+- Vite (MIT), marked (MIT), sharp (Apache-2.0), Playwright (Apache-2.0), axe-core (MPL-2.0).

@@ -1,0 +1,54 @@
+// Original 5×7 pixel font (A–Z and !), drawn here letter by letter: no third-party font.
+// pixelText() returns an SVG: bold navy letters (each pixel doubled sideways) with a red drop shadow, sharp at any size.
+import { writeFile } from 'node:fs/promises';
+import { PALETTE } from '../../src/palette.js';
+
+const GLYPHS = {
+  A: '.###.|#...#|#...#|#####|#...#|#...#|#...#',
+  B: '####.|#...#|#...#|####.|#...#|#...#|####.',
+  C: '.###.|#...#|#....|#....|#....|#...#|.###.',
+  D: '####.|#...#|#...#|#...#|#...#|#...#|####.',
+  E: '#####|#....|#....|####.|#....|#....|#####',
+  F: '#####|#....|#....|####.|#....|#....|#....',
+  G: '.###.|#...#|#....|#.###|#...#|#...#|.####',
+  H: '#...#|#...#|#...#|#####|#...#|#...#|#...#',
+  I: '#####|..#..|..#..|..#..|..#..|..#..|#####',
+  J: '..###|...#.|...#.|...#.|#..#.|#..#.|.##..',
+  K: '#...#|#..#.|#.#..|##...|#.#..|#..#.|#...#',
+  L: '#....|#....|#....|#....|#....|#....|#####',
+  M: '#...#|##.##|#.#.#|#.#.#|#...#|#...#|#...#',
+  N: '#...#|##..#|#.#.#|#..##|#...#|#...#|#...#',
+  O: '.###.|#...#|#...#|#...#|#...#|#...#|.###.',
+  P: '####.|#...#|#...#|####.|#....|#....|#....',
+  Q: '.###.|#...#|#...#|#...#|#.#.#|#..#.|.##.#',
+  R: '####.|#...#|#...#|####.|#.#..|#..#.|#...#',
+  S: '.####|#....|#....|.###.|....#|....#|####.',
+  T: '#####|..#..|..#..|..#..|..#..|..#..|..#..',
+  U: '#...#|#...#|#...#|#...#|#...#|#...#|.###.',
+  V: '#...#|#...#|#...#|#...#|#...#|.#.#.|..#..',
+  W: '#...#|#...#|#...#|#.#.#|#.#.#|##.##|#...#',
+  X: '#...#|#...#|.#.#.|..#..|.#.#.|#...#|#...#',
+  Y: '#...#|#...#|.#.#.|..#..|..#..|..#..|..#..',
+  Z: '#####|....#|...#.|..#..|.#...|#....|#####',
+  '!': '..#..|..#..|..#..|..#..|..#..|.....|..#..',
+  ' ': '.....|.....|.....|.....|.....|.....|.....',
+};
+
+export function pixelText(text, { color = PALETTE.navy, shadow = PALETTE.red } = {}) {
+  const pixels = [];
+  [...text.toUpperCase()].forEach((ch, n) => {
+    const glyph = GLYPHS[ch];
+    if (!glyph) throw new Error(`no pixel glyph for "${ch}"`);
+    glyph.split('|').forEach((row, y) => [...row].forEach((p, x) => {
+      if (p === '#') pixels.push([n * 8 + x, y], [n * 8 + x + 1, y]);
+    }));
+  });
+  const width = text.length * 8; // 6 px bold letter + 2 px gap (the last gap holds the shadow)
+  const path = (dx, dy) => pixels.map(([x, y]) => `M${x + dx} ${y + dy}h1v1h-1z`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 8" width="${width}" height="8" shape-rendering="crispEdges">`
+    + `<path fill="${shadow}" d="${path(1, 1)}"/><path fill="${color}" d="${path(0, 0)}"/></svg>\n`;
+}
+
+export async function title(out) {
+  await writeFile(out('title.svg'), pixelText('Riccardo Cirillo'));
+}

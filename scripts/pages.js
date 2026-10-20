@@ -205,9 +205,9 @@ async function casePage(c, i, all) {
 function diamond(cases) {
   const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
-  const bases = STOPS.map((stop) => {
+  const bases = STOPS.map((stop, i) => {
     const href = stop.id === 'home' ? '#field-panel' : `/${stop.id}/`;
-    return `          <li><a class="base" href="${href}" data-stop="${stop.id}" style="--x: ${pct(stop.x, FIELD.width)}; --y: ${pct(stop.y, FIELD.height)}"><span class="base-label">${stop.label}</span> <span class="base-name">${stop.name}</span></a></li>`;
+    return `          <li><a class="base" href="${href}" data-stop="${stop.id}" data-tag="${stop.tag}" style="--x: ${pct(stop.x, FIELD.width)}; --y: ${pct(stop.y, FIELD.height)}; --icon: ${i}"><span class="base-icon"></span><span class="base-text"><span class="base-label">${stop.label}</span> <span class="base-name">${stop.name}</span></span></a></li>`;
   });
   const main = bySlug.nipotyno.data;
   const panels = [
@@ -238,7 +238,7 @@ function diamond(cases) {
             <ul class="bases" aria-label="Bases">
 ${bases.join('\n')}
             </ul>
-            <img class="runner" src="/game/runner.png" alt="" width="16" height="16" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}">
+            <div class="runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
           </div>
           <div class="panel" id="field-panel" tabindex="-1" aria-live="polite">
 ${panels.join('\n')}
@@ -270,7 +270,7 @@ async function homePage(cases, about) {
     .replace(/<h2>/g, '<h3>').replace(/<\/h2>/g, '</h3>');
 
   const main = `      <section class="hero wrap wide" aria-labelledby="name">
-        <h1 id="name">Riccardo Cirillo</h1>
+        <h1 id="name"><img class="pixel-title" src="/game/title.svg" alt="" width="128" height="8"><span class="visually-hidden">Riccardo Cirillo</span></h1>
         <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
         <p class="motto">“${escape(about.data.motto)}”</p>
         <ul class="actions">

@@ -23,3 +23,4 @@
 - 2026-10-20 — B3: field 320×180 shown at 2× (640×360) next to/below the panel; hidden under 700 px (not 640: 640 px of field + margins need ~680 px) → list view. Positions in src/field-map.js (one source for art, links and runner).
 - 2026-10-20 — B3: home order = hero → ballpark → list. On desktop the default "Home plate" panel links Nipotyno, so the main case is still in the first screen; on phones the Nipotyno card is.
 - 2026-10-20 — B3: field and runner are placeholder pixel art drawn in code (scripts/field.js, `npm run art`); B4 replaces public/game/*.png with the final art, same size and names.
+- 2026-10-20 — B4: all art drawn in code (scripts/art/, `npm run art`) with one 16-colour palette (src/palette.js, checked by tests/art.spec.js). Player 32×32, 10 frames (idle/run/swing) + Aseprite-style runner.json. Pixel title uses an original 5×7 font (not Press Start 2P) so all art stays original. Credits in docs/CREDITS.md.

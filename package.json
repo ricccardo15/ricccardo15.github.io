@@ -11,7 +11,7 @@
     "test": "playwright test",
     "images": "node scripts/images.js",
     "pages": "node scripts/pages.js",
-    "art": "node scripts/field.js"
+    "art": "node scripts/art.js"
   },
   "engines": {
     "node": ">=20"
