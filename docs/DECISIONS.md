@@ -20,3 +20,6 @@
 - 2026-10-20 — Phone number removed from the public repo/site (content/facts.md, content/about.md): email only. Phone stays in the CV PDFs.
 - 2026-10-20 — Stack confirmed after Riccardo asked about React: stay on plain HTML/CSS/JS + Vite (static HTML = OG previews always work, fast, few dependencies, easy to edit for years). Revisit only if the game needs it.
 - 2026-10-20 — B2: pages are generated from content/*.md by scripts/pages.js (marked) at every dev/build; generated HTML is gitignored. OG previews use JPG 1200×630 copies (LinkedIn reads WebP badly).
+- 2026-10-20 — B3: field 320×180 shown at 2× (640×360) next to/below the panel; hidden under 700 px (not 640: 640 px of field + margins need ~680 px) → list view. Positions in src/field-map.js (one source for art, links and runner).
+- 2026-10-20 — B3: home order = hero → ballpark → list. On desktop the default "Home plate" panel links Nipotyno, so the main case is still in the first screen; on phones the Nipotyno card is.
+- 2026-10-20 — B3: field and runner are placeholder pixel art drawn in code (scripts/field.js, `npm run art`); B4 replaces public/game/*.png with the final art, same size and names.

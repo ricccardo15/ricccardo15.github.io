@@ -18,3 +18,6 @@ tests/screenshots/
 /housing/
 /lab/
 /public/og/
+
+# Local preview config for the Claude app
+.claude/launch.json

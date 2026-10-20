@@ -82,28 +82,93 @@ for (const path of pages.filter((p) => p !== '/')) {
   });
 }
 
-test('home lists every case with a deep link (#nipotyno etc.)', async ({ page }) => {
-  for (const slug of ['nipotyno', 'levante', 'housing', 'lab']) {
-    await page.goto(`/#${slug}`);
-    const card = page.locator(`#${slug}`);
-    await expect(card).toBeInViewport();
-    await card.getByRole('link').click();
-    await expect(page).toHaveURL(new RegExp(`/${slug}/$`));
-    await expect(page.locator('h1')).toBeVisible();
-  }
+test.describe('phone (390 px): list view instead of the field', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('the field is hidden and the first case card is on screen', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#field')).toBeHidden();
+    await expect(page.locator('#nipotyno')).toBeInViewport();
+  });
+
+  test('deep links (#nipotyno etc.) jump to the card in the list', async ({ page }) => {
+    for (const slug of ['nipotyno', 'levante', 'housing', 'lab']) {
+      await page.goto(`/#${slug}`);
+      const card = page.locator(`#${slug}`);
+      await expect(card).toBeInViewport();
+      await card.getByRole('link').click();
+      await expect(page).toHaveURL(new RegExp(`/${slug}/$`));
+      await expect(page.locator('h1')).toBeVisible();
+    }
+  });
 });
 
-test('first screen of the home shows name, role, CV, contact and the Nipotyno card', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto('/');
-  for (const locator of [
-    page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
-    page.getByText('UX Research & Design intern · Madrid · Feb–Jul 2027').first(),
-    page.getByRole('link', { name: 'Download CV (English, PDF)' }),
-    page.getByRole('link', { name: 'CV en español (PDF)' }),
-    page.locator('main a[href^="mailto:"]'),
-    page.locator('#nipotyno'),
-  ]) {
-    await expect(locator).toBeInViewport();
-  }
+test.describe('desktop (1280 px): the ballpark', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  const panel = (page) => page.locator('#field-panel [data-panel]:visible');
+
+  test('first screen shows name, role, CV, contact and a way into Nipotyno', async ({ page }) => {
+    await page.goto('/');
+    for (const locator of [
+      page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
+      page.getByText('UX Research & Design intern · Madrid · Feb–Jul 2027').first(),
+      page.getByRole('link', { name: 'Download CV (English, PDF)' }),
+      page.getByRole('link', { name: 'CV en español (PDF)' }),
+      page.locator('main a[href^="mailto:"]'),
+      page.getByRole('link', { name: 'Nipotyno — read the case study' }),
+      page.getByRole('link', { name: 'Prefer a list? Skip to the case studies' }),
+    ]) {
+      await expect(locator).toBeInViewport();
+    }
+  });
+
+  test('clicking a base runs there and opens its panel', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.base[data-stop="levante"]').click();
+    await expect(page).toHaveURL(/#levante$/);
+    await expect(panel(page)).toHaveAttribute('data-panel', 'levante');
+    await expect(page.locator('.base[data-stop="levante"]')).toHaveAttribute('aria-current', 'location');
+    await expect(page.locator('#field-panel')).toBeFocused();
+    await panel(page).getByRole('link', { name: /Read the case study/ }).click();
+    await expect(page).toHaveURL(/\/levante\/$/);
+  });
+
+  test('arrow keys move between bases, Esc closes the panel, Back returns', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await page.locator('.base[data-stop="home"]').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('.base[data-stop="nipotyno"]')).toBeFocused();
+    await expect(panel(page)).toHaveAttribute('data-panel', 'nipotyno');
+    await page.keyboard.press('ArrowRight');
+    await expect(panel(page)).toHaveAttribute('data-panel', 'levante');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await expect(panel(page)).toHaveAttribute('data-panel', 'lab');
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#field-panel')).toBeHidden();
+    await expect(page.locator('.base[data-stop="lab"]')).toBeFocused();
+
+    await page.goto('/#housing');
+    await page.locator('.base[data-stop="nipotyno"]').click();
+    await page.goBack();
+    await expect(panel(page)).toHaveAttribute('data-panel', 'housing');
+  });
+
+  test('deep link /#lab opens the dugout panel with the runner on it', async ({ page }) => {
+    await page.goto('/#lab');
+    await expect(panel(page)).toHaveAttribute('data-panel', 'lab');
+    await expect(page.locator('#field')).toBeInViewport();
+    const runner = await page.locator('.runner').evaluate((el) => el.style.getPropertyValue('--x'));
+    expect(runner).toBe(`${(36 / 320) * 100}%`);
+  });
+
+  test('field art is pixel-perfect: 320×180 shown at an integer scale', async ({ page }) => {
+    await page.goto('/');
+    const box = await page.locator('.field-img').boundingBox();
+    expect(box.width / 320).toBe(Math.round(box.width / 320));
+    expect(box.height / 180).toBe(box.width / 320);
+  });
 });

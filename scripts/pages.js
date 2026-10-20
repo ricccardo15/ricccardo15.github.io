@@ -8,6 +8,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
 import sharp from 'sharp';
+import { FIELD, STOPS } from '../src/field-map.js';
 
 const SITE = 'https://ricccardo15.github.io';
 const EMAIL = 'riccardo.cirillo.work@gmail.com';
@@ -97,7 +98,7 @@ async function ogImage(src, name) {
 
 // --- Layout -----------------------------------------------------------------
 
-function layout({ title, description, path, image, main, bodyClass = '' }) {
+function layout({ title, description, path, image, main, bodyClass = '', scripts = '' }) {
   const url = `${SITE}${path}`;
   return `<!doctype html>
 <html lang="en">
@@ -117,6 +118,7 @@ function layout({ title, description, path, image, main, bodyClass = '' }) {
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="stylesheet" href="/src/style.css">
+    ${scripts}
   </head>
   <body${bodyClass ? ` class="${bodyClass}"` : ''}>
     <a class="skip" href="#main">Skip to content</a>
@@ -197,6 +199,54 @@ async function casePage(c, i, all) {
   });
 }
 
+// The ballpark: pixel field + bases as real links + one panel per stop.
+// Without JavaScript the bases are plain links to the case pages; src/diamond.js adds the running and the panels.
+// Hidden under 700 px (see style.css): phones get the list of case studies instead.
+function diamond(cases) {
+  const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
+  const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
+  const bases = STOPS.map((stop) => {
+    const href = stop.id === 'home' ? '#field-panel' : `/${stop.id}/`;
+    return `          <li><a class="base" href="${href}" data-stop="${stop.id}" style="--x: ${pct(stop.x, FIELD.width)}; --y: ${pct(stop.y, FIELD.height)}"><span class="base-label">${stop.label}</span> <span class="base-name">${stop.name}</span></a></li>`;
+  });
+  const main = bySlug.nipotyno.data;
+  const panels = [
+    `          <article class="panel-card" data-panel="home">
+            <p class="kicker">Home plate · Start here</p>
+            <h3>Every base is a project</h3>
+            <p>Click a base, or use the <kbd>←</kbd> <kbd>→</kbd> keys, and I'll run there. Start with my main project:</p>
+            <p><a class="button" href="/nipotyno/">${escape(shortName(bySlug.nipotyno))} — read the case study</a></p>
+            <p class="small">${escape(main.description)}</p>
+          </article>`,
+    ...cases.map(({ data }) => {
+      const stop = STOPS.find((s) => s.id === data.slug);
+      return `          <article class="panel-card" data-panel="${data.slug}" hidden>
+            <p class="kicker">${escape(stop.label)} · ${escape(stop.name)}</p>
+            <h3>${escape(shortName({ data }))}<span class="sub">${escape(subtitle({ data }))}</span></h3>
+            <p>${escape(data.tldr)}</p>
+            ${data.role ? `<p class="small"><strong>My role:</strong> ${escape(data.role)}</p>` : ''}
+            <p><a class="button" href="/${data.slug}/">Read the case study<span class="visually-hidden">: ${escape(shortName({ data }))}</span> →</a></p>
+          </article>`;
+    }),
+  ];
+  return `      <section id="field" class="field wrap wide" aria-labelledby="field-title">
+        <h2 id="field-title">Explore the ballpark</h2>
+        <p class="hint">A small game on top of the portfolio. <a href="#work">Prefer a list? Skip to the case studies</a></p>
+        <div class="field-layout">
+          <div class="stage">
+            <img class="field-img" src="/game/field.png" alt="Pixel-art baseball field. Each base links to a project." width="${FIELD.width}" height="${FIELD.height}">
+            <ul class="bases" aria-label="Bases">
+${bases.join('\n')}
+            </ul>
+            <img class="runner" src="/game/runner.png" alt="" width="16" height="16" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}">
+          </div>
+          <div class="panel" id="field-panel" tabindex="-1" aria-live="polite">
+${panels.join('\n')}
+          </div>
+        </div>
+      </section>`;
+}
+
 async function homePage(cases, about) {
   const cards = await Promise.all(
     cases.map(async ({ data }, i) => {
@@ -219,7 +269,7 @@ async function homePage(cases, about) {
     .join('\n')
     .replace(/<h2>/g, '<h3>').replace(/<\/h2>/g, '</h3>');
 
-  const main = `      <section class="hero wrap" aria-labelledby="name">
+  const main = `      <section class="hero wrap wide" aria-labelledby="name">
         <h1 id="name">Riccardo Cirillo</h1>
         <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
         <p class="motto">“${escape(about.data.motto)}”</p>
@@ -229,6 +279,7 @@ async function homePage(cases, about) {
           <li><a class="button ghost" href="mailto:${EMAIL}">${EMAIL}</a></li>
         </ul>
       </section>
+${diamond(cases)}
       <section id="work" class="work wrap" aria-labelledby="work-title" tabindex="-1">
         <h2 id="work-title">Case studies</h2>
         <ul class="case-list">
@@ -247,6 +298,7 @@ ${aboutHtml}
     image: await ogImage(cases[0].data.cover, 'home'),
     main,
     bodyClass: 'home',
+    scripts: '<script type="module" src="/src/diamond.js"></script>',
   });
 }
 

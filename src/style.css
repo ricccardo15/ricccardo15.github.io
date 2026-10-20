@@ -36,6 +36,17 @@ a:focus-visible,
 main:focus { outline: none; }
 
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 1rem; }
+.wrap.wide { max-width: 64rem; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.small { font-size: .9375rem; color: var(--muted); }
+kbd { padding: 0 .3em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: var(--card); font: inherit; font-size: .875em; }
 
 /* Skip link: hidden until focused with the keyboard. */
 .skip {
@@ -111,6 +122,75 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .case-card p { margin: .5rem 0 0; padding: 0 1rem 1rem; font-size: 1rem; color: var(--muted); }
 
 .about h3 { font-size: 1.25rem; margin: 2rem 0 .5rem; }
+
+/* --- Ballpark (home). Field = 320×180 pixel image at 2× (integer scale = sharp pixels).
+   Positions come from src/field-map.js as --x / --y percentages. Hidden under 700 px: phones get the list. --- */
+.field { display: none; padding-block: 1.5rem 0; }
+@media (min-width: 700px) {
+  .field { display: block; }
+}
+.field h2 { margin: 0; }
+.hint { margin: .25rem 0 1rem; font-size: 1rem; color: var(--muted); }
+.field-layout { display: grid; gap: 1rem; }
+@media (min-width: 1100px) {
+  .field-layout { grid-template-columns: 644px 1fr; align-items: start; }
+}
+.stage { position: relative; box-sizing: content-box; width: 640px; height: 360px; border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
+.field-img { width: 100%; height: 100%; image-rendering: pixelated; }
+.bases { list-style: none; margin: 0; padding: 0; }
+.base {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 3;
+  transform: translate(-50%, calc(-100% - 36px));
+  padding: 2px 8px;
+  border: 2px solid var(--navy);
+  border-radius: 4px;
+  background: var(--card);
+  font-size: .875rem;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+/* little pointer under each label */
+.base::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top-color: var(--navy);
+  border-bottom: 0;
+}
+.base-label { display: block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--red); }
+.base-name { display: block; font-weight: 700; }
+.base:hover, .base[aria-current] { background: var(--navy); color: #fff; }
+.base:hover .base-label, .base[aria-current] .base-label { color: #fff; }
+.base:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+
+.runner {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -90%);
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.runner.is-flipped { transform: translate(-50%, -90%) scaleX(-1); }
+.is-running .runner { animation: hop .24s steps(2) infinite; }
+@keyframes hop { 50% { margin-top: -2px; } }
+
+.panel { padding: 1rem 1.25rem; background: var(--card); border: 2px solid var(--navy); border-radius: 4px; }
+.panel h3 { margin: .25rem 0 .5rem; font-size: 1.375rem; }
+.panel h3 .sub { display: block; margin-top: .25rem; font-size: 1rem; font-weight: 600; color: var(--ink); }
+.panel p { margin: .5rem 0; font-size: 1rem; }
+.panel .button { margin-top: .25rem; }
 
 /* --- Case study --- */
 .case { padding-top: 1.5rem; }

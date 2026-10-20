@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "playwright test",
     "images": "node scripts/images.js",
-    "pages": "node scripts/pages.js"
+    "pages": "node scripts/pages.js",
+    "art": "node scripts/field.js"
   },
   "engines": {
     "node": ">=20"
