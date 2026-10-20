@@ -4,7 +4,7 @@
 > - Stack: Vite + HTML/CSS/SVG + plain JS (no Phaser). The site works without the game.
 > - Home = first viewport already shows name, "UX Research & Design intern · Madrid · Feb–Jul 2027", CV EN/ES, contacts, Nipotyno card. No gate before content.
 > - Every case = real static page with Open Graph (`/nipotyno/`, `/levante/`, `/housing/`, `/lab/`). `/nipotyno/` for consultancies/corporates; home for studios/startups.
-> - Diamond = pixel PNG 320×180 at integer scale, bases = HTML links on the same grid; < 640 px → list view.
+> - Diamond = pixel PNG 320×180 at integer scale, bases = HTML links on the same grid; < 700 px → the same field at 1× with simplified touch labels (the list of cases stays below). The field is shown in every version.
 > - **UPDATE (Riccardo): the COMPLETE portfolio is built in ~2 days** — uniforms, batting, home-run tour and all case studies included (see ROADMAP). No phased release.
 > - Interaction: home-run tour that stops at each base = main; batting = optional extra that never decides content.
 > - Baseball only in graphics and labels with plain translation ("1st base · Nipotyno"); never in case-study text.

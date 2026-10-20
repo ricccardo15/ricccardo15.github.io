@@ -6,8 +6,6 @@ import { FIELD, STOPS, RING } from './field-map.js';
 
 const stage = document.querySelector('.stage');
 const field = document.querySelector('#field');
-// Under 700 px the field is hidden by CSS (phones get the list), so there is nothing to scroll to or focus.
-const visible = () => getComputedStyle(field).display !== 'none';
 if (stage) start();
 
 function start() {
@@ -123,9 +121,9 @@ function start() {
     if (!byId[id]) return false;
     runTo(id, { animate: false });
     // The list cards share these ids, so the browser scrolls to the card on load: scroll back to the field after it.
-    if (scroll && visible()) {
+    if (scroll) {
       // Chrome keeps the page pinned to the #id target while images load, undoing our scroll:
-      // on desktop the field is the deep-link view, so take the id off the list card.
+      // the field is the deep-link view, so take the id off the list card.
       const card = document.getElementById(id);
       if (card && !field.contains(card)) { card.dataset.id = id; card.removeAttribute('id'); }
       const toField = () => requestAnimationFrame(() => field.scrollIntoView({ block: 'start' }));
@@ -135,7 +133,7 @@ function start() {
     return true;
   };
   window.addEventListener('popstate', () => fromHash({ scroll: false }) || runTo('home', { animate: false }));
-  if (fromHash({ scroll: true }) && visible()) panel.focus({ preventScroll: true });
+  if (fromHash({ scroll: true })) panel.focus({ preventScroll: true });
 
   stage.classList.add('is-ready');
 }

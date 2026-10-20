@@ -203,7 +203,7 @@ async function casePage(c, i, all) {
 
 // The ballpark: pixel field + bases as real links + one panel per stop.
 // Without JavaScript the bases are plain links to the case pages; src/diamond.js adds the running and the panels.
-// Hidden under 700 px (see style.css): phones get the list of case studies instead.
+// Under 700 px it is shown at 1× with simplified touch labels (see style.css).
 function diamond(cases) {
   const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
@@ -339,8 +339,8 @@ async function homePage(cases, about) {
   const principles = aboutParts.find((part) => part.includes('id="how-i-design"')).match(/<ol>[\s\S]*<\/ol>/)[0];
 
   const main = `${startScreen(cases, about)}
-${howIDesign(cases, principles)}
 ${diamond(cases)}
+${howIDesign(cases, principles)}
       <section id="work" class="work wrap" aria-labelledby="work-title" tabindex="-1">
         <h2 id="work-title">Case studies</h2>
         <ul class="case-list">

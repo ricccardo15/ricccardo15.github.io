@@ -82,13 +82,12 @@ for (const path of pages.filter((p) => p !== '/')) {
   });
 }
 
-test.describe('phone (390 px): list view instead of the field', () => {
-  test.use({ viewport: { width: 390, height: 844 } });
+test.describe('phone (390 px): simplified touch field', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const panel = (page) => page.locator('#field-panel [data-panel]:visible');
 
-  test('the field is hidden; name, CV, contact and Nipotyno are on the first screen', async ({ page }) => {
+  test('name, CV, contact and Nipotyno are on the first screen; the field is there too', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#field')).toBeHidden();
-    await expect(page.getByRole('link', { name: 'Play ball!' })).toBeHidden();
     for (const locator of [
       page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
       page.getByRole('link', { name: 'Download CV (English, PDF)' }),
@@ -98,19 +97,54 @@ test.describe('phone (390 px): list view instead of the field', () => {
     ]) {
       await expect(locator).toBeInViewport();
     }
+    await expect(page.locator('#field')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Play ball!' })).toBeVisible();
   });
 
-  test('deep links (#nipotyno etc.) jump to the card in the list', async ({ page }) => {
+  test('field at 1× (320×180, sharp pixels), touch bases at least 24 px high', async ({ page }) => {
+    await page.goto('/');
+    const box = await page.locator('.field-img').boundingBox();
+    expect([box.width, box.height]).toEqual([320, 180]);
+    for (const base of await page.locator('.base').all()) {
+      expect((await base.boundingBox()).height).toBeGreaterThanOrEqual(24);
+    }
+  });
+
+  test('tapping a base opens its panel', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.base[data-stop="housing"]').tap();
+    await expect(page).toHaveURL(/#housing$/);
+    await expect(panel(page)).toHaveAttribute('data-panel', 'housing');
+  });
+
+  test('deep links (#nipotyno etc.) open the field on that base', async ({ page }) => {
     for (const slug of ['nipotyno', 'levante', 'housing', 'lab']) {
+      await page.goto('/lab/');
       await page.goto(`/#${slug}`);
-      const card = page.locator(`#${slug}`);
-      await expect(card).toBeInViewport();
-      await card.getByRole('link').click();
+      await expect(panel(page)).toHaveAttribute('data-panel', slug);
+      await expect(page.locator('#field')).toBeInViewport();
+      await panel(page).getByRole('link', { name: /Read the case study/ }).click();
       await expect(page).toHaveURL(new RegExp(`/${slug}/$`));
       await expect(page.locator('h1')).toBeVisible();
     }
   });
 });
+
+// 632 px = a side panel, 320 px = the smallest phones (there the field shrinks to the screen).
+for (const width of [632, 320]) {
+  test.describe(`narrow window (${width} px)`, () => {
+    test.use({ viewport: { width, height: 800 } });
+
+    test('the field is shown inside the screen and nothing scrolls sideways', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('#field')).toBeVisible();
+      const stage = await page.locator('.stage').boundingBox();
+      expect(stage.x + stage.width).toBeLessThanOrEqual(width);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+      expect(overflow).toBe(false);
+    });
+  });
+}
 
 test.describe('desktop (1280 px): the ballpark', () => {
   test.use({ viewport: { width: 1280, height: 800 } });

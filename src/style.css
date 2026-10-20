@@ -109,10 +109,6 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .play .button:hover { background: var(--navy); border-color: var(--navy); }
 .small-label { font-weight: 400; font-size: .875rem; }
 .skip-list { font-weight: 700; }
-/* No field under 700 px (phones get the list), so no "Play ball!" there either. */
-@media (max-width: 699px) {
-  .play-ball { display: none; }
-}
 
 /* Uniform = row of public/game/runner.png (src/uniforms.js). Picked with the radios, no JS needed. */
 :root:has(#u-designer:checked) { --uniform-row: 1; }
@@ -200,19 +196,20 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 
 .about h3 { font-size: 1.25rem; margin: 2rem 0 .5rem; }
 
-/* --- Ballpark (home). Field = 320×180 pixel image at 2× (integer scale = sharp pixels).
-   Positions come from src/field-map.js as --x / --y percentages. Hidden under 700 px: phones get the list. --- */
-.field { display: none; padding-block: 1.5rem 0; }
-@media (min-width: 700px) {
-  .field { display: block; }
+/* --- Ballpark (home). Field = 320×180 pixel image at an integer scale --fs (sharp pixels):
+   2× from 700 px, 1× below (simplified touch version). Positions come from src/field-map.js as --x / --y percentages. --- */
+.field { --fs: 2; padding-block: 1.5rem 0; }
+@media (max-width: 699px) {
+  .field { --fs: 1; }
 }
 .field h2 { margin: 0; }
 .hint { margin: .25rem 0 1rem; font-size: 1rem; color: var(--muted); }
-.field-layout { display: grid; gap: 1rem; }
+.field-layout { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1100px) {
   .field-layout { grid-template-columns: 644px 1fr; align-items: start; }
 }
-.stage { position: relative; box-sizing: content-box; width: 640px; height: 360px; border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
+/* max-width: on phones under ~360 px the field shrinks to the screen (the only non-integer case). */
+.stage { position: relative; box-sizing: content-box; width: calc(320px * var(--fs)); max-width: calc(100% - 4px); aspect-ratio: 16 / 9; border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
 .field-img { width: 100%; height: 100%; image-rendering: pixelated; }
 .bases { list-style: none; margin: 0; padding: 0; }
 .base {
@@ -253,24 +250,35 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .base:hover, .base[aria-current] { background: var(--navy); color: #fff; }
 .base:hover .base-label, .base[aria-current] .base-label { color: #fff; }
 .base:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+/* Simplified touch bases at 1×: icon + name only ("1st base" stays for screen readers), no pointer,
+   labels closer to the base. Height >= 24 px (WCAG 2.5.8 target size). */
+@media (max-width: 699px) {
+  .base { gap: 4px; padding: 3px 6px 3px 3px; font-size: .75rem; line-height: 1.2; }
+  .base::after { display: none; }
+  .base[data-tag="below"] { transform: translate(-50%, 6px); }
+  .base[data-tag="above"] { transform: translate(-50%, calc(-100% - 37px)); }
+  .base[data-tag="right"] { transform: translate(12px, -50%); }
+  .base-icon { width: 16px; height: 16px; background-position: calc(var(--icon) * -16px) 0; background-size: auto 16px; }
+  .base-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 
 /* Runner: 32×32 frames from public/game/runner.png (10 frames × 3 uniforms, see runner.json) at 2×.
    idle = frames 0–1, run = 2–5, swing = 6–9. --s = scale (the big batter on the Start screen uses the same frames). */
 .runner {
-  --s: 2;
+  --s: var(--fs);
   position: absolute;
   left: var(--x);
   top: var(--y);
   z-index: 2;
-  width: 64px;
-  height: 64px;
-  transform: translate(-50%, calc(-100% + 6px));
-  background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -64px) / 640px 192px no-repeat;
+  width: calc(32px * var(--s));
+  height: calc(32px * var(--s));
+  transform: translate(-50%, calc(-100% + 3px * var(--s)));
+  background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(320px * var(--s)) calc(96px * var(--s)) no-repeat;
   image-rendering: pixelated;
   pointer-events: none;
   animation: idle 1s steps(2, jump-none) infinite;
 }
-.runner.is-flipped { transform: translate(-50%, calc(-100% + 6px)) scaleX(-1); }
+.runner.is-flipped { transform: translate(-50%, calc(-100% + 3px * var(--s))) scaleX(-1); }
 .is-running .runner { animation: run .4s steps(4, jump-none) infinite; }
 .runner.is-swinging { animation: swing .44s steps(4, jump-none) 1 forwards; }
 @keyframes idle { from { background-position-x: 0; } to { background-position-x: calc(-32px * var(--s)); } }
