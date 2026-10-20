@@ -10,3 +10,11 @@ blob-report/
 tests/screenshots/
 .vite/
 *.log
+
+# Generated from content/*.md by scripts/pages.js (edit the .md files, not these)
+/index.html
+/nipotyno/
+/levante/
+/housing/
+/lab/
+/public/og/

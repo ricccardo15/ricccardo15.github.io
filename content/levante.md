@@ -37,7 +37,7 @@ We mapped the people who live with that delay:
 
 ![Persona: Ping, a mother who needs to know quickly if the water is safe (AI-generated portrait)](/assets/levante/persona-ping.webp)
 
-![Persona: Gabriella, a lab manager who needs reliable, faster results (AI-generated portrait)](/assets/levante/persona-gabriella.webp)
+![Persona: Gabriella, a lab manager who needs reliable, faster results (AI-generated portrait)](/assets/levante/persona-gabriela.webp)
 
 ## Ideas
 Instead of a faster lab test alone, we designed a **service**: sensors on a buoy measure turbidity, temperature, conductivity and rainfall; an edge-AI model estimates the risk on the spot; when risk is high, a field team verifies with qPCR and the beach status is updated.

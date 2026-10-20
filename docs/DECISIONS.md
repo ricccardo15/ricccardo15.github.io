@@ -18,3 +18,5 @@
 - 2026-10-20 — Style: day game, navy blue + red uniform/UI, character drawn from Riccardo's reference photo (docs/reference/, never published), sound effects behind a toggle, off by default.
 - 2026-10-20 — B1: repo `ricccardo15/ricccardo15.github.io` (public), deployed by GitHub Actions (build → Playwright + axe → Pages). Deploy only if tests pass.
 - 2026-10-20 — Phone number removed from the public repo/site (content/facts.md, content/about.md): email only. Phone stays in the CV PDFs.
+- 2026-10-20 — Stack confirmed after Riccardo asked about React: stay on plain HTML/CSS/JS + Vite (static HTML = OG previews always work, fast, few dependencies, easy to edit for years). Revisit only if the game needs it.
+- 2026-10-20 — B2: pages are generated from content/*.md by scripts/pages.js (marked) at every dev/build; generated HTML is gitignored. OG previews use JPG 1200×630 copies (LinkedIn reads WebP badly).
