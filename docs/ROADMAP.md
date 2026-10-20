@@ -10,7 +10,7 @@ Una sessione = un blocco: plan mode → codice → verifica → commit → spunt
 - Online aggiornato + commit.
 
 ## Giorno 1
-- [ ] **B1 Setup** — repo `<username>.github.io`, Vite, deploy GitHub Pages, Playwright + axe. Link online.
+- [x] **B1 Setup** — repo `ricccardo15.github.io`, Vite, deploy GitHub Pages, Playwright + axe. Link online: https://ricccardo15.github.io (20/10)
 - [ ] **B2 Sito base completo** — header (nome, ruolo, CV EN/ES, contatti), vista lista, pagine statiche con Open Graph per OGNI caso generate da `content/*.md` (`/nipotyno/`, `/levante/`, `/housing/`, `/lab/`), template caso studio.
 - [ ] **B3 Diamante** — sfondo pixel 320×180 a scala intera, basi come link HTML, il battitore corre tra le basi (avanti/indietro con frecce/tap), pannello del caso. Mobile < 640 px: versione semplificata touch.
 - [ ] **B4 Grafica pixel** — palette unica 16 colori, battitore 32×32 (idle, corsa, battuta), campo, icone delle basi, titolo pixel. Generata in codice/Aseprite JSON, 100% originale.
