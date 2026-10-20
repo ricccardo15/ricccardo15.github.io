@@ -12,6 +12,8 @@
 }
 
 * { box-sizing: border-box; }
+/* `hidden` always wins, also over .button / flex rows. */
+[hidden] { display: none !important; }
 
 html { scroll-padding-top: 1rem; }
 
@@ -210,7 +212,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 }
 /* max-width: on phones under ~360 px the field shrinks to the screen (the only non-integer case). */
 .stage { position: relative; box-sizing: content-box; width: calc(320px * var(--fs)); max-width: calc(100% - 4px); aspect-ratio: 16 / 9; border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
-.field-img { width: 100%; height: 100%; image-rendering: pixelated; }
+.field-img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .bases { list-style: none; margin: 0; padding: 0; }
 .base {
   position: absolute;
@@ -262,9 +264,15 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   .base-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
-/* Runner: 32×32 frames from public/game/runner.png (15 frames × 3 uniforms, see runner.json) at --fs.
-   idle = frames 0–1, run = 2–5, swing = 6–9. --s = scale (the big batter on the Start screen uses the same frames). */
-.runner {
+/* World = everything drawn on the field (image + people + ball). The tour zooms it 2× (integer = sharp);
+   the base links stay outside, so they never scale. --tx / --ty come from src/diamond.js. */
+.world { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .5s ease; }
+.stage.is-zoomed .world { transform: translate(var(--tx, 0), var(--ty, 0)) scale(2); }
+.stage.is-zoomed .bases { visibility: hidden; }
+
+/* Sprites: 32×32 frames at --s, feet on (--x, --y). Runner = public/game/runner.png (15 frames × 3 uniforms),
+   crew = public/game/crew.png (8 frames × 4 people, see crew.json). The big batter on the Start screen uses the runner frames too. */
+.sprite {
   --s: var(--fs);
   position: absolute;
   left: var(--x);
@@ -273,20 +281,90 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   width: calc(32px * var(--s));
   height: calc(32px * var(--s));
   transform: translate(-50%, calc(-100% + 3px * var(--s)));
-  background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(480px * var(--s)) calc(96px * var(--s)) no-repeat;
   image-rendering: pixelated;
   pointer-events: none;
   animation: idle 1s steps(2, jump-none) infinite;
 }
-.runner.is-flipped { transform: translate(-50%, calc(-100% + 3px * var(--s))) scaleX(-1); }
+.sprite.is-flipped { transform: translate(-50%, calc(-100% + 3px * var(--s))) scaleX(-1); }
+.runner { z-index: 3; background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(480px * var(--s)) calc(96px * var(--s)) no-repeat; }
+.crew-sprite { background: url("/game/crew.png") 0 calc(var(--row) * -32px * var(--s)) / calc(256px * var(--s)) calc(128px * var(--s)) no-repeat; }
+
+/* Runner frames: idle 0–1 · run 2–5 · swing 6–9 · high five 10 · cheer 11–12 · wave 13–14 */
 .is-running .runner { animation: run .4s steps(4, jump-none) infinite; }
+.runner.is-batting { animation: none; background-position-x: calc(-192px * var(--s)); }
 .runner.is-swinging { animation: swing .44s steps(4, jump-none) 1 forwards; }
+.runner.is-highfive { animation: none; background-position-x: calc(-320px * var(--s)); }
+.runner.is-cheer { animation: cheer .4s steps(2, jump-none) infinite; }
+.runner.is-wave { animation: wave .5s steps(2, jump-none) infinite; }
 @keyframes idle { from { background-position-x: 0; } to { background-position-x: calc(-32px * var(--s)); } }
 @keyframes run { from { background-position-x: calc(-64px * var(--s)); } to { background-position-x: calc(-160px * var(--s)); } }
 @keyframes swing { from { background-position-x: calc(-192px * var(--s)); } to { background-position-x: calc(-288px * var(--s)); } }
-@media (prefers-reduced-motion: reduce) {
-  .runner, .is-running .runner, .batter { animation: none !important; }
+@keyframes cheer { from { background-position-x: calc(-352px * var(--s)); } to { background-position-x: calc(-384px * var(--s)); } }
+@keyframes wave { from { background-position-x: calc(-416px * var(--s)); } to { background-position-x: calc(-448px * var(--s)); } }
+/* Crew frames: idle 0–1 · high five 2 · cheer 3–4 · pitch 5–7 */
+.crew-sprite.is-highfive { animation: none; background-position-x: calc(-64px * var(--s)); }
+.crew-sprite.is-cheer { animation: crew-cheer .4s steps(2, jump-none) infinite; }
+.crew-sprite.is-pitching { animation: pitch .75s steps(3, jump-none) 1 forwards; }
+@keyframes crew-cheer { from { background-position-x: calc(-96px * var(--s)); } to { background-position-x: calc(-128px * var(--s)); } }
+@keyframes pitch { from { background-position-x: calc(-160px * var(--s)); } to { background-position-x: calc(-224px * var(--s)); } }
+
+/* Ball: one 2×2 pixel ball with a dark outline, moved by src/batting.js. */
+.ball {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 4;
+  width: calc(2px * var(--fs));
+  height: calc(2px * var(--fs));
+  background: #ffffff;
+  box-shadow: 0 0 0 calc(1px * var(--fs)) #0f1a30;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
+.banner {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  z-index: 5;
+  margin: 0;
+  padding: .25em .6em;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--navy);
+  border-radius: 4px;
+  background: var(--red);
+  color: #fff;
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 var(--navy);
+  animation: pop .35s ease-out;
+}
+@keyframes pop { from { transform: translate(-50%, -50%) scale(.4); } to { transform: translate(-50%, -50%) scale(1); } }
+.stage.is-batting { cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite, .is-running .runner, .batter, .banner { animation: none !important; }
+  .world { transition: none; }
+}
+
+/* Game bar under the field: batting, tour controls, free mode. Only shown by src/diamond.js. */
+.game-bar { margin-top: .5rem; max-width: calc(320px * var(--fs) + 4px); }
+.bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
+.bar-hint { margin: 0; font-size: .9375rem; color: var(--muted); }
+.game-bar .button { padding: .4rem .8rem; font-size: 1rem; }
+.swing { background: var(--red); border-color: var(--red); }
+.swing:hover { background: var(--navy); border-color: var(--navy); }
+.tour-step { font-weight: 700; font-size: .9375rem; }
+button.link { padding: 0; border: 0; background: none; color: var(--navy); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
+button.link:hover { color: var(--red); }
+button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.button { cursor: pointer; font-family: inherit; line-height: inherit; }
+.button:disabled { opacity: .45; cursor: default; pointer-events: none; }
+/* Time left before the next base: fills from 0 to 100 %. Pauses with the tour. */
+.timer { flex-basis: 100%; height: 6px; border: 1px solid var(--navy); border-radius: 3px; background: var(--card); overflow: hidden; }
+.timer span { display: block; width: calc(var(--done, 0) * 100%); height: 100%; background: var(--red); }
+.panel-cover { width: 100%; max-height: 9rem; object-fit: cover; object-position: top; margin-bottom: .75rem; border: 1px solid var(--line); border-radius: 4px; }
 
 .panel { padding: 1rem 1.25rem; background: var(--card); border: 2px solid var(--navy); border-radius: 4px; }
 .panel h3 { margin: .25rem 0 .5rem; font-size: 1.375rem; }

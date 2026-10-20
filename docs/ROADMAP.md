@@ -17,7 +17,7 @@ Una sessione = un blocco: plan mode → codice → verifica → commit → spunt
 
 ## Giorno 2
 - [x] **B5 Start screen** — battitore grande + 3 divise (Researcher/Designer/Maker = palette swap + accessorio), pannello "How I design" (moodboard, principi, CV, contatti). (20/10)
-- [ ] **B6 Interazione** — battuta iniziale a tempo che non si può sbagliare → home run → tour che si ferma a ogni base (avanti/indietro/pausa, mai un video); poi modalità libera; battuta come extra ("take another swing").
+- [x] **B6 Interazione** — battuta iniziale a tempo che non si può sbagliare → home run → tour che si ferma a ogni base (avanti/indietro/pausa, mai un video); poi modalità libera; battuta come extra ("take another swing"). (20/10)
 - [ ] **B7 Rifinitura** — animazioni, suoni (spenti di default), reduced motion, mobile, velocità, anteprime OG, PDF dei casi con CSS di stampa.
 - [ ] **B8 Test e pubblicazione** — prova con 2–3 persone (anche veloce), correzioni, link nel CV.
 

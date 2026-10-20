@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
 import sharp from 'sharp';
-import { FIELD, STOPS } from '../src/field-map.js';
+import { FIELD, STOPS, CREW, CREW_ROWS } from '../src/field-map.js';
 import { UNIFORMS } from '../src/uniforms.js';
 import { PALETTE } from '../src/palette.js';
 
@@ -202,9 +202,10 @@ async function casePage(c, i, all) {
 }
 
 // The ballpark: pixel field + bases as real links + one panel per stop.
-// Without JavaScript the bases are plain links to the case pages; src/diamond.js adds the running and the panels.
+// Without JavaScript the bases are plain links to the case pages; src/diamond.js adds the game:
+// batting, the home-run tour (one project per base) and free running. The game bar stays hidden without JS.
 // Under 700 px it is shown at 1× with simplified touch labels (see style.css).
-function diamond(cases) {
+async function diamond(cases) {
   const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
   const bases = STOPS.map((stop, i) => {
@@ -212,17 +213,22 @@ function diamond(cases) {
     return `          <li><a class="base" href="${href}" data-stop="${stop.id}" data-tag="${stop.tag}" style="--x: ${pct(stop.x, FIELD.width)}; --y: ${pct(stop.y, FIELD.height)}; --icon: ${i}"><span class="base-icon"></span><span class="base-text"><span class="base-label">${stop.label}</span> <span class="base-name">${stop.name}</span></span></a></li>`;
   });
   const main = bySlug.nipotyno.data;
+  // Crew sprites (coaches, teammates, pitcher): decoration only, so hidden from screen readers.
+  const crew = CREW.map((m) => `              <div class="sprite crew-sprite${m.flip ? ' is-flipped' : ''}" data-crew="${m.id}" style="--x: ${pct(m.x, FIELD.width)}; --y: ${pct(m.y, FIELD.height)}; --row: ${CREW_ROWS.indexOf(m.who)}"></div>`);
+  const covers = Object.fromEntries(await Promise.all(cases.map(async ({ data }) => [data.slug, { src: data.cover, ...(await imageSize(data.cover)) }])));
   const panels = [
     `          <article class="panel-card" data-panel="home">
             <p class="kicker">Home plate · Start here</p>
             <h3>Every base is a project</h3>
-            <p>Click a base, or use the <kbd>←</kbd> <kbd>→</kbd> keys, and I'll run there. Start with my main project:</p>
+            <p>Swing at the pitch for a home-run tour of my projects — or click or tap any base (or use the <kbd>←</kbd> <kbd>→</kbd> keys) and I'll run there. Start with my main project:</p>
             <p><a class="button" href="/nipotyno/">${escape(shortName(bySlug.nipotyno))} — read the case study</a></p>
             <p class="small">${escape(main.description)}</p>
           </article>`,
     ...cases.map(({ data }) => {
       const stop = STOPS.find((s) => s.id === data.slug);
+      const cover = covers[data.slug];
       return `          <article class="panel-card" data-panel="${data.slug}" hidden>
+            <img class="panel-cover" src="${cover.src}" alt="" width="${cover.width}" height="${cover.height}" loading="lazy" decoding="async">
             <p class="kicker">${escape(stop.label)} · ${escape(stop.name)}</p>
             <h3>${escape(shortName({ data }))}<span class="sub">${escape(subtitle({ data }))}</span></h3>
             <p>${escape(data.tldr)}</p>
@@ -230,17 +236,54 @@ function diamond(cases) {
             <p><a class="button" href="/${data.slug}/">Read the case study<span class="visually-hidden">: ${escape(shortName({ data }))}</span> →</a></p>
           </article>`;
     }),
+    `          <article class="panel-card" data-panel="done" hidden>
+            <p class="kicker">Home run · Tour complete</p>
+            <h3>That's the tour!</h3>
+            <p>Thanks for running the bases with me. If you need someone who finds out first and then designs, let's talk about a UX internship in Madrid (Feb–Jul 2027).</p>
+            <ul class="actions">
+              <li><a class="button" href="/cv/CV_Riccardo_Cirillo_EN.pdf">CV (English, PDF)</a></li>
+              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">CV en español</a></li>
+              <li><a class="button ghost" href="mailto:${EMAIL}">Email me</a></li>
+            </ul>
+            <p><button class="button ghost" type="button" data-action="again">Take another swing</button></p>
+          </article>`,
   ];
   return `      <section id="field" class="field wrap wide" aria-labelledby="field-title">
         <h2 id="field-title">Explore the ballpark</h2>
         <p class="hint">A small game on top of the portfolio. <a href="#work">Prefer a list? Skip to the case studies</a></p>
         <div class="field-layout">
-          <div class="stage">
-            <img class="field-img" src="/game/field.png" alt="Pixel-art baseball field. Each base links to a project." width="${FIELD.width}" height="${FIELD.height}">
-            <ul class="bases" aria-label="Bases">
+          <div class="stage-col">
+            <div class="stage">
+              <div class="world">
+                <img class="field-img" src="/game/field.png" alt="Pixel-art baseball field. Each base links to a project." width="${FIELD.width}" height="${FIELD.height}">
+${crew.join('\n')}
+                <div class="sprite runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
+                <div class="ball" hidden></div>
+              </div>
+              <ul class="bases" aria-label="Bases">
 ${bases.join('\n')}
-            </ul>
-            <div class="runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
+              </ul>
+              <p class="banner" aria-hidden="true" hidden>Home run!</p>
+            </div>
+            <div class="game-bar" hidden>
+              <div class="bar-row" data-mode="bat">
+                <button class="button swing" type="button" data-action="swing">Swing!</button>
+                <p class="bar-hint">Click or tap the field, or press <kbd>Space</kbd>, to hit the pitch. <button class="link" type="button" data-action="free">Just explore the bases</button></p>
+              </div>
+              <div class="bar-row" data-mode="tour" hidden>
+                <button class="button ghost" type="button" data-action="back"><span aria-hidden="true">◀</span> Back</button>
+                <button class="button ghost" type="button" data-action="pause">Pause</button>
+                <button class="button" type="button" data-action="next">Next <span aria-hidden="true">▶</span></button>
+                <span class="tour-step"></span>
+                <button class="link" type="button" data-action="free">Explore freely</button>
+                <div class="timer" aria-hidden="true"><span></span></div>
+              </div>
+              <div class="bar-row" data-mode="free" hidden>
+                <button class="button ghost" type="button" data-action="again">Take another swing</button>
+                <p class="bar-hint">Click or tap a base, or use the <kbd>←</kbd> <kbd>→</kbd> keys.</p>
+              </div>
+              <p class="visually-hidden" role="status"></p>
+            </div>
           </div>
           <div class="panel" id="field-panel" tabindex="-1" aria-live="polite">
 ${panels.join('\n')}
@@ -339,7 +382,7 @@ async function homePage(cases, about) {
   const principles = aboutParts.find((part) => part.includes('id="how-i-design"')).match(/<ol>[\s\S]*<\/ol>/)[0];
 
   const main = `${startScreen(cases, about)}
-${diamond(cases)}
+${await diamond(cases)}
 ${howIDesign(cases, principles)}
       <section id="work" class="work wrap" aria-labelledby="work-title" tabindex="-1">
         <h2 id="work-title">Case studies</h2>

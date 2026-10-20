@@ -92,7 +92,7 @@ test.describe('phone (390 px): simplified touch field', () => {
       page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
       page.getByRole('link', { name: 'Download CV (English, PDF)' }),
       page.getByRole('link', { name: 'CV en español (PDF)' }),
-      page.locator('main a[href^="mailto:"]'),
+      page.locator('.hero a[href^="mailto:"]'),
       page.getByRole('link', { name: /^Start here/ }),
     ]) {
       await expect(locator).toBeInViewport();
@@ -157,7 +157,7 @@ test.describe('desktop (1280 px): the ballpark', () => {
       page.getByText('UX Research & Design intern · Madrid · Feb–Jul 2027').first(),
       page.getByRole('link', { name: 'Download CV (English, PDF)' }),
       page.getByRole('link', { name: 'CV en español (PDF)' }),
-      page.locator('main a[href^="mailto:"]'),
+      page.locator('.hero a[href^="mailto:"]'),
       page.getByRole('link', { name: /^Start here/ }),
       page.getByRole('link', { name: 'Play ball!' }),
       page.getByRole('link', { name: 'Skip → Case studies' }),

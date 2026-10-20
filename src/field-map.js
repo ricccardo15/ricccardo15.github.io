@@ -34,5 +34,5 @@ export const TOUR = [
   { stop: 'levante', moment: 'cheer', with: {} },
   { stop: 'housing', moment: 'highfive', with: { coach3: 'highfive' } },
   { stop: 'lab', moment: 'wave', with: { mateA: 'cheer', mateB: 'cheer' } },
-  { stop: 'lab', panel: 'done', moment: 'wave', with: {} },
+  { stop: 'lab', panel: 'done' }, // last card: CV, email, take another swing
 ];

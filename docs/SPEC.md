@@ -46,7 +46,8 @@ Running the bases = the design process. Arriving on a base opens that case study
 - Same structure for every case ("innings"): **Problem → Research → Ideas → Prototype → Test → Result → My role / team**.
 - "Back to the field" returns to the same base. Deep link per case (`#nipotyno`, `#levante`, `#housing`, `#lab`).
 
-## 4. Interaction — how you move between bases **[OPEN: choose in interview]**
+## 4. Interaction — how you move between bases
+> **Decided (B6, Riccardo):** one click/tap/Space hits the pitch (can't miss) → home run → tour that stops at each base with a small moment (zoom 2×, high five with the 1st/3rd base coach, a cheer on 2nd) and a short preview of the project; ~10 s to open it, Back / Pause / Next always there (reduced motion: Next only). The tour ends in the dugout with the teammates (Lab), then a last card with CV + contacts + "Take another swing" (replays bat + tour). Then free mode. Ideas A/C below are kept for history.
 Riccardo's ideas:
 - **A. Bat to move:** each move is a swing. Power/timing (how long you hold the button, or when you release) decides where the ball goes and so which base you reach (single → 1st, double → 2nd, triple → 3rd, home run → home).
 - **B. Home-run tour:** one swing at the start → home run → the character runs the bases and at each base the case study opens. Controls: **pause / play, back, next**, plus a base indicator to jump. It must NOT feel like a video: the user is always in control.
