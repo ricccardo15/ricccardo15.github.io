@@ -249,6 +249,8 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 }
 .base-label { display: block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--red); }
 .base-name { display: block; font-weight: 700; }
+.base { transition: translate .15s ease; }
+.base:hover, .base:focus-visible { translate: 0 -2px; }
 .base:hover, .base[aria-current] { background: var(--navy); color: #fff; }
 .base:hover .base-label, .base[aria-current] .base-label { color: #fff; }
 .base:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
@@ -364,6 +366,17 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 /* Time left before the next base: fills from 0 to 100 %. Pauses with the tour. */
 .timer { flex-basis: 100%; height: 6px; border: 1px solid var(--navy); border-radius: 3px; background: var(--card); overflow: hidden; }
 .timer span { display: block; width: calc(var(--done, 0) * 100%); height: 100%; background: var(--red); }
+.bar-tools { margin: .5rem 0 0; font-size: .9375rem; }
+.sound-toggle .state { display: inline-block; min-width: 1.6em; padding: 0 .3em; border: 1px solid var(--navy); border-radius: 3px; font-size: .8125rem; text-decoration: none; }
+.sound-toggle[aria-pressed="true"] .state { background: var(--navy); color: #fff; }
+/* Touch screens have no Space or arrow keys: hide those hints there. */
+@media (hover: none) and (pointer: coarse) {
+  .no-touch { display: none; }
+}
+/* A new panel card fades in; the start-screen batter swings when the uniform changes (src/uniform.js). */
+.panel-card { animation: fade-in .25s ease-out; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.batter.is-swinging { animation: swing .44s steps(4, jump-none) 1; }
 .panel-cover { width: 100%; max-height: 9rem; object-fit: cover; object-position: top; margin-bottom: .75rem; border: 1px solid var(--line); border-radius: 4px; }
 
 .panel { padding: 1rem 1.25rem; background: var(--card); border: 2px solid var(--navy); border-radius: 4px; }
@@ -426,8 +439,24 @@ th { background: var(--navy); color: #fff; }
   }
 }
 
+/* Print = the case-study PDFs (scripts/pdf.js prints each case page with these rules). */
+.print-head { display: none; }
 @media print {
+  @page { size: A4; margin: 14mm 14mm 16mm; }
+  body { background: #fff; font-size: 10.5pt; line-height: 1.45; }
   .site-header, .skip, .pager, .crumb { display: none; }
-  .site-footer { background: none; color: var(--ink); }
+  .print-head { display: block; margin: 0 0 6mm; padding-bottom: 2mm; border-bottom: 1px solid var(--line); font-size: 9pt; color: var(--muted); }
+  .wrap, .case { max-width: none; padding: 0; }
+  .site-footer { margin-top: 8mm; padding: 3mm 0 0; background: none; color: var(--ink); border-top: 1px solid var(--line); font-size: 9pt; }
   .site-footer a { color: var(--ink); }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; margin: 6mm 0 2mm; break-after: avoid; }
+  h3 { break-after: avoid; }
+  figure, img, table, .facts, #tl-dr, .card { break-inside: avoid; }
+  figure { margin: 4mm 0; }
+  figure img { max-height: 110mm; width: auto; margin: 0 auto; }
+  .table-wrap { overflow: visible; }
+  .cards { grid-template-columns: 1fr 1fr; gap: 5mm; }
+  a { color: inherit; }
+  .case a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8.5pt; color: var(--muted); }
 }

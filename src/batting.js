@@ -3,6 +3,7 @@
 // You can't miss: a swing at any moment hits the next ball that reaches the plate, and it is always a home run.
 // With reduced motion there is no pitch: a swing shows "Home run!" straight away.
 import { FIELD } from './field-map.js';
+import { sound } from './sound.js';
 
 // Field pixels (320×180), like src/field-map.js.
 const RELEASE = { x: 150, y: 100 }; // the pitcher's hand
@@ -36,9 +37,11 @@ export function atBat({ stage, runner, pitcher, ball, banner, reduceMotion }) {
 
   async function homeRun(run) {
     runner.classList.replace('is-batting', 'is-swinging');
+    sound.play('crack');
     if (!(await fly(PLATE, OUT, 900, 40, run))) return;
     ball.hidden = true;
     banner.hidden = false;
+    sound.play('crowd');
     await sleep(1300);
     if (run.cancelled) return;
     finish();
@@ -97,6 +100,8 @@ export function atBat({ stage, runner, pitcher, ball, banner, reduceMotion }) {
       swing = { promise: new Promise((r) => { resolve = r; }) };
       swing.resolve = resolve;
       if (reduceMotion.matches) {
+        sound.play('crack');
+        sound.play('crowd');
         banner.hidden = false;
         sleep(600).then(() => { if (pitching) finish(); });
       }

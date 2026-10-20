@@ -11,11 +11,14 @@ import sharp from 'sharp';
 import { FIELD, STOPS, CREW, CREW_ROWS } from '../src/field-map.js';
 import { UNIFORMS } from '../src/uniforms.js';
 import { PALETTE } from '../src/palette.js';
+import { pixelText } from './art/title.js';
 
 const SITE = 'https://ricccardo15.github.io';
 const EMAIL = 'riccardo.cirillo.work@gmail.com';
 // Order on the home and on the diamond: 1st, 2nd, 3rd base, dugout.
 export const CASES = ['nipotyno', 'levante', 'housing', 'lab'];
+// PDF of each case (made after the build by scripts/pdf.js from the page itself, with the print CSS).
+export const pdfName = (slug) => `Riccardo_Cirillo_${STOPS.find((s) => s.id === slug).name}.pdf`;
 // Pages Vite must build (home + one per case).
 export const PAGES = ['index.html', ...CASES.map((slug) => `${slug}/index.html`)];
 
@@ -87,20 +90,64 @@ const figures = (html) => html.replace(/<p>(<img [^>]+>)<\/p>/g, '<figure>$1</fi
 
 // --- Open Graph images ------------------------------------------------------
 
-// LinkedIn and some chat apps don't read WebP previews: make a 1200×630 JPG copy for each page.
-async function ogImage(src, name) {
+// The previews shown when the link is shared (LinkedIn, WhatsApp, email): 1200×630 JPG (LinkedIn reads WebP badly).
+// Text is drawn with the site's own pixel font (scripts/art/title.js), so it looks the same on any build machine.
+const OG = { width: 1200, height: 630 };
+
+// Pixel text as a PNG layer for sharp, at an integer scale (nearest neighbour = sharp pixels).
+async function pixelLayer(text, scale, colors, left, top) {
+  const width = text.length * 8 * scale;
+  const input = await sharp(Buffer.from(pixelText(text, colors))).resize(width, 8 * scale, { kernel: 'nearest' }).png().toBuffer();
+  return { input, left: left ?? Math.round((OG.width - width) / 2), top };
+}
+const band = (height) => ({
+  input: { create: { width: OG.width, height, channels: 3, background: PALETTE.navy } }, left: 0, top: 0,
+});
+
+async function saveOg(name, image) {
   await mkdir(root('public/og'), { recursive: true });
-  await sharp(root(`public${src}`))
-    .resize(1200, 630, { fit: 'contain', background: '#f7f4ec' })
-    .flatten({ background: '#f7f4ec' })
-    .jpeg({ quality: 82 })
-    .toFile(root(`public/og/${name}.jpg`));
+  await image.jpeg({ quality: 84 }).toFile(root(`public/og/${name}.jpg`));
   return `/og/${name}.jpg`;
+}
+
+// Home: the pixel ballpark at 4× (with Riccardo at bat on home plate) under a navy band with the pixel name and role.
+async function ogHome() {
+  const home = STOPS.find((s) => s.id === 'home');
+  const batter = await sharp(root('public/game/runner.png'))
+    .extract({ left: 6 * 32, top: 0, width: 32, height: 32 }) // swing stance, Researcher uniform
+    .resize(128, 128, { kernel: 'nearest' })
+    .toBuffer();
+  const field = await sharp(root('public/game/field.png'))
+    .resize(1280, 720, { kernel: 'nearest' })
+    .extract({ left: 40, top: 90, width: OG.width, height: OG.height })
+    .toBuffer();
+  return saveOg('home', sharp(field).composite([
+    { input: batter, left: home.x * 4 - 40 - 64, top: (home.y + 3) * 4 - 90 - 128 },
+    band(190),
+    await pixelLayer('Riccardo Cirillo', 7, { color: PALETTE.white, shadow: PALETTE.red }, undefined, 42),
+    await pixelLayer('UX Research & Design · Madrid 2027', 3, { color: PALETTE.yellow, shadow: PALETTE.navyDark }, undefined, 128),
+  ]));
+}
+
+// Case: navy band with the case name in pixels, the cover image below.
+async function ogCase(slug, src) {
+  const stop = STOPS.find((s) => s.id === slug);
+  const cover = await sharp(root(`public${src}`))
+    .resize(OG.width, OG.height - 150, { fit: 'contain', background: '#f7f4ec' })
+    .flatten({ background: '#f7f4ec' })
+    .toBuffer();
+  const base = sharp({ create: { ...OG, channels: 3, background: '#f7f4ec' } });
+  return saveOg(slug, base.composite([
+    band(150),
+    await pixelLayer(stop.name, 8, { color: PALETTE.white, shadow: PALETTE.red }, 60, 28),
+    await pixelLayer(`${stop.label} · Case study by Riccardo Cirillo`, 2, { color: PALETTE.yellow, shadow: PALETTE.navyDark }, 60, 112),
+    { input: cover, left: 0, top: 150 },
+  ]));
 }
 
 // --- Layout -----------------------------------------------------------------
 
-function layout({ title, description, path, image, main, bodyClass = '', scripts = '' }) {
+function layout({ title, description, path, image, imageAlt, main, bodyClass = '', scripts = '' }) {
   const url = `${SITE}${path}`;
   return `<!doctype html>
 <html lang="en">
@@ -118,6 +165,7 @@ function layout({ title, description, path, image, main, bodyClass = '', scripts
     <meta property="og:image" content="${SITE}${image}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="${escape(imageAlt)}">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="stylesheet" href="/src/style.css">
     ${scripts}
@@ -184,7 +232,8 @@ async function casePage(c, i, all) {
 </nav>`;
 
   const main = `      <article class="case wrap">
-        <p class="crumb"><a href="/#${data.slug}">← All case studies</a></p>
+        <p class="print-head">Riccardo Cirillo · UX Research &amp; Design intern · ${EMAIL} · ${SITE.replace('https://', '')}/${data.slug}/</p>
+        <p class="crumb"><a href="/#${data.slug}">← All case studies</a> · <a href="/pdf/${pdfName(data.slug)}">Download PDF<span class="visually-hidden"> of this case study</span></a></p>
         <p class="kicker">${escape(data.base)} · ${escape(shortName(c))}</p>
         <h1>${escape(shortName(c))}${subtitle(c) ? `<span class="sub">${escape(subtitle(c))}</span>` : ''}</h1>
         ${isLab ? `<p class="lede">${escape(data.tldr)}</p>` : facts(data)}
@@ -196,7 +245,8 @@ async function casePage(c, i, all) {
     title: `${shortName(c)} — ${subtitle(c) || 'Riccardo Cirillo'} · Riccardo Cirillo`,
     description: data.description,
     path: `/${data.slug}/`,
-    image: await ogImage(data.og_image, data.slug),
+    image: await ogCase(data.slug, data.og_image),
+    imageAlt: `${shortName(c)} — case study by Riccardo Cirillo (${STOPS.find((s) => s.id === data.slug).label})`,
     main,
   });
 }
@@ -268,7 +318,7 @@ ${bases.join('\n')}
             <div class="game-bar" hidden>
               <div class="bar-row" data-mode="bat">
                 <button class="button swing" type="button" data-action="swing">Swing!</button>
-                <p class="bar-hint">Click or tap the field, or press <kbd>Space</kbd>, to hit the pitch. <button class="link" type="button" data-action="free">Just explore the bases</button></p>
+                <p class="bar-hint">Click or tap the field<span class="no-touch">, or press <kbd>Space</kbd>,</span> to hit the pitch. <button class="link" type="button" data-action="free">Just explore the bases</button></p>
               </div>
               <div class="bar-row" data-mode="tour" hidden>
                 <button class="button ghost" type="button" data-action="back"><span aria-hidden="true">◀</span> Back</button>
@@ -280,8 +330,9 @@ ${bases.join('\n')}
               </div>
               <div class="bar-row" data-mode="free" hidden>
                 <button class="button ghost" type="button" data-action="again">Take another swing</button>
-                <p class="bar-hint">Click or tap a base, or use the <kbd>←</kbd> <kbd>→</kbd> keys.</p>
+                <p class="bar-hint">Click or tap a base<span class="no-touch">, or use the <kbd>←</kbd> <kbd>→</kbd> keys</span>.</p>
               </div>
+              <p class="bar-tools"><button class="link sound-toggle" type="button" data-action="sound" aria-pressed="false"><span aria-hidden="true">♪</span> Sound <span class="state" aria-hidden="true">off</span></button></p>
               <p class="visually-hidden" role="status"></p>
             </div>
           </div>
@@ -399,10 +450,17 @@ ${aboutHtml}
     title: 'Riccardo Cirillo — UX Research & Design',
     description: 'Riccardo Cirillo, UX Research & Design intern · Madrid · Feb–Jul 2027. Case studies, CV and contacts.',
     path: '/',
-    image: await ogImage(cases[0].data.cover, 'home'),
+    image: await ogHome(),
+    imageAlt: 'Pixel-art baseball field under the title Riccardo Cirillo, UX Research & Design, Madrid 2027',
     main,
     bodyClass: 'home',
-    scripts: '<script type="module" src="/src/diamond.js"></script>\n    <script type="module" src="/src/uniform.js"></script>',
+    // The sprites are CSS backgrounds (found late by the browser): preload them so the batter and the field show at once.
+    scripts: [
+      '<link rel="preload" as="image" href="/game/runner.png">',
+      '<link rel="preload" as="image" href="/game/crew.png">',
+      '<script type="module" src="/src/diamond.js"></script>',
+      '<script type="module" src="/src/uniform.js"></script>',
+    ].join('\n    '),
   });
 }
 

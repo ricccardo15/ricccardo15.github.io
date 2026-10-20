@@ -4,10 +4,12 @@
 // - tour: the runner stops at each base for a small moment (zoom, high five, cheer) while the panel shows a preview
 //   of the project; it moves on after TOUR_WAIT unless paused. Back / Pause / Next are always there.
 // - free: click/tap a base or ← → and the runner runs there · Esc closes the panel · "Take another swing" starts again
+// Sound (src/sound.js) is off until the visitor turns it on with the toggle in the game bar.
 // The address shows the base (/#nipotyno): deep links (they skip the at-bat) and the browser Back button work.
 // With reduced motion: no pitch, no zoom, no timer — the tour waits for Next.
 import { FIELD, STOPS, RING, CREW, TOUR } from './field-map.js';
 import { atBat } from './batting.js';
+import { sound } from './sound.js';
 
 const stage = document.querySelector('.stage');
 const field = document.querySelector('#field');
@@ -176,6 +178,7 @@ function start() {
     const xs = [base.x, ...others.map((m) => m.x)];
     zoomOn({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: base.y - 14 });
     runner.classList.add(`is-${s.moment}`);
+    sound.play(s.moment === 'highfive' ? 'clap' : 'cheer');
     for (const [id, anim] of Object.entries(s.with)) crew[id].classList.add(`is-${anim}`);
     await sleep(MOMENT);
     if (run === tourRun) endMoment();
@@ -256,11 +259,13 @@ function start() {
   // --- Controls -----------------------------------------------------------------
 
   field.addEventListener('click', (event) => {
+    sound.wake();
     const action = event.target.closest('[data-action]')?.dataset.action;
     if (action === 'swing') swing();
     else if (action === 'next' && step < TOUR.length - 1) tourStep(step + 1);
     else if (action === 'back' && step > 0) tourStep(step - 1);
     else if (action === 'pause') { paused = !paused; updateTourBar(); }
+    else if (action === 'sound') { sound.set(!sound.on); showSound(); }
     else if (action === 'free') {
       setMode('free');
       say('Free mode: click or tap a base.');
@@ -277,6 +282,7 @@ function start() {
     const box = stage.getBoundingClientRect();
     if (box.bottom < 0 || box.top > innerHeight) return;
     event.preventDefault();
+    sound.wake();
     swing();
   });
 
@@ -330,6 +336,12 @@ function start() {
     runTo(id, { animate: false });
   });
 
+  const soundToggle = bar.querySelector('[data-action="sound"]');
+  const showSound = () => {
+    soundToggle.setAttribute('aria-pressed', String(sound.on));
+    soundToggle.querySelector('.state').textContent = sound.on ? 'on' : 'off';
+  };
+  showSound();
   bar.hidden = false;
   if (fromHash({ scroll: true })) {
     setMode('free');

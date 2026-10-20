@@ -6,7 +6,7 @@
   "description": "Riccardo Cirillo — UX Research & Design portfolio",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/pdf.js",
     "preview": "vite preview",
     "test": "playwright test",
     "images": "node scripts/images.js",

@@ -21,7 +21,7 @@ export const RING = ['home', 'nipotyno', 'levante', 'housing'];
 export const CREW_ROWS = ['coach', 'mateA', 'mateB', 'pitcher'];
 export const CREW = [
   { id: 'coach1', who: 'coach', x: 244, y: 114, flip: true },
-  { id: 'coach3', who: 'coach', x: 76, y: 114 },
+  { id: 'coach3', who: 'coach', x: 78, y: 114 }, // hand meets the runner's on 3rd
   { id: 'pitcher', who: 'pitcher', x: 160, y: 114, flip: true },
   { id: 'mateA', who: 'mateA', x: 12, y: 160 },
   { id: 'mateB', who: 'mateB', x: 60, y: 160, flip: true },
