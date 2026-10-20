@@ -85,10 +85,19 @@ for (const path of pages.filter((p) => p !== '/')) {
 test.describe('phone (390 px): list view instead of the field', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('the field is hidden and the first case card is on screen', async ({ page }) => {
+  test('the field is hidden; name, CV, contact and Nipotyno are on the first screen', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#field')).toBeHidden();
-    await expect(page.locator('#nipotyno')).toBeInViewport();
+    await expect(page.getByRole('link', { name: 'Play ball!' })).toBeHidden();
+    for (const locator of [
+      page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
+      page.getByRole('link', { name: 'Download CV (English, PDF)' }),
+      page.getByRole('link', { name: 'CV en español (PDF)' }),
+      page.locator('main a[href^="mailto:"]'),
+      page.getByRole('link', { name: /^Start here/ }),
+    ]) {
+      await expect(locator).toBeInViewport();
+    }
   });
 
   test('deep links (#nipotyno etc.) jump to the card in the list', async ({ page }) => {
@@ -115,8 +124,10 @@ test.describe('desktop (1280 px): the ballpark', () => {
       page.getByRole('link', { name: 'Download CV (English, PDF)' }),
       page.getByRole('link', { name: 'CV en español (PDF)' }),
       page.locator('main a[href^="mailto:"]'),
-      page.getByRole('link', { name: 'Nipotyno — read the case study' }),
-      page.getByRole('link', { name: 'Prefer a list? Skip to the case studies' }),
+      page.getByRole('link', { name: /^Start here/ }),
+      page.getByRole('link', { name: 'Play ball!' }),
+      page.getByRole('link', { name: 'Skip → Case studies' }),
+      page.getByRole('radio', { name: 'Researcher' }),
     ]) {
       await expect(locator).toBeInViewport();
     }
@@ -170,5 +181,50 @@ test.describe('desktop (1280 px): the ballpark', () => {
     const box = await page.locator('.field-img').boundingBox();
     expect(box.width / 320).toBe(Math.round(box.width / 320));
     expect(box.height / 180).toBe(box.width / 320);
+  });
+});
+
+test.describe('Start screen: uniforms', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  const card = (page) => page.locator('.uniform-card:visible');
+
+  test('Researcher by default; Maker shows its skills and suggests Levante, and is remembered', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('radio', { name: 'Researcher' })).toBeChecked();
+    await expect(card(page)).toHaveCount(1);
+    await expect(card(page)).toHaveAttribute('data-uniform', 'researcher');
+
+    await page.getByText('Maker', { exact: true }).click();
+    await expect(card(page)).toHaveAttribute('data-uniform', 'maker');
+    await expect(card(page)).toContainText('Arduino');
+    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/levante/');
+    // the batter and the runner on the field wear the Maker uniform (row 2 of the sprite)
+    const row = await page.locator('.runner').evaluate((el) => getComputedStyle(el).getPropertyValue('--uniform-row').trim());
+    expect(row).toBe('2');
+
+    await page.reload();
+    await expect(page.getByRole('radio', { name: 'Maker' })).toBeChecked();
+  });
+
+  test('uniforms work with the keyboard and show focus', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('radio', { name: 'Researcher' }).focus();
+    await page.keyboard.press('ArrowRight');
+    const designer = page.getByRole('radio', { name: 'Designer' });
+    await expect(designer).toBeFocused();
+    await expect(designer).toBeChecked();
+    await expect(card(page)).toHaveAttribute('data-uniform', 'designer');
+    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/nipotyno/');
+    const outline = await page.locator('.uniforms label:has(input:focus-visible)').evaluate((el) => getComputedStyle(el).outlineStyle);
+    expect(outline).not.toBe('none');
+  });
+
+  test('Play ball! goes to the field, Skip goes to the list', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Play ball!' }).click();
+    await expect(page.locator('#field')).toBeInViewport();
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Skip → Case studies' }).click();
+    await expect(page.locator('#work')).toBeInViewport();
   });
 });

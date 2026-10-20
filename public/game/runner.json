@@ -227,7 +227,7 @@
     "format": "RGBA8888",
     "size": {
       "w": 320,
-      "h": 32
+      "h": 96
     },
     "scale": "1",
     "frameTags": [

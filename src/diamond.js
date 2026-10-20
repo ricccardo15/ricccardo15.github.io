@@ -124,6 +124,10 @@ function start() {
     runTo(id, { animate: false });
     // The list cards share these ids, so the browser scrolls to the card on load: scroll back to the field after it.
     if (scroll && visible()) {
+      // Chrome keeps the page pinned to the #id target while images load, undoing our scroll:
+      // on desktop the field is the deep-link view, so take the id off the list card.
+      const card = document.getElementById(id);
+      if (card && !field.contains(card)) { card.dataset.id = id; card.removeAttribute('id'); }
       const toField = () => requestAnimationFrame(() => field.scrollIntoView({ block: 'start' }));
       if (document.readyState === 'complete') toField();
       else window.addEventListener('load', toField, { once: true });

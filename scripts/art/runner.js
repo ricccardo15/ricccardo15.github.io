@@ -1,9 +1,11 @@
 // Riccardo as a 32×32 pixel player, facing right, in 10 frames on one sprite sheet:
 //   idle 0–1 · run 2–5 · swing 6–9   (same order as the tags in runner.json)
+// One row per uniform (src/uniforms.js): Researcher, Designer, Maker = palette swap + accessory.
 // Look taken from his reference photo (docs/reference/, private): navy helmet and jersey, dark curly hair,
 // stubble, black earring, white pants and batting gloves, black wristbands. The photo itself is never used.
 import { writeFile } from 'node:fs/promises';
 import { canvas } from './canvas.js';
+import { UNIFORMS } from '../../src/uniforms.js';
 
 const SIZE = 32;
 
@@ -18,7 +20,7 @@ const HEAD = `
 ..BKsSSSSSSS...
 ...sssssSss....
 .....SSSS......`;
-const HEAD_KEY = { N: 'navy', D: 'navyDark', B: 'black', S: 'skin', s: 'skinDark', K: 'black' };
+const headKey = (u) => ({ N: u.colors.helmet, D: u.colors.helmetShade, B: 'black', S: 'skin', s: 'skinDark', K: 'black' });
 
 const TORSO = `
 ..NNNNNN..
@@ -29,7 +31,7 @@ const TORSO = `
 ..NNNNNNN.
 ..KKKKKKK.
 ..WWWWWWW.`;
-const TORSO_KEY = { N: 'navy', R: 'red', K: 'black', W: 'white' };
+const torsoKey = (u) => ({ N: u.colors.jersey, R: u.colors.number, K: 'black', W: 'white' });
 
 // A pose: knee/ankle of each leg, elbow/hand of each arm (sprite pixels), body bob, optional bat end.
 const legs = {
@@ -57,39 +59,58 @@ export const TAGS = [
   { name: 'swing', from: 6, to: 9, duration: 110 },
 ];
 
-function leg(c, ox, hip, [knee, ankle], color) {
-  c.line(ox + hip[0], hip[1], ox + knee[0], knee[1], color, 3);
-  c.line(ox + knee[0], knee[1], ox + ankle[0], ankle[1], color, 3);
-  c.rect(ox + ankle[0] - 1, ankle[1] + 1, 4, 2, 'black'); // cleat, toe to the right
+function leg(c, ox, oy, hip, [knee, ankle], color) {
+  c.line(ox + hip[0], oy + hip[1], ox + knee[0], oy + knee[1], color, 3);
+  c.line(ox + knee[0], oy + knee[1], ox + ankle[0], oy + ankle[1], color, 3);
+  c.rect(ox + ankle[0] - 1, oy + ankle[1] + 1, 4, 2, 'black'); // cleat, toe to the right
 }
 
-function arm(c, ox, shoulder, [elbow, hand]) {
-  c.line(ox + shoulder[0], shoulder[1], ox + elbow[0], elbow[1], 'navy', 2);
-  c.line(ox + elbow[0], elbow[1], ox + hand[0], hand[1], 'skin', 2);
-  c.set(ox + hand[0], hand[1] - 1, 'black'); // wristband
-  c.rect(ox + hand[0], hand[1], 2, 2, 'white'); // batting glove
+function arm(c, ox, oy, shoulder, [elbow, hand], sleeve) {
+  c.line(ox + shoulder[0], oy + shoulder[1], ox + elbow[0], oy + elbow[1], sleeve, 2);
+  c.line(ox + elbow[0], oy + elbow[1], ox + hand[0], oy + hand[1], 'skin', 2);
+  c.set(ox + hand[0], oy + hand[1] - 1, 'black'); // wristband
+  c.rect(ox + hand[0], oy + hand[1], 2, 2, 'white'); // batting glove
 }
 
-function frame(c, i, pose) {
+// Accessory of the uniform, shown when the player has no bat (idle and run frames).
+function accessory(c, ox, oy, b, [hx, hy], kind) {
+  if (kind === 'lens') { // magnifying glass held up in the front hand
+    c.line(ox + hx + 1, oy + hy, ox + hx + 2, oy + hy - 2, 'black');
+    c.rect(ox + hx + 1, oy + hy - 7, 5, 5, 'grey');
+    c.rect(ox + hx + 2, oy + hy - 6, 3, 3, 'skyLight');
+  } else if (kind === 'wrench') { // wrench in the front hand
+    c.line(ox + hx + 1, oy + hy, ox + hx + 3, oy + hy - 4, 'grey', 2);
+    c.rect(ox + hx + 2, oy + hy - 7, 4, 2, 'grey');
+    c.set(ox + hx + 3, oy + hy - 7, 'skyLight'); // open jaw
+  } else if (kind === 'pencil') { // yellow pencil behind the ear
+    c.line(ox + 8, oy + b + 8, ox + 11, oy + b + 5, 'yellow');
+    c.set(ox + 7, oy + b + 9, 'black'); // tip
+    c.set(ox + 12, oy + b + 4, 'redLight'); // eraser
+  }
+}
+
+function frame(c, i, pose, u) {
   const ox = i * SIZE;
+  const oy = u.row * SIZE;
   const b = pose.bob;
-  arm(c, ox, [14, 12 + b], pose.armBack);
-  leg(c, ox, [15, 19 + b], pose.back, 'skyLight'); // the far leg is in shadow
-  c.map(ox + 11, 11 + b, TORSO, TORSO_KEY);
-  leg(c, ox, [18, 19 + b], pose.front, 'white');
-  c.map(ox + 8, 1 + b, HEAD, HEAD_KEY);
+  arm(c, ox, oy, [14, 12 + b], pose.armBack, u.colors.jersey);
+  leg(c, ox, oy, [15, 19 + b], pose.back, 'skyLight'); // the far leg is in shadow
+  c.map(ox + 11, oy + 11 + b, TORSO, torsoKey(u));
+  leg(c, ox, oy, [18, 19 + b], pose.front, 'white');
+  c.map(ox + 8, oy + 1 + b, HEAD, headKey(u));
   if (pose.bat) {
     const [[x0, y0], [x1, y1]] = pose.bat;
-    c.line(ox + x0, y0, ox + x1, y1, 'dirtDark', 2);
-    c.set(ox + x1, y1, 'black'); // end cap
+    c.line(ox + x0, oy + y0, ox + x1, oy + y1, 'dirtDark', 2);
+    c.set(ox + x1, oy + y1, 'black'); // end cap
   }
-  arm(c, ox, [19, 12 + b], pose.armFront);
-  c.outline('navyDark', { x: ox, y: 0, w: SIZE, h: SIZE });
+  arm(c, ox, oy, [19, 12 + b], pose.armFront, u.colors.jersey);
+  if (!pose.bat) accessory(c, ox, oy, b, pose.armFront[1], u.accessory);
+  c.outline('navyDark', { x: ox, y: oy, w: SIZE, h: SIZE });
 }
 
 export async function runner(out) {
-  const c = canvas(SIZE * POSES.length, SIZE);
-  POSES.forEach((pose, i) => frame(c, i, pose));
+  const c = canvas(SIZE * POSES.length, SIZE * UNIFORMS.length);
+  for (const u of UNIFORMS) POSES.forEach((pose, i) => frame(c, i, pose, u));
   await c.png(out('runner.png'));
 
   // Aseprite-style JSON (array format): open runner.png + runner.json in Aseprite to edit the frames.
@@ -108,7 +129,7 @@ export async function runner(out) {
       app: 'scripts/art/runner.js',
       image: 'runner.png',
       format: 'RGBA8888',
-      size: { w: SIZE * POSES.length, h: SIZE },
+      size: { w: SIZE * POSES.length, h: SIZE * UNIFORMS.length },
       scale: '1',
       frameTags: TAGS.map(({ name, from, to }) => ({ name, from, to, direction: 'forward' })),
     },

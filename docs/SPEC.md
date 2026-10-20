@@ -25,7 +25,7 @@ Draft prepared in the "Internship" project. Open points are marked **[OPEN]**: i
 
 ## 3. Scenes
 ### 3.1 Start — "At bat" (home plate)
-- **Left:** Riccardo's pixel character as the batter, big, in the foreground. Choose a **uniform** (Researcher / Designer / Maker); each uniform highlights a skill set. **[OPEN]** does the uniform change anything else (e.g. order of cases)?
+- **Left:** Riccardo's pixel character as the batter, big, in the foreground. Choose a **uniform** (Researcher / Designer / Maker); each uniform highlights a skill set. **Decided (B5):** the uniform changes the look (palette swap + accessory: lens / yellow pencil / wrench), the skills shown and a suggested case — never the order of the cases.
 - **Right:** "How I design" panel: 3-line intro, 3 design principles, moodboard (palette, type, references), download CV (EN / ES), contacts.
 - Buttons: **Play ball!** → field. **Skip → Case studies** (list view), always visible.
 

@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
 import sharp from 'sharp';
 import { FIELD, STOPS } from '../src/field-map.js';
+import { UNIFORMS } from '../src/uniforms.js';
+import { PALETTE } from '../src/palette.js';
 
 const SITE = 'https://ricccardo15.github.io';
 const EMAIL = 'riccardo.cirillo.work@gmail.com';
@@ -247,6 +249,72 @@ ${panels.join('\n')}
       </section>`;
 }
 
+// Start screen "At bat": Riccardo at bat + uniform picker on one side, name/CV/contacts on the other.
+// Not a gate: everything a recruiter needs is here at once. The uniform switch is plain CSS
+// (radio + :has() in style.css); src/uniform.js only remembers the choice.
+function startScreen(cases, about) {
+  const nipotyno = cases.find((c) => c.data.slug === 'nipotyno');
+  const radios = UNIFORMS.map((u, i) => `            <label><input type="radio" name="uniform" id="u-${u.id}" value="${u.id}"${i === 0 ? ' checked' : ''}> ${u.label}</label>`);
+  return `      <section class="hero wrap wide" aria-labelledby="name">
+        <div class="intro">
+          <h1 id="name"><img class="pixel-title" src="/game/title.svg" alt="" width="128" height="8"><span class="visually-hidden">Riccardo Cirillo</span></h1>
+          <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
+          <p class="motto">“${escape(about.data.motto)}”</p>
+          <ul class="actions">
+            <li><a class="button" href="/cv/CV_Riccardo_Cirillo_EN.pdf">Download CV (English, PDF)</a></li>
+            <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">CV en español (PDF)</a></li>
+            <li><a class="button ghost" href="mailto:${EMAIL}">${EMAIL}</a></li>
+          </ul>
+          <a class="start-here" href="/nipotyno/"><span class="kicker">Start here · Main case</span> <strong>${escape(shortName(nipotyno))} — ${escape(subtitle(nipotyno))}</strong></a>
+          <ul class="play">
+            <li class="play-ball"><a class="button" href="#field">Play ball! <span aria-hidden="true">→</span> <span class="small-label">explore the ballpark</span></a></li>
+            <li><a class="skip-list" href="#work">Skip → Case studies</a></li>
+          </ul>
+        </div>
+        <div class="at-bat">
+          <div class="batter" aria-hidden="true"></div>
+          <fieldset class="uniforms">
+            <legend>Pick my uniform</legend>
+${radios.join('\n')}
+          </fieldset>
+        </div>
+      </section>`;
+}
+
+// "How I design": principles (content/about.md), the skills of the chosen uniform, and the moodboard.
+function howIDesign(cases, principles) {
+  const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
+  const uniformCards = UNIFORMS.map((u) => {
+    const c = bySlug[u.suggested];
+    return `            <div class="uniform-card" data-uniform="${u.id}">
+              <h3>Your uniform: ${u.label}</h3>
+              <ul class="skills">${u.skills.map((s) => `<li>${escape(s)}</li>`).join('')}</ul>
+              <p>Suggested case: <a href="/${c.data.slug}/">${escape(shortName(c))} — ${escape(subtitle(c))}</a></p>
+            </div>`;
+  });
+  const swatches = ['navy', 'red', 'sky', 'grass', 'dirt', 'yellow'].map(
+    (name) => `<li><span class="swatch" style="background: ${PALETTE[name]}"></span>${name} <code>${PALETTE[name]}</code></li>`,
+  );
+  return `      <section id="how" class="how wrap wide" aria-labelledby="how-title">
+        <h2 id="how-title">How I design</h2>
+        <div class="how-grid">
+          <div class="how-block">
+            <h3>Principles</h3>
+            ${principles}
+          </div>
+          <div class="how-block">
+${uniformCards.join('\n')}
+          </div>
+          <div class="how-block moodboard">
+            <h3>Moodboard</h3>
+            <ul class="swatches" aria-label="Colour palette">${swatches.join('')}</ul>
+            <p><strong>Type:</strong> an original 5×7 pixel font for titles, a plain system font for reading.</p>
+            <p><strong>Mood:</strong> a day game — blue sky, green grass, 16-bit arcade. Style reference: <a href="https://ponywolf.com/retro-pixel-baseball">Retro Pixel Baseball by Ponywolf</a> (all art here is my own).</p>
+          </div>
+        </div>
+      </section>`;
+}
+
 async function homePage(cases, about) {
   const cards = await Promise.all(
     cases.map(async ({ data }, i) => {
@@ -262,23 +330,16 @@ async function homePage(cases, about) {
     }),
   );
 
-  // About: the motto is already in the header and contacts are in the footer, so skip those parts.
-  const aboutHtml = sections(await markdown(about.body))
-    .split(/(?=<section)/)
-    .filter((part) => !/id="(i-dont-know|contact)/.test(part))
+  // About: the motto is already in the hero, the principles in "How I design", contacts in the footer: skip those parts.
+  const aboutParts = sections(await markdown(about.body)).split(/(?=<section)/);
+  const aboutHtml = aboutParts
+    .filter((part) => !/id="(i-dont-know|how-i-design|contact)/.test(part))
     .join('\n')
     .replace(/<h2>/g, '<h3>').replace(/<\/h2>/g, '</h3>');
+  const principles = aboutParts.find((part) => part.includes('id="how-i-design"')).match(/<ol>[\s\S]*<\/ol>/)[0];
 
-  const main = `      <section class="hero wrap wide" aria-labelledby="name">
-        <h1 id="name"><img class="pixel-title" src="/game/title.svg" alt="" width="128" height="8"><span class="visually-hidden">Riccardo Cirillo</span></h1>
-        <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
-        <p class="motto">“${escape(about.data.motto)}”</p>
-        <ul class="actions">
-          <li><a class="button" href="/cv/CV_Riccardo_Cirillo_EN.pdf">Download CV (English, PDF)</a></li>
-          <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">CV en español (PDF)</a></li>
-          <li><a class="button ghost" href="mailto:${EMAIL}">${EMAIL}</a></li>
-        </ul>
-      </section>
+  const main = `${startScreen(cases, about)}
+${howIDesign(cases, principles)}
 ${diamond(cases)}
       <section id="work" class="work wrap" aria-labelledby="work-title" tabindex="-1">
         <h2 id="work-title">Case studies</h2>
@@ -298,7 +359,7 @@ ${aboutHtml}
     image: await ogImage(cases[0].data.cover, 'home'),
     main,
     bodyClass: 'home',
-    scripts: '<script type="module" src="/src/diamond.js"></script>',
+    scripts: '<script type="module" src="/src/diamond.js"></script>\n    <script type="module" src="/src/uniform.js"></script>',
   });
 }
 
