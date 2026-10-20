@@ -373,9 +373,10 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 @media (hover: none) and (pointer: coarse) {
   .no-touch { display: none; }
 }
-/* A new panel card fades in; the start-screen batter swings when the uniform changes (src/uniform.js). */
-.panel-card { animation: fade-in .25s ease-out; }
-@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* A new panel card slides in a little (no fade: the text keeps full contrast at every moment);
+   the start-screen batter swings when the uniform changes (src/uniform.js). */
+.panel-card { animation: slide-in .25s ease-out; }
+@keyframes slide-in { from { transform: translateY(6px); } to { transform: none; } }
 .batter.is-swinging { animation: swing .44s steps(4, jump-none) 1; }
 .panel-cover { width: 100%; max-height: 9rem; object-fit: cover; object-position: top; margin-bottom: .75rem; border: 1px solid var(--line); border-radius: 4px; }
 
