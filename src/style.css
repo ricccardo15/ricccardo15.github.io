@@ -1,0 +1,55 @@
+/* Palette: navy + red on a light background (SPEC §8). All text pairs >= 4.5:1. */
+:root {
+  --navy: #1b2a4a;
+  --red: #b3261e;
+  --paper: #f7f4ec;
+  --ink: #1b2a4a;
+  --muted: #4a5568;
+  --focus: #b3261e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1.125rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.intro {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.1;
+  color: var(--navy);
+}
+
+.headline { margin: .5rem 0 1.5rem; font-weight: 600; color: var(--red); }
+.motto { font-size: 1.25rem; font-style: italic; }
+
+.links { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: .5rem; }
+.links a { color: var(--navy); font-weight: 600; text-underline-offset: .2em; overflow-wrap: anywhere; }
+.links a:hover { color: var(--red); }
+
+a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.note { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

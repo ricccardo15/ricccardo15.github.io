@@ -1,0 +1,20 @@
+# Decisions
+
+- 2026-10-20 — Portfolio = interactive website, one fixed link for all applications (GitHub Pages).
+- 2026-10-20 — Theme: retro pixel baseball (Riccardo loves baseball). Style references only: Retro Pixel Baseball by Ponywolf, old Super Mario look. All art original.
+- 2026-10-20 — Map = baseball diamond. Home = start/contacts, 1st = Nipotyno, 2nd = Levante, 3rd = Student housing, dugout = Lab.
+- 2026-10-20 — Case-study text in HTML outside the canvas; "Skip" list view always available.
+- 2026-10-20 — Multisensory project excluded until December.
+- 2026-10-20 — Team meeting (see MEETING_2026-10-20.md): NO Phaser → Vite + HTML/CSS/SVG + plain JS.
+- 2026-10-20 — The game is a layer on top of a site that works alone. Every content reachable in HTML in 1 click.
+- 2026-10-20 — Real static page `/nipotyno/` with Open Graph in v1; page generator after 29/11.
+- 2026-10-20 — Diamond = pixel PNG 320×180 at integer scale + bases as HTML links on the same grid; < 640 px → list view.
+- 2026-10-20 — Accessibility checklist is part of every "done" from M1.
+- 2026-10-20 — Interaction: home-run tour (stops at each base) = main; batting = optional extra, never decides content; per-base actions later.
+- 2026-10-20 — Baseball only in graphics and labels (with plain translation), never in case-study text.
+- 2026-10-20 — v1 sent by Tue 3 Nov; gate for the diamond on Sun 1 Nov; mini-test Sat 31 Oct.
+- 2026-10-20 — CV PDF EN + ES in v1; Nipotyno PDF via print CSS by 15 Nov.
+- 2026-10-20 — UPDATE from Riccardo: complete portfolio in ~2 days, all features and all cases, no phased release. Content prepared in parallel by Claude (Internship project).
+- 2026-10-20 — Style: day game, navy blue + red uniform/UI, character drawn from Riccardo's reference photo (docs/reference/, never published), sound effects behind a toggle, off by default.
+- 2026-10-20 — B1: repo `ricccardo15/ricccardo15.github.io` (public), deployed by GitHub Actions (build → Playwright + axe → Pages). Deploy only if tests pass.
+- 2026-10-20 — Phone number removed from the public repo/site (content/facts.md, content/about.md): email only. Phone stays in the CV PDFs.

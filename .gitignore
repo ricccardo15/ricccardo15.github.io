@@ -1,0 +1,12 @@
+# Private: never push to GitHub (the repo is public)
+docs/reference/
+docs/assets-preview/
+.DS_Store
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+tests/screenshots/
+.vite/
+*.log
