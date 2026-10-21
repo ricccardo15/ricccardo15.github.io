@@ -9,7 +9,7 @@ Contact sheets of all images: `docs/assets-preview/`.
 | content/nipotyno.md | ✅ final (~900 words, 8 images) | — |
 | content/levante.md | ✅ final (7 images; personas AI-generated, labelled) | — |
 | content/housing.md | ✅ final (4 images) | — |
-| content/lab.md | ✅ final, 5 cards | — |
+| content/lab.md | ✅ final, 3 cards (colour observation and type study removed 21/10) | — |
 | content/about.md | ✅ final (motto by Riccardo) | — |
 | content/facts.md | ✅ single source of truth | — |
 | public/cv/*_ES.pdf | ⚠️ current version, replace after native review | — |

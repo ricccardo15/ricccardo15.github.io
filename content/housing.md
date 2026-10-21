@@ -4,7 +4,7 @@ slug: housing
 base: "3rd base"
 description: "Qualitative research with international master's students in Madrid: interviews, contextual inquiry, coding with reliability checks, personas and a wireflow for a safer housing-search app."
 og_image: /assets/housing/wireflow-contract-pay.webp
-cover: /assets/housing/sketch-list-map.webp
+cover: /assets/housing/wireflow-filters-visit.webp
 tldr: "UPM has no student residences, so international students face Madrid's rental market alone — with scams, language barriers and little time. With a team of 6, we interviewed 6 students, coded 615 sentences into 441 codes and 6 themes, built personas, and co-designed a wireflow for a safer search, visit and contract flow."
 role: "UX researcher & co-designer (team of 6)"
 team: "Riccardo Cirillo, Nasim Roshan Ghorbani Elizeh, Fabio Vito Papapicco, Andrea Ramaglia Bianchino, Ilaria Salami, Lakmi Weerapperuma"

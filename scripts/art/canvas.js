@@ -51,7 +51,10 @@ export function canvas(width, height) {
   };
 
   const png = (file) => sharp(data, { raw: { width, height, channels: 4 } }).png().toFile(file);
-  return { width, height, set, isSet, rect, line, map, outline, png };
+  // Lossless WebP at `scale`× with nearest neighbour: sharp pixels and exactly the palette colours.
+  const webp = (file, scale = 1) => sharp(data, { raw: { width, height, channels: 4 } })
+    .resize(width * scale, height * scale, { kernel: 'nearest' }).webp({ lossless: true }).toFile(file);
+  return { width, height, set, isSet, rect, line, map, outline, png, webp };
 }
 
 // Same "random" numbers on every run, so the art never changes unless the code does.

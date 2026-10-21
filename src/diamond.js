@@ -1,12 +1,13 @@
 // The ballpark game layer (home page). Optional: without this file the bases are plain links.
-// Three modes, shown in the game bar under the field:
+// Three modes:
 // - bat (first visit): the pitcher throws, the visitor swings (click/tap the field, Space, "Swing!") → home run → tour
-// - tour: the runner stops at each base for a small moment (zoom, high five, cheer) while the panel shows a preview
-//   of the project; it moves on after TOUR_WAIT unless paused. Back / Pause / Next are always there.
+// - tour: the runner stops at each project for a small moment (zoom, high five, cheer) while the card shows a preview.
+//   NOTHING moves on by itself: the card has one main button ("Next base: Levante →") and a small "◀ Back";
+//   the diamond in the corner of the field shows the bases visited; "✕ Exit tour" leaves it.
 // - free: click/tap a base or ← → and the runner runs there · Esc closes the panel · "Take another swing" starts again
 // Sound (src/sound.js) is off until the visitor turns it on with the toggle in the game bar.
-// The address shows the base (/#nipotyno): deep links (they skip the at-bat) and the browser Back button work.
-// With reduced motion: no pitch, no zoom, no timer — the tour waits for Next.
+// The address shows the base (/#nipotyno) and is only REPLACED, never added to: one Back press leaves the page.
+// Deep links skip the at-bat. With reduced motion: no pitch and no zoom — the tour is the same, just without animation.
 import { FIELD, STOPS, RING, CREW, TOUR } from './field-map.js';
 import { atBat } from './batting.js';
 import { sound } from './sound.js';
@@ -24,15 +25,16 @@ function start() {
   const crew = Object.fromEntries([...stage.querySelectorAll('[data-crew]')].map((el) => [el.dataset.crew, el]));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const SPEED = 110; // field pixels per second
-  const TOUR_WAIT = 10000; // time on each base before the tour moves on (ms)
   const MOMENT = 2000; // zoom + high five / cheer / wave (ms)
+  const PROJECTS = TOUR.filter((s) => !s.panel).length; // stops that count in "2 of 4"
 
   const bar = field.querySelector('.game-bar');
   const rows = Object.fromEntries([...bar.querySelectorAll('[data-mode]')].map((row) => [row.dataset.mode, row]));
-  const button = (action) => bar.querySelector(`[data-mode="${action === 'swing' ? 'bat' : 'tour'}"] [data-action="${action}"]`);
+  const swingButton = bar.querySelector('[data-action="swing"]');
   const status = bar.querySelector('[role="status"]');
-  const stepLabel = bar.querySelector('.tour-step');
-  const timer = bar.querySelector('.timer');
+  const tourMap = stage.querySelector('.tour-map');
+  const tourCount = tourMap.querySelector('.tour-count');
+  const corners = [...tourMap.querySelectorAll('[data-corner]')];
   const batting = atBat({
     stage, runner, pitcher: crew.pitcher, ball: stage.querySelector('.ball'), banner: stage.querySelector('.banner'), reduceMotion,
   });
@@ -42,15 +44,14 @@ function start() {
   let pos = { x: byId.home.x, y: byId.home.y };
   let running = null;
   // Tour state. `tourRun` changes on every new step, so a step that was left behind stops by itself.
-  let step = 0;
+  // `shown` = the step whose card is on screen (Next and Back count from it).
+  let shown = 0;
   let tourRun = 0;
-  let paused = false;
-  let hold = false; // mouse on the panel or focus inside it: the timer waits
-  let ticking = null;
+  let visited = new Set();
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const say = (text) => { status.textContent = text; };
-  const stopName = (s) => (s.panel === 'done' ? "That's the tour" : byId[s.stop].name);
+  const stopName = (s) => byId[s.stop].name;
 
   const place = ({ x, y }) => {
     runner.style.setProperty('--x', `${(Math.round(x) / FIELD.width) * 100}%`);
@@ -123,8 +124,10 @@ function start() {
 
   function setMode(next) {
     if (mode === 'bat' && next !== 'bat') batting.stop();
-    if (mode === 'tour' && next !== 'tour') { tourRun++; stopTimer(); endMoment(); }
+    if (mode === 'tour' && next !== 'tour') { tourRun++; endMoment(); clearNav(); }
     mode = next;
+    panel.dataset.mode = next; // CSS: in the tour the "Read the case study" link is the quiet button
+    tourMap.hidden = next !== 'tour';
     for (const [name, row] of Object.entries(rows)) row.hidden = name !== next;
   }
 
@@ -133,6 +136,9 @@ function start() {
     const active = document.activeElement;
     if (active === document.body || (bar.contains(active) && active.closest('[hidden]'))) target.focus({ preventScroll: true });
   }
+
+  // Replace (never add) the history entry, so the address can be shared and one Back press leaves the page.
+  const setHash = (id) => { if (location.hash !== `#${id}`) history.replaceState({ stop: id }, '', `#${id}`); };
 
   // --- At bat ---------------------------------------------------------------
 
@@ -151,8 +157,8 @@ function start() {
     await batting.swing();
     if (mode !== 'bat') return;
     setMode('tour');
+    visited = new Set();
     tourStep(0);
-    refocus(button('next'));
   }
 
   // --- Tour -------------------------------------------------------------------
@@ -172,6 +178,7 @@ function start() {
   }
 
   // The small moment on a base: zoom on the runner (and whoever joins in), animate, zoom back out.
+  // It never blocks anything: Next and Back work while it plays (a new step ends it).
   async function moment(s, run) {
     const base = byId[s.stop];
     const others = Object.keys(s.with).map((id) => crewAt[id]);
@@ -184,67 +191,83 @@ function start() {
     if (run === tourRun) endMoment();
   }
 
-  function updateTourBar() {
-    const last = step === TOUR.length - 1;
-    stepLabel.textContent = `${step + 1} / ${TOUR.length} · ${stopName(TOUR[step])}`;
-    button('back').disabled = step === 0;
-    button('next').disabled = last;
-    const timed = !reduceMotion.matches && !last;
-    button('pause').hidden = !timed;
-    timer.hidden = !timed;
-    button('pause').textContent = paused ? 'Play' : 'Pause';
-    button('pause').setAttribute('aria-label', paused ? 'Resume the tour' : 'Pause the tour');
-  }
-
-  function stopTimer() {
-    cancelAnimationFrame(ticking);
-    timer.style.setProperty('--done', 0);
-  }
-
-  // Count TOUR_WAIT on this base (only while not paused, not held and the tab is visible), then go on.
-  function startTimer(run) {
-    let waited = 0;
-    let last = performance.now();
-    const tick = (now) => {
-      if (run !== tourRun) return;
-      if (!paused && !hold && !document.hidden) waited += now - last;
-      last = now;
-      timer.style.setProperty('--done', Math.min(waited / TOUR_WAIT, 1));
-      if (waited >= TOUR_WAIT) tourStep(step + 1);
-      else ticking = requestAnimationFrame(tick);
-    };
-    ticking = requestAnimationFrame(tick);
-  }
-
-  async function tourStep(i, { push = true } = {}) {
-    const run = ++tourRun;
-    stopTimer();
-    endMoment();
-    step = i;
+  // The diamond in the corner: bases already visited are filled, the current one is highlighted.
+  function showProgress(i) {
     const s = TOUR[i];
-    if (push && location.hash !== `#${s.stop}`) history.pushState({ stop: s.stop }, '', `#${s.stop}`);
-    updateTourBar();
+    if (s.panel) for (const t of TOUR) { if (t.corner) visited.add(t.corner); }
+    else visited.add(s.corner);
+    for (const el of corners) {
+      el.classList.toggle('is-visited', visited.has(el.dataset.corner));
+      el.classList.toggle('is-current', el.dataset.corner === s.corner);
+    }
+    tourCount.textContent = s.panel ? 'Tour complete' : `${i + 1} of ${PROJECTS} · ${stopName(s)}`;
+    say(s.panel ? 'Tour complete.' : `Tour ${i + 1} of ${PROJECTS}: ${stopName(s)}.`);
+  }
+
+  function clearNav() {
+    for (const nav of panel.querySelectorAll('.tour-nav')) nav.remove();
+  }
+
+  // The tour controls live inside the card the visitor is reading: one main button and a small Back.
+  // They are made here, so the static page has none.
+  function renderNav(i) {
+    clearNav();
+    const s = TOUR[i];
+    const nav = document.createElement('div');
+    nav.className = 'tour-nav';
+    if (i < TOUR.length - 1) {
+      const next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'button';
+      next.dataset.action = 'next';
+      next.append(i === TOUR.length - 2 ? 'Finish the tour ' : `Next base: ${stopName(TOUR[i + 1])} `);
+      next.insertAdjacentHTML('beforeend', '<span aria-hidden="true">→</span>');
+      nav.append(next);
+    }
+    if (i > 0) {
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'link';
+      back.dataset.action = 'back';
+      back.innerHTML = '<span aria-hidden="true">◀</span> Back';
+      nav.append(back);
+    }
+    panel.querySelector(`[data-panel="${s.panel ?? s.stop}"]`).append(nav);
+  }
+
+  // After a step the focus goes to the new main button, so keyboard users can keep pressing Enter.
+  // Only if the focus was not somewhere else on the page.
+  function focusNav() {
+    const active = document.activeElement;
+    if (active !== document.body && !panel.contains(active) && !bar.contains(active)) return;
+    const target = panel.querySelector('.tour-nav .button') ?? panel.querySelector('[data-panel]:not([hidden]) [data-action="again"]');
+    target?.focus({ preventScroll: true });
+  }
+
+  async function tourStep(i) {
+    const run = ++tourRun;
+    endMoment();
+    const s = TOUR[i];
+    setHash(s.stop);
     await runTo(s.stop, { panelId: s.panel ?? s.stop });
     if (run !== tourRun) return;
-    say(`Tour ${i + 1} of ${TOUR.length}: ${stopName(s)}.`);
-    if (s.moment && !reduceMotion.matches) {
-      await moment(s, run);
-      if (run !== tourRun) return;
-    }
-    if (i < TOUR.length - 1 && !reduceMotion.matches) startTimer(run);
+    // On arrival, all at once: card, counter, diamond, controls.
+    shown = i;
+    showProgress(i);
+    renderNav(i);
+    focusNav();
+    if (s.moment && !reduceMotion.matches) await moment(s, run);
   }
-
-  panel.addEventListener('mouseenter', () => { hold = true; });
-  panel.addEventListener('mouseleave', () => { hold = false; });
-  panel.addEventListener('focusin', () => { hold = true; });
-  panel.addEventListener('focusout', (event) => { if (!panel.contains(event.relatedTarget)) hold = false; });
 
   // --- Free running -----------------------------------------------------------
 
-  function go(id, { focus = 'panel', history: push = true } = {}) {
+  function go(id, { focus = 'panel' } = {}) {
+    const wasTour = mode === 'tour';
     if (mode !== 'free') setMode('free');
-    if (push && location.hash !== `#${id}`) history.pushState({ stop: id }, '', `#${id}`);
+    setHash(id);
     const arrived = runTo(id);
+    const note = `${wasTour ? 'Tour ended. Free mode. ' : ''}${byId[id].name}, ${byId[id].label}.`;
+    arrived.then(() => say(note));
     if (focus === 'base') links.find((l) => l.dataset.stop === id).focus();
     else arrived.then(() => panel.focus({ preventScroll: true }));
   }
@@ -262,17 +285,16 @@ function start() {
     sound.wake();
     const action = event.target.closest('[data-action]')?.dataset.action;
     if (action === 'swing') swing();
-    else if (action === 'next' && step < TOUR.length - 1) tourStep(step + 1);
-    else if (action === 'back' && step > 0) tourStep(step - 1);
-    else if (action === 'pause') { paused = !paused; updateTourBar(); }
+    else if (action === 'next' && mode === 'tour' && shown < TOUR.length - 1) tourStep(shown + 1);
+    else if (action === 'back' && mode === 'tour' && shown > 0) tourStep(shown - 1);
     else if (action === 'sound') { sound.set(!sound.on); showSound(); }
     else if (action === 'free') {
       setMode('free');
-      say('Free mode: click or tap a base.');
+      say('Tour ended. Free mode.');
       refocus(links.find((l) => l.dataset.stop === current));
     } else if (action === 'again') {
       batUp();
-      button('swing').focus({ preventScroll: true });
+      swingButton.focus({ preventScroll: true });
     } else if (mode === 'bat' && event.target.closest('.stage') && !event.target.closest('.base')) swing();
   });
 
@@ -286,10 +308,14 @@ function start() {
     swing();
   });
 
-  // "Play ball!" on the Start screen: after the jump to the field, the Swing button has the focus.
+  // "Play ball!" on the Start screen: scroll to the field and put the focus on Swing!.
+  // Done here, not by the browser, because a link to #field would add a step to the history
+  // (and then one Back press would not be enough to leave). Without JS it is a normal link.
   for (const play of document.querySelectorAll('a[href="#field"]')) {
-    play.addEventListener('click', () => {
-      if (mode === 'bat') requestAnimationFrame(() => button('swing').focus({ preventScroll: true }));
+    play.addEventListener('click', (event) => {
+      event.preventDefault();
+      field.scrollIntoView({ block: 'start' });
+      if (mode === 'bat') swingButton.focus({ preventScroll: true });
     });
   }
 
@@ -301,8 +327,9 @@ function start() {
       const dir = event.key === 'ArrowRight' ? 1 : -1;
       go(STOPS[(index + dir + STOPS.length) % STOPS.length].id, { focus: 'base' });
     } else if (event.key === 'Escape' && !panel.hidden) {
+      // Esc closes the card; in the tour that also ends it (without its card there are no tour controls).
+      if (mode === 'tour') { setMode('free'); say('Tour ended. Free mode.'); }
       panel.hidden = true;
-      if (mode === 'tour') { paused = true; updateTourBar(); }
       history.replaceState(null, '', location.pathname + location.search);
       links.find((l) => l.dataset.stop === current).focus();
     }
@@ -326,12 +353,12 @@ function start() {
     return true;
   };
 
+  // Only other anchors (#work, #about…) or an address that was typed can add history entries now,
+  // so Back/Forward here simply means "free mode" at whatever the address says.
   window.addEventListener('popstate', () => {
     const id = location.hash.slice(1);
     if (!id) { if (mode !== 'bat') { setMode('free'); runTo('home', { animate: false }); } return; }
-    if (!byId[id]) return; // other anchors (#field, #work…) are not bases
-    const j = TOUR.findIndex((s) => s.stop === id && !s.panel);
-    if (mode === 'tour' && j >= 0) { tourStep(j, { push: false }); return; }
+    if (!byId[id]) { if (mode === 'tour') setMode('free'); return; } // #work, #about… are not bases
     setMode('free');
     runTo(id, { animate: false });
   });

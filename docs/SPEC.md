@@ -44,10 +44,10 @@ Running the bases = the design process. Arriving on a base opens that case study
 ### 3.3 Case study (on a base)
 - HTML panel over the game, pixel frame, normal readable text, scrollable.
 - Same structure for every case ("innings"): **Problem → Research → Ideas → Prototype → Test → Result → My role / team**.
-- "Back to the field" returns to the same base. Deep link per case (`#nipotyno`, `#levante`, `#housing`, `#lab`).
+- "◀ Back to the ballpark · 1st base" (and "All case studies") at the top of every case page return to the same base / to the list. Deep link per case (`#nipotyno`, `#levante`, `#housing`, `#lab`).
 
 ## 4. Interaction — how you move between bases
-> **Decided (B6, Riccardo):** one click/tap/Space hits the pitch (can't miss) → home run → tour that stops at each base with a small moment (zoom 2×, high five with the 1st/3rd base coach, a cheer on 2nd) and a short preview of the project; ~10 s to open it, Back / Pause / Next always there (reduced motion: Next only). The tour ends in the dugout with the teammates (Lab), then a last card with CV + contacts + "Take another swing" (replays bat + tour). Then free mode. Ideas A/C below are kept for history.
+> **Decided (B6, Riccardo):** one click/tap/Space hits the pitch (can't miss) → home run → tour that stops at each base with a small moment (zoom 2×, high five with the 1st/3rd base coach, a cheer on 2nd) and a short preview of the project. **Nothing moves on by itself** (Fase 0, 21/10): the card has one main button ("Next base: Levante →", "Finish the tour →" on the last) and a small "◀ Back"; a small diamond in the corner of the field shows the bases visited ("2 of 4 · Levante"); "✕ Exit tour" leaves; clicking any base or pressing Esc also ends the tour; the address is replaced, never added to, so one browser Back leaves the page. The tour ends in the dugout with the teammates (Lab), then a last card with CV + contacts + "Take another swing" (replays bat + tour). Then free mode. Ideas A/C below are kept for history.
 Riccardo's ideas:
 - **A. Bat to move:** each move is a swing. Power/timing (how long you hold the button, or when you release) decides where the ball goes and so which base you reach (single → 1st, double → 2nd, triple → 3rd, home run → home).
 - **B. Home-run tour:** one swing at the start → home run → the character runs the bases and at each base the case study opens. Controls: **pause / play, back, next**, plus a base indicator to jump. It must NOT feel like a video: the user is always in control.
@@ -66,7 +66,7 @@ All case-study text goes in `content/<case>.md` (prepared in the Internship proj
 | Nipotyno (UPM HCI Project, team of 4 + business plan) | `~/Desktop/INFO INTERSHIP/II SEMESTRE/HCI Project/` (HIGH FIDELITY PROTOTYPE/SCREEN: 20 screens; NavigatioMap.png; screen_layout_options.pdf; lo-fi and hi-fi reports, SUS 78.75, UEQ Good/Excellent); `.../II SEMESTRE/Entrepreneurship and business modelling/FIRST PART/` | Device mockups, process diagram |
 | Levante (EIT Digital Summer School 2026, team of 6) | `~/Desktop/EIT/SUMMER SCHOOL/PROJECT/` (personas, user journeys, dashboard overview.png, Dashboard.mov, device concepts, BMC, final slides) | Process diagram; Riccardo designed the dashboard |
 | Student housing research (UPM HCI Intro + Ethics, team of 6) | `~/Desktop/INFO INTERSHIP/I SEMESTRE/HCI-Introduction and Design Methods/` (final report, wireflow, layout scheme, contextual inquiry, coding) | Screens from wireflow, findings summary |
-| Lab | Heuristic evaluation (individual) `.../II SEMESTRE/Evaluation of Interactive System/Individual Evaluation/Final Report/`; Discord iOS UX analysis, type study, colour observation, sketches (`.../I SEMESTRE/User Experience and Mobile Interaction/`); A/B test | One card each: image + 2 lines |
+| Lab | Heuristic evaluation (individual) `.../II SEMESTRE/Evaluation of Interactive System/Individual Evaluation/Final Report/`; Discord iOS UX analysis, sketches (`.../I SEMESTRE/User Experience and Mobile Interaction/`); A/B test | One card each: image + 2 lines |
 
 Never publish: interview audio/transcripts, participant names, personal documents.
 

@@ -3,7 +3,7 @@
 import { writeFile } from 'node:fs/promises';
 import { PALETTE } from '../../src/palette.js';
 
-const GLYPHS = {
+export const GLYPHS = {
   A: '.###.|#...#|#...#|#####|#...#|#...#|#...#',
   B: '####.|#...#|#...#|####.|#...#|#...#|####.',
   C: '.###.|#...#|#....|#....|#....|#...#|.###.',

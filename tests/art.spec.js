@@ -26,6 +26,19 @@ for (const [file, size] of [['field.png', [320, 180]], ['runner.png', [480, 96]]
   });
 }
 
+test('Lab cover: 640×480 (160×120 at 4×), original, only palette colours', async () => {
+  const { found, info } = await colours('public/assets/lab/cover.webp');
+  expect([info.width, info.height]).toEqual([640, 480]);
+  expect([...found].filter((c) => !allowed.has(c))).toEqual([]);
+  // pixel art at 4×: every 4×4 block is one colour, so the image has at most 160×120 distinct cells
+  const { data } = await sharp('public/assets/lab/cover.webp').ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (const [x, y] of [[3, 3], [100, 77], [401, 250], [637, 477]]) {
+    const at = (px, py) => data.subarray((py * 640 + px) * 4, (py * 640 + px) * 4 + 4).join();
+    const bx = x - (x % 4), by = y - (y % 4);
+    expect(at(bx + 3, by + 3)).toBe(at(bx, by));
+  }
+});
+
 test('runner.json describes 15 frames: idle, run, swing, high five, cheer, wave', async () => {
   const sheet = JSON.parse(await readFile('public/game/runner.json', 'utf8'));
   expect(sheet.frames).toHaveLength(15);

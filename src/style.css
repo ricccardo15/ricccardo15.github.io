@@ -100,6 +100,8 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   .hero .at-bat { grid-area: bat; }
 }
 .headline { margin: .5rem 0 1rem; font-weight: 600; color: var(--red); }
+.status-line { margin: -.5rem 0 1rem; font-size: .9375rem; color: var(--muted); }
+.about .status-line { margin: 0 0 1rem; }
 .motto { margin: 0 0 1.5rem; font-size: 1.25rem; font-style: italic; }
 
 .start-here { display: block; margin-top: 1rem; padding: .75rem 1rem; max-width: 34rem; border: 2px solid var(--navy); border-left-width: 6px; border-radius: 6px; background: var(--card); text-decoration: none; }
@@ -213,7 +215,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 /* max-width: on phones under ~360 px the field shrinks to the screen (the only non-integer case). */
 .stage { position: relative; box-sizing: content-box; width: calc(320px * var(--fs)); max-width: calc(100% - 4px); aspect-ratio: 16 / 9; border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
 .field-img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-.bases { list-style: none; margin: 0; padding: 0; }
+.bases { list-style: none; margin: 0; padding: 0; transition: visibility 0s .5s; }
 .base {
   position: absolute;
   left: var(--x);
@@ -270,7 +272,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
    the base links stay outside, so they never scale. --tx / --ty come from src/diamond.js. */
 .world { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .5s ease; }
 .stage.is-zoomed .world { transform: translate(var(--tx, 0), var(--ty, 0)) scale(2); }
-.stage.is-zoomed .bases { visibility: hidden; }
+.stage.is-zoomed .bases { visibility: hidden; transition: none; }
 
 /* Sprites: 32×32 frames at --s, feet on (--x, --y). Runner = public/game/runner.png (15 frames × 3 uniforms),
    crew = public/game/crew.png (8 frames × 4 people, see crew.json). The big batter on the Start screen uses the runner frames too. */
@@ -357,15 +359,32 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .game-bar .button { padding: .4rem .8rem; font-size: 1rem; }
 .swing { background: var(--red); border-color: var(--red); }
 .swing:hover { background: var(--navy); border-color: var(--navy); }
-.tour-step { font-weight: 700; font-size: .9375rem; }
 button.link { padding: 0; border: 0; background: none; color: var(--navy); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
 button.link:hover { color: var(--red); }
 button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .button { cursor: pointer; font-family: inherit; line-height: inherit; }
 .button:disabled { opacity: .45; cursor: default; pointer-events: none; }
-/* Time left before the next base: fills from 0 to 100 %. Pauses with the tour. */
-.timer { flex-basis: 100%; height: 6px; border: 1px solid var(--navy); border-radius: 3px; background: var(--card); overflow: hidden; }
-.timer span { display: block; width: calc(var(--done, 0) * 100%); height: 100%; background: var(--red); }
+/* Tour: the diamond in the corner of the field (bases visited filled, current one in red) and the controls inside the card.
+   Nothing here moves on by itself. */
+.tour-map { position: absolute; top: 6px; right: 6px; z-index: 6; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 2px solid #fff; border-radius: 4px; background: var(--navy); color: #fff; font-size: .8125rem; font-weight: 700; line-height: 1.2; }
+.tour-diamond { position: relative; flex: none; width: 22px; height: 22px; }
+.tour-diamond::before { content: ""; position: absolute; inset: 5px; border: 1px solid #8a94a6; transform: rotate(45deg); }
+.tour-diamond i { position: absolute; width: 6px; height: 6px; border: 1px solid #fff; background: var(--navy); }
+.tour-diamond i[data-corner="second"] { left: 8px; top: 0; }
+.tour-diamond i[data-corner="third"] { left: 0; top: 8px; }
+.tour-diamond i[data-corner="first"] { right: 0; top: 8px; }
+.tour-diamond i[data-corner="home"] { left: 8px; bottom: 0; }
+.tour-diamond i.is-visited { background: #f2c14e; }
+.tour-diamond i.is-current { background: #e0533f; box-shadow: 0 0 0 1px #fff; }
+.tour-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: .75rem; }
+.tour-nav { font-size: 1rem; }
+.tour-nav .button { margin-top: 0; font-size: inherit; }
+/* In the tour the one main button is "Next base": the link to the full case study turns into the quiet one. */
+.panel[data-mode="tour"] .panel-card[data-panel]:not([data-panel="done"]) > p > a.button { background: transparent; color: var(--navy); }
+.panel[data-mode="tour"] .panel-card[data-panel]:not([data-panel="done"]) > p > a.button:hover { background: var(--card); color: var(--red); border-color: var(--red); }
+@media (max-width: 699px) {
+  .tour-map { top: 4px; right: 4px; gap: 5px; padding: 2px 5px; font-size: .6875rem; }
+}
 .bar-tools { margin: .5rem 0 0; font-size: .9375rem; }
 .sound-toggle .state { display: inline-block; min-width: 1.6em; padding: 0 .3em; border: 1px solid var(--navy); border-radius: 3px; font-size: .8125rem; text-decoration: none; }
 .sound-toggle[aria-pressed="true"] .state { background: var(--navy); color: #fff; }
@@ -407,6 +426,12 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
 figure { margin: 1.5rem 0; }
 figure img { border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+/* On screen a tall image (a phone screen is 2000+ px) is at most 70% of the window high, centred, never bigger than its real size.
+   The width is worked out from the image's own proportions (--w / --h, set by scripts/pages.js) instead of `max-height` + `width: auto`:
+   that way the box has the right size before the image has loaded and the page does not jump. The Lab cards have their own size. */
+@media screen {
+  .case figure img { width: min(100%, calc(70vh * var(--w) / var(--h)), calc(var(--w) * 1px)); height: auto; margin-inline: auto; }
+}
 
 .table-wrap { overflow-x: auto; margin: 1.5rem 0; }
 table { border-collapse: collapse; width: 100%; font-size: 1rem; background: var(--card); }

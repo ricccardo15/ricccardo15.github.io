@@ -22,7 +22,7 @@ test.describe('sound toggle', () => {
     page.on('pageerror', (err) => errors.push(err.message));
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(page.locator('.tour-step')).toHaveText('1 / 5 · Nipotyno');
+    await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
     expect(errors).toEqual([]);
   });
 });
@@ -63,7 +63,7 @@ for (const width of [1280, 390]) {
       await page.goto('/');
       await page.getByText('Designer', { exact: true }).click(); // would make the batter swing
       await page.getByRole('button', { name: 'Swing!' }).click();
-      await expect(page.locator('.tour-step')).toHaveText('1 / 5 · Nipotyno');
+      await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
       await page.waitForTimeout(100);
       const moving = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
       expect(moving).toBe(0);

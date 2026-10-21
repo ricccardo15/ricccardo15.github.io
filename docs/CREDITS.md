@@ -5,6 +5,7 @@ All original, drawn in code by `npm run art` (scripts/art/) for this portfolio: 
 - Field, crowd, dugout, base icons: original.
 - Player sprite: original, inspired by Riccardo's look (navy uniform, helmet, curly hair). The reference photos in `docs/reference/` are private and never published or copied.
 - Coaches, teammates and pitcher (crew.png): original, same body as the player with a cap.
+- Lab cover (public/assets/lab/cover.webp): original chalkboard-in-the-dugout scene drawn in code (scripts/art/lab-cover.js).
 - Pixel title font (5×7, A–Z, 0–9 and a few signs): original, in scripts/art/title.js.
 - Palette: 16 colours in src/palette.js.
 

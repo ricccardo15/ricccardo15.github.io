@@ -62,7 +62,8 @@ async function markdown(body) {
     renderer: {
       image({ href, text }) {
         const { width, height } = sizes.get(href);
-        return `<img src="${href}" alt="${escape(text)}" width="${width}" height="${height}" loading="lazy" decoding="async">`;
+        // --w / --h = the real size: src/style.css uses them to cap the height on screen without a jump when the image loads.
+        return `<img src="${href}" alt="${escape(text)}" width="${width}" height="${height}" style="--w: ${width}; --h: ${height}" loading="lazy" decoding="async">`;
       },
     },
   });
@@ -178,8 +179,9 @@ function layout({ title, description, path, image, imageAlt, main, bodyClass = '
         <nav aria-label="Main">
           <ul>
             <li><a href="/#work">Case studies</a></li>
+            <li><a href="/#about">About</a></li>
             <li><a href="/cv/CV_Riccardo_Cirillo_EN.pdf">CV <abbr title="English">EN</abbr></a></li>
-            <li><a href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">CV <abbr title="Español">ES</abbr></a></li>
+            <li><a href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">CV <abbr title="Español">ES</abbr></a></li>
             <li><a href="mailto:${EMAIL}">Email</a></li>
           </ul>
         </nav>
@@ -191,12 +193,24 @@ ${main}
     <footer class="site-footer">
       <div class="wrap">
         <p><strong>Riccardo Cirillo</strong> · UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
-        <p><a href="mailto:${EMAIL}">${EMAIL}</a> · CV: <a href="/cv/CV_Riccardo_Cirillo_EN.pdf">English</a> · <a href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">Español</a></p>
+        <p><a href="mailto:${EMAIL}">${EMAIL}</a> · CV: <a href="/cv/CV_Riccardo_Cirillo_EN.pdf">English</a> · <a href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">Español</a></p>
       </div>
     </footer>
   </body>
 </html>
 `;
+}
+
+// One small line a recruiter in Madrid looks for first: work status, languages, what he is after.
+// It comes from the "Status" and "Languages" lines of content/facts.md (single source of truth); the build stops if they change shape.
+// "EU citizen with Spanish NIE · Available…" → "EU citizen · Spanish NIE"; "English (B2 – IELTS…)" → "English B2".
+async function statusLine() {
+  const facts = await readFile(root('content/facts.md'), 'utf8');
+  const field = (name) => facts.match(new RegExp(`^- ${name}: (.+)$`, 'm'))?.[1];
+  const status = field('Status')?.split(' · ')[0].replace(' with ', ' · ');
+  const languages = field('Languages')?.split(' · ').map((l) => l.replace(/^(\w+) \((B[12]|C[12])\b[^)]*\)$/, '$1 $2'));
+  if (!status || !languages?.length) throw new Error('content/facts.md: the "Status" or "Languages" line is missing or has another shape');
+  return [status, ...languages, "Curricular internship + master's thesis"].join(' · ');
 }
 
 const shortName = (c) => c.data.title.split(' — ')[0];
@@ -233,7 +247,7 @@ async function casePage(c, i, all) {
 
   const main = `      <article class="case wrap">
         <p class="print-head">Riccardo Cirillo · UX Research &amp; Design intern · ${EMAIL} · ${SITE.replace('https://', '')}/${data.slug}/</p>
-        <p class="crumb"><a href="/#${data.slug}">← All case studies</a> · <a href="/pdf/${pdfName(data.slug)}">Download PDF<span class="visually-hidden"> of this case study</span></a></p>
+        <p class="crumb"><a href="/#${data.slug}"><span aria-hidden="true">◀</span> Back to the ballpark · ${escape(STOPS.find((s) => s.id === data.slug).label)}</a> · <a href="/#work">All case studies</a> · <a href="/pdf/${pdfName(data.slug)}">Download PDF<span class="visually-hidden"> of this case study</span></a></p>
         <p class="kicker">${escape(data.base)} · ${escape(shortName(c))}</p>
         <h1>${escape(shortName(c))}${subtitle(c) ? `<span class="sub">${escape(subtitle(c))}</span>` : ''}</h1>
         ${isLab ? `<p class="lede">${escape(data.tldr)}</p>` : facts(data)}
@@ -292,7 +306,7 @@ async function diamond(cases) {
             <p>Thanks for running the bases with me. If you need someone who finds out first and then designs, let's talk about a UX internship in Madrid (Feb–Jul 2027).</p>
             <ul class="actions">
               <li><a class="button" href="/cv/CV_Riccardo_Cirillo_EN.pdf">CV (English, PDF)</a></li>
-              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">CV en español</a></li>
+              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">CV en español</a></li>
               <li><a class="button ghost" href="mailto:${EMAIL}">Email me</a></li>
             </ul>
             <p><button class="button ghost" type="button" data-action="again">Take another swing</button></p>
@@ -314,19 +328,18 @@ ${crew.join('\n')}
 ${bases.join('\n')}
               </ul>
               <p class="banner" aria-hidden="true" hidden>Home run!</p>
+              <div class="tour-map" aria-hidden="true" hidden>
+                <span class="tour-diamond"><i data-corner="second"></i><i data-corner="third"></i><i data-corner="first"></i><i data-corner="home"></i></span>
+                <span class="tour-count"></span>
+              </div>
             </div>
             <div class="game-bar" hidden>
               <div class="bar-row" data-mode="bat">
                 <button class="button swing" type="button" data-action="swing">Swing!</button>
-                <p class="bar-hint">Click or tap the field<span class="no-touch">, or press <kbd>Space</kbd>,</span> to hit the pitch. <button class="link" type="button" data-action="free">Just explore the bases</button></p>
+                <p class="bar-hint">Click or tap the field<span class="no-touch">, or press <kbd>Space</kbd>,</span> to hit the pitch — or click any base to explore.</p>
               </div>
               <div class="bar-row" data-mode="tour" hidden>
-                <button class="button ghost" type="button" data-action="back"><span aria-hidden="true">◀</span> Back</button>
-                <button class="button ghost" type="button" data-action="pause">Pause</button>
-                <button class="button" type="button" data-action="next">Next <span aria-hidden="true">▶</span></button>
-                <span class="tour-step"></span>
-                <button class="link" type="button" data-action="free">Explore freely</button>
-                <div class="timer" aria-hidden="true"><span></span></div>
+                <button class="link" type="button" data-action="free"><span aria-hidden="true">✕</span> Exit tour</button>
               </div>
               <div class="bar-row" data-mode="free" hidden>
                 <button class="button ghost" type="button" data-action="again">Take another swing</button>
@@ -336,7 +349,7 @@ ${bases.join('\n')}
               <p class="visually-hidden" role="status"></p>
             </div>
           </div>
-          <div class="panel" id="field-panel" tabindex="-1" aria-live="polite">
+          <div class="panel" id="field-panel" tabindex="-1">
 ${panels.join('\n')}
           </div>
         </div>
@@ -346,17 +359,18 @@ ${panels.join('\n')}
 // Start screen "At bat": Riccardo at bat + uniform picker on one side, name/CV/contacts on the other.
 // Not a gate: everything a recruiter needs is here at once. The uniform switch is plain CSS
 // (radio + :has() in style.css); src/uniform.js only remembers the choice.
-function startScreen(cases, about) {
+function startScreen(cases, about, status) {
   const nipotyno = cases.find((c) => c.data.slug === 'nipotyno');
   const radios = UNIFORMS.map((u, i) => `            <label><input type="radio" name="uniform" id="u-${u.id}" value="${u.id}"${i === 0 ? ' checked' : ''}> ${u.label}</label>`);
   return `      <section class="hero wrap wide" aria-labelledby="name">
         <div class="intro">
           <h1 id="name"><img class="pixel-title" src="/game/title.svg" alt="" width="128" height="8"><span class="visually-hidden">Riccardo Cirillo</span></h1>
           <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
+          <p class="status-line">${escape(status)}</p>
           <p class="motto">“${escape(about.data.motto)}”</p>
           <ul class="actions">
             <li><a class="button" href="/cv/CV_Riccardo_Cirillo_EN.pdf">Download CV (English, PDF)</a></li>
-            <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es">CV en español (PDF)</a></li>
+            <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">CV en español (PDF)</a></li>
             <li><a class="button ghost" href="mailto:${EMAIL}">${EMAIL}</a></li>
           </ul>
           <a class="start-here" href="/nipotyno/"><span class="kicker">Start here · Main case</span> <strong>${escape(shortName(nipotyno))} — ${escape(subtitle(nipotyno))}</strong></a>
@@ -409,7 +423,7 @@ ${uniformCards.join('\n')}
       </section>`;
 }
 
-async function homePage(cases, about) {
+async function homePage(cases, about, status) {
   const cards = await Promise.all(
     cases.map(async ({ data }, i) => {
       const { width, height } = await imageSize(data.cover);
@@ -432,7 +446,7 @@ async function homePage(cases, about) {
     .replace(/<h2>/g, '<h3>').replace(/<\/h2>/g, '</h3>');
   const principles = aboutParts.find((part) => part.includes('id="how-i-design"')).match(/<ol>[\s\S]*<\/ol>/)[0];
 
-  const main = `${startScreen(cases, about)}
+  const main = `${startScreen(cases, about, status)}
 ${await diamond(cases)}
 ${howIDesign(cases, principles)}
       <section id="work" class="work wrap" aria-labelledby="work-title" tabindex="-1">
@@ -443,6 +457,7 @@ ${cards.join('\n')}
       </section>
       <section id="about" class="about wrap" aria-labelledby="about-title">
         <h2 id="about-title">About me</h2>
+        <p class="status-line">${escape(status)}</p>
 ${aboutHtml}
       </section>`;
 
@@ -469,7 +484,7 @@ export async function generate() {
   const cases = await Promise.all(CASES.map(load));
   const about = await load('about');
 
-  await writeFile(root('index.html'), await homePage(cases, about));
+  await writeFile(root('index.html'), await homePage(cases, about, await statusLine()));
   for (const [i, c] of cases.entries()) {
     await mkdir(root(c.data.slug), { recursive: true });
     await writeFile(root(`${c.data.slug}/index.html`), await casePage(c, i, cases));

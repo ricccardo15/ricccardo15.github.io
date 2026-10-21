@@ -178,7 +178,7 @@ test.describe('desktop (1280 px): the ballpark', () => {
     await expect(page).toHaveURL(/\/levante\/$/);
   });
 
-  test('arrow keys move between bases, Esc closes the panel, Back returns', async ({ page }) => {
+  test('arrow keys move between bases, Esc closes the panel, one Back press leaves the page', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
     await page.locator('.base[data-stop="home"]').focus();
@@ -196,10 +196,13 @@ test.describe('desktop (1280 px): the ballpark', () => {
     await expect(page.locator('#field-panel')).toBeHidden();
     await expect(page.locator('.base[data-stop="lab"]')).toBeFocused();
 
+    // the address is replaced when a base is clicked (never added to): one Back press goes to the page before
+    await page.goto('/lab/');
     await page.goto('/#housing');
     await page.locator('.base[data-stop="nipotyno"]').click();
+    await expect(page).toHaveURL(/#nipotyno$/);
     await page.goBack();
-    await expect(panel(page)).toHaveAttribute('data-panel', 'housing');
+    await expect(page).toHaveURL(/\/lab\/$/);
   });
 
   test('deep link /#lab opens the dugout panel with the runner on it', async ({ page }) => {
