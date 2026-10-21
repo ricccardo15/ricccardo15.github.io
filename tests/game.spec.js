@@ -61,7 +61,7 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     await panel(page).getByRole('button', { name: 'Take another swing' }).click();
     await expect(bar(page, 'bat')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Swing!' })).toBeFocused();
-    await expect(panel(page)).toHaveAttribute('data-panel', 'home');
+    await expect(page.locator('#field-panel')).toBeHidden(); // back at bat: the card closes, the whole field is free
     await expect(page.locator('.tour-nav')).toHaveCount(0);
   });
 
@@ -84,7 +84,7 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
   test('Space and a click on the field also swing', async ({ page }) => {
     await page.goto('/');
     await page.locator('#field').scrollIntoViewIfNeeded();
-    await page.locator('body').click({ position: { x: 5, y: 5 } }); // focus on the page, not on a control
+    await page.locator('#field-title').click(); // focus on the page next to the field, not on a control
     await page.keyboard.press('Space');
     await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
 
@@ -96,7 +96,7 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
   test('after the tour one browser Back press leaves the page (the address is replaced, not added to)', async ({ page }) => {
     await page.goto('/lab/');
     await page.goto('/');
-    await page.getByRole('link', { name: 'Play ball!' }).click(); // a link to #field: must not add a history entry
+    await page.getByRole('link', { name: 'Enter the ballpark' }).click(); // "Enter the ballpark" links to #field: must not add a history entry
     await page.getByRole('button', { name: 'Swing!' }).click();
     await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
     await nextButton(page).click();
@@ -159,9 +159,9 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     await expect(panel(page)).toHaveAttribute('data-panel', 'levante');
   });
 
-  test('"Play ball!" jumps to the field with the focus on Swing!', async ({ page }) => {
+  test('"Enter the ballpark" jumps to the field with the focus on Swing!', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Play ball!' }).click();
+    await page.getByRole('link', { name: 'Enter the ballpark' }).click();
     await expect(page.getByRole('button', { name: 'Swing!' })).toBeFocused();
     await expect(page.locator('.stage')).toBeInViewport();
   });

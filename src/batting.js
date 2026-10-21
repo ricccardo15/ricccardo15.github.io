@@ -1,5 +1,5 @@
 // At bat: the pitcher throws again and again until the visitor swings
-// (click/tap the field, Space or the "Swing!" button — wired in src/diamond.js).
+// (click/tap the field, Space or the "Swing!" button — wired in src/game.js).
 // You can't miss: a swing at any moment hits the next ball that reaches the plate, and it is always a home run.
 // With reduced motion there is no pitch: a swing shows "Home run!" straight away.
 import { FIELD } from './field-map.js';

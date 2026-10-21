@@ -92,60 +92,105 @@ h1 { font-size: clamp(2rem, 6vw, 3rem); margin: 0; }
 h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .kicker { margin: 0; font-size: .875rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
 
-/* --- Home: Start screen "At bat" --- */
-.hero { padding-block: 2rem 1rem; display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …): a wide child can never stretch the page */
+/* --- Home: the lobby (first screen, never a gate) ---
+   Desktop: "Select your player" on the left (≈40%) with the one main button under it, the player card = a short About on the right.
+   Phone: the card comes first (name, role, CV, email and Nipotyno stay on the first screen), then the button, then the player. */
+.lobby { padding-block: 1.5rem 1rem; display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); grid-template-areas: "card" "cta" "select"; } /* minmax(0, …): a wide child can never stretch the page */
 @media (min-width: 900px) {
-  .hero { grid-template-columns: auto 1fr; grid-template-areas: "bat intro"; align-items: center; gap: 2.5rem; }
-  .hero .intro { grid-area: intro; }
-  .hero .at-bat { grid-area: bat; }
+  .lobby { grid-template-columns: minmax(420px, 2fr) minmax(0, 3fr); grid-template-rows: auto 1fr; grid-template-areas: "select card" "cta card"; align-items: start; gap: 1.25rem 2rem; } /* the button sits right under the player, on the first screen */
 }
-.headline { margin: .5rem 0 1rem; font-weight: 600; color: var(--red); }
-.status-line { margin: -.5rem 0 1rem; font-size: .9375rem; color: var(--muted); }
-.about .status-line { margin: 0 0 1rem; }
-.motto { margin: 0 0 1.5rem; font-size: 1.25rem; font-style: italic; }
-
-.start-here { display: block; margin-top: 1rem; padding: .75rem 1rem; max-width: 34rem; border: 2px solid var(--navy); border-left-width: 6px; border-radius: 6px; background: var(--card); text-decoration: none; }
-.start-here strong { display: block; }
-.start-here:hover strong { color: var(--red); text-decoration: underline; }
-
-.play { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
-.play .button { background: var(--red); border-color: var(--red); }
-.play .button:hover { background: var(--navy); border-color: var(--navy); }
-.small-label { font-weight: 400; font-size: .875rem; }
+.player-select { grid-area: select; min-width: 0; }
+.player-card { grid-area: card; min-width: 0; }
+.lobby-cta { grid-area: cta; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+.lobby-cta .enter { padding: .7rem 1.4rem; background: var(--red); border-color: var(--red); font-size: 1.125rem; }
+.lobby-cta .enter:hover { background: var(--navy); border-color: var(--navy); }
 .skip-list { font-weight: 700; }
+.headline { margin: 0 0 .75rem; font-weight: 600; color: var(--red); }
+.status-line { margin: -.25rem 0 1rem; font-size: .9375rem; color: var(--muted); }
+.about .status-line { margin: 0 0 1rem; }
+.motto { margin: 0 0 1rem; font-size: 1.125rem; font-style: italic; }
 
 /* Uniform = row of public/game/runner.png (src/uniforms.js). Picked with the radios, no JS needed. */
 :root:has(#u-designer:checked) { --uniform-row: 1; }
 :root:has(#u-maker:checked) { --uniform-row: 2; }
 
-.at-bat { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; } /* the uniform buttons drop under the batter on the narrowest screens or with wider fonts */
-@media (min-width: 900px) {
-  .at-bat { flex-direction: column; align-items: center; }
+/* Select your player: a navy panel with the clubhouse (public/game/lobby.png, 200×150 at --ls×) and three character tiles. */
+.uniforms { margin: 0; padding: .75rem; min-width: 0; border: 2px solid var(--navy); border-radius: 4px; background: var(--navy); }
+.uniforms legend { float: left; width: 100%; padding: 0; margin-bottom: .75rem; } /* float: the legend sits inside the panel */
+.pixel-heading svg, .pixel-name svg { display: block; width: 100%; height: auto; }
+.pixel-heading svg { max-width: 400px; margin-inline: auto; }
+.player-stage {
+  --ls: 1; /* scale of the clubhouse picture */
+  --s: 3; /* scale of the batter (48 px cells) */
+  clear: both;
+  position: relative;
+  width: calc(200px * var(--ls));
+  height: calc(150px * var(--ls));
+  margin-inline: auto;
+  background: url("/game/lobby.png") 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
 }
+@media (min-width: 480px) {
+  .player-stage { --ls: 2; --s: 5; }
+}
+/* The batter stands on the plate drawn in the picture (x 100, y 140): his soles are 2 px above the bottom of his cell. */
+.player-stage .batter { position: absolute; left: 50%; bottom: calc(10px * var(--ls) - 2px * var(--s)); transform: translateX(-50%); }
 .batter {
-  --s: 3; /* sizes and sprite sheet: see the "Sprites" block below */
-  flex: none;
-  box-sizing: content-box;
-  background-image: url("/game/runner.png"), linear-gradient(#8fd3ff 70%, #3f9b3a 70%); /* palette sky + grass: a day game */
+  background-image: url("/game/runner.png");
   background-repeat: no-repeat;
-  background-position: 0 calc(var(--uniform-row, 0) * var(--step)), 0 0;
-  background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px), 100% 100%;
+  background-position: 0 calc(var(--uniform-row, 0) * var(--step));
+  background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px);
+}
+/* ◀ ▶ (src/uniform.js) change the uniform on a phone, next to the batter; on desktop the tiles are enough. */
+.uniform-step { position: absolute; top: 50%; z-index: 1; min-width: 44px; min-height: 44px; padding: 0; border: 2px solid var(--navyDark, #0f1a30); border-radius: 4px; background: var(--card); color: var(--navy); font: inherit; font-size: 1.25rem; font-weight: 700; transform: translateY(-50%); cursor: pointer; }
+.uniform-step[data-step="-1"] { left: .25rem; }
+.uniform-step[data-step="1"] { right: .25rem; }
+.uniform-step:hover { color: var(--red); }
+@media (min-width: 900px) {
+  .uniform-step { display: none; }
+}
+.uniform-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: .75rem; }
+.uniform-tile { position: relative; display: grid; justify-items: center; align-content: start; gap: .3rem; padding: .5rem .4rem .6rem; border: 2px solid #2c4170; border-radius: 4px; background: var(--card); color: var(--ink); text-align: center; cursor: pointer; }
+.uniform-tile input { position: absolute; top: 4px; left: 4px; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.uniform-tile:has(input:checked) { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }
+.uniform-tile:has(input:checked)::before { content: "▶"; position: absolute; top: .35rem; left: .4rem; color: var(--red); font-size: .875rem; line-height: 1; animation: blink 1s steps(2, jump-none) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.uniform-tile:has(input:focus-visible) { outline: 3px solid #f2c14e; outline-offset: 2px; } /* palette yellow: visible on the navy panel */
+/* Portrait: the head of the 48 px frame at 2× (a 52×40 window on the sheet) on the day-game sky */
+.portrait {
+  width: 52px;
+  height: 40px;
   border: 2px solid var(--navy);
-  border-radius: 4px;
+  border-radius: 2px;
+  background: url("/game/runner.png") -20px calc(var(--row) * -96px) / 1440px 288px no-repeat, linear-gradient(#8fd3ff 70%, #3f9b3a 70%);
+  image-rendering: pixelated;
 }
-@media (min-width: 900px) {
-  .batter { --s: 4; }
+.tile-name { font-weight: 700; font-size: 1rem; }
+.tile-desc { font-size: .8125rem; line-height: 1.3; color: var(--muted); }
+.tile-suggest { display: block; margin-top: .3rem; font-weight: 700; color: var(--red); }
+@media (max-width: 599px) {
+  .tile-desc { display: none; } /* compact on phones: portrait + name (the skills are in How I design) */
 }
-.uniforms { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: .4rem; }
-@media (min-width: 900px) {
-  .uniforms { flex-direction: row; }
+
+/* The player card (a short About). Its colour follows the uniform: navy, red or dark grey (white text stays ≥ 4.5:1). */
+.player-card { --team: var(--navy); overflow: hidden; border: 2px solid var(--team); border-radius: 6px; background: var(--card); box-shadow: 4px 4px 0 var(--red); }
+:root:has(#u-designer:checked) .player-card { --team: var(--red); }
+:root:has(#u-maker:checked) .player-card { --team: #5b6577; }
+.card-band { padding: .9rem 1.25rem .8rem; background: var(--team); }
+.card-band h1 { margin: 0; }
+.pixel-name svg { max-width: 512px; }
+.card-body { padding: 1rem 1.25rem 1.25rem; }
+.card-stats { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.card-stats li { padding: .4rem .5rem; border: 2px solid var(--line); border-radius: 4px; text-align: center; font-size: .8125rem; line-height: 1.25; color: var(--muted); }
+.card-stats strong { display: block; font-size: 1.375rem; color: var(--navy); }
+.card-bio { margin: 0 0 1rem; font-size: 1rem; }
+@media (max-width: 599px) {
+  .card-bio { display: none; } /* compact card on phones: the bio is in the About */
 }
-.uniforms legend { padding: 0; margin-bottom: .4rem; font-size: .875rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
-.uniforms label { display: flex; align-items: center; gap: .35rem; padding: .3rem .6rem; border: 2px solid var(--navy); border-radius: 4px; background: var(--card); font-size: 1rem; font-weight: 600; cursor: pointer; }
-.uniforms label:has(input:checked) { background: var(--navy); color: #fff; }
-.uniforms input { accent-color: var(--red); margin: 0; }
-.uniforms input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.uniforms label:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+.player-card .actions { margin-bottom: 1rem; }
+.start-here { display: block; margin-top: 1rem; padding: .75rem 1rem; max-width: 34rem; border: 2px solid var(--navy); border-left-width: 6px; border-radius: 6px; background: var(--card); text-decoration: none; }
+.start-here strong { display: block; }
+.start-here:hover strong { color: var(--red); text-decoration: underline; }
 
 /* --- How I design --- */
 .how h2 { margin-top: 1.5rem; }
@@ -202,13 +247,14 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
    2× (960×540) from 1000 px wide, 1× (480×270) below. Positions come from src/field-map.js as --x / --y percentages.
    On a phone the stage is as wide as the screen and the 480 px picture is centred and cropped (about 64 px off each side):
    everything a visitor can click lives between x = 64 and x = 416 (tests/field.spec.js checks it). --- */
-.field { --fs: 1; padding-block: 1.5rem 0; }
+.field { --fs: 1; padding-block: 1rem 1.5rem; min-height: calc(100dvh - 3.5rem); } /* the stadium fills the screen under the header */
 @media (min-width: 1000px) {
   .field { --fs: 2; }
 }
 .field h2 { margin: 0; }
-.hint { margin: .25rem 0 1rem; font-size: 1rem; color: var(--muted); }
-.field-layout { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+.hint { margin: .25rem 0 .75rem; font-size: 1rem; color: var(--muted); }
+/* The stage and the card that opens over it. */
+.ballpark { position: relative; width: calc(480px * var(--fs) + 4px); max-width: calc(100% - 2rem); margin-inline: auto; }
 .stage {
   position: relative;
   box-sizing: content-box;
@@ -219,9 +265,12 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   border: 2px solid var(--navy);
   border-radius: 4px;
   overflow: hidden;
+  background: var(--navy); /* shows as a frame where the camera has slid the picture away (under the open card) */
 }
 /* The picture's own box: centred in the stage, so it can be wider than the stage (the crop on phones). */
 .field-box {
+  transform: translateX(var(--cam, 0px));
+  transition: transform .3s ease;
   position: absolute;
   top: 0;
   left: calc((100% - 480px * var(--fs)) / 2);
@@ -272,26 +321,37 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .base:hover, .base[aria-current] { background: var(--navy); color: #fff; }
 .base:hover .base-label, .base[aria-current] .base-label { color: #fff; }
 .base:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
-/* At 1× (under 1000 px) the bases are simplified for touch: icon + name only ("1st base" stays for screen readers),
-   no pointer, labels closer to the base. Height >= 24 px (WCAG 2.5.8 target size). */
+/* 'upleft' (the mound): the label sits above and to the left of the point, on the infield grass, clear of 2nd base and the batter. */
+.base[data-tag="upleft"] { transform: translate(calc(-100% - 8px * var(--fs)), calc(-100% - 18px * var(--fs))); }
+.base[data-tag="upleft"]::after { right: 8px; bottom: -14px; border-top-color: var(--navy); }
+/* The Lab label goes to the right of the dugout (46 field pixels from its centre, so it starts just past the dugout's edge):
+   above it, it would cover the coach on 3rd base. A little higher than centred: clear of "Swing!" under home plate. */
+.base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% - 2px * var(--fs))); }
+/* At 1× (under 1000 px) the points show their icon only, with their name for screen readers (WCAG: never hover-only):
+   the names are in the "Stadium map" list under the field. Target ≥ 24 px (WCAG 2.5.8). */
 @media (max-width: 999px) {
-  .base { --gap: 5px; gap: 4px; padding: 3px 6px 3px 3px; font-size: .75rem; line-height: 1.2; }
+  .base { --gap: 5px; padding: 3px; }
   .base::after { display: none; }
   .base[data-tag="below"] { transform: translate(-50%, calc(4px * var(--fs) + 3px)); }
   .base[data-tag="right"] { transform: translate(calc(12px * var(--fs) + 4px), -50%); }
-  .base-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% + 4px)); } /* clear of the 3rd-base icon */
+  .base-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
-/* The Lab label goes to the right of the dugout (46 field pixels from its centre, so it starts just past the dugout's edge):
-   above it, it would cover the coach on 3rd base. It stays inside the crop even on a 320 px phone (x = 156 …). */
-.base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% + 6px)); } /* a little lower: clear of the 3rd-base label */
-/* On the narrowest phones the crop is bigger (up to 98 px per side): the 1st-base label leans to the left so it stays whole
-   even with wider fonts (the CI machine has different fonts from a Mac). */
-@media (max-width: 519px) {
-  .base[data-stop="nipotyno"] { transform: translate(-62%, calc(4px * var(--fs) + 3px)); }
+/* Stadium map: the list of every point, under the field on phones and tablets (keyboard friendly). On desktop the labels say it all. */
+.stadium-map { margin-top: 1rem; }
+.stadium-map h3 { margin: 0 0 .5rem; font-size: 1.125rem; }
+.stadium-map ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: .4rem; }
+.stadium-map a { display: flex; align-items: center; gap: .5rem; min-height: 44px; padding: .25rem .5rem; border: 2px solid var(--navy); border-radius: 4px; background: var(--card); font-weight: 700; text-decoration: none; }
+.stadium-map a:hover, .stadium-map a[aria-current] { background: var(--navy); color: #fff; }
+.stadium-map .base-icon { --fs: 1; }
+.map-label { margin-left: auto; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--red); }
+.stadium-map a:hover .map-label, .stadium-map a[aria-current] .map-label { color: #fff; }
+@media (min-width: 1000px) {
+  .stadium-map { display: none; }
 }
 
 /* World = everything drawn on the field (image + people + ball). The tour zooms it 2× (integer = sharp);
-   the base links stay outside, so they never scale. --tx / --ty come from src/diamond.js. */
+   the base links stay outside, so they never scale. --tx / --ty come from src/tour.js. */
 .world { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .5s ease; }
 .stage.is-zoomed .world { transform: translate(var(--tx, 0), var(--ty, 0)) scale(2); }
 .stage.is-zoomed .bases { visibility: hidden; transition: none; }
@@ -395,13 +455,20 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   .world { transition: none; }
 }
 
-/* Game bar under the field: batting, tour controls, free mode. Only shown by src/diamond.js. */
+/* Game bar under the field: batting, tour controls, free mode. Only shown by src/game.js. */
 .game-bar { margin: .5rem auto 0; max-width: calc(480px * var(--fs) + 4px); }
 .bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
 .bar-hint { margin: 0; font-size: .9375rem; color: var(--muted); }
 .game-bar .button { padding: .4rem .8rem; font-size: 1rem; }
-.swing { background: var(--red); border-color: var(--red); }
-.swing:hover { background: var(--navy); border-color: var(--navy); }
+.swing-box { position: absolute; z-index: 5; left: calc(50% - 20px * var(--fs)); bottom: 6px; transform: translateX(-50%); }
+@media (max-width: 999px) {
+  .swing-box { left: auto; right: 8px; bottom: 6px; transform: none; } /* bottom-right: only grass and the bullpen there */
+}
+.swing { padding: .35rem .9rem; border: 3px solid var(--navyDark, #0f1a30); border-radius: 4px; background: var(--red); color: #fff; font-size: 1.125rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; box-shadow: 3px 3px 0 #0f1a30; }
+.swing:hover { background: var(--navy); color: #fff; }
+@media (max-width: 999px) {
+  .swing { padding: .2rem .6rem; font-size: .9375rem; }
+}
 button.link { padding: 0; border: 0; background: none; color: var(--navy); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
 button.link:hover { color: var(--red); }
 button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
@@ -440,16 +507,59 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .panel-card { animation: slide-in .25s ease-out; }
 @keyframes slide-in { from { transform: translateY(6px); } to { transform: none; } }
 .batter.is-swinging { animation: swing .44s steps(4, jump-none) 1; }
-.panel-cover { width: 100%; max-height: 9rem; object-fit: cover; object-position: top; margin-bottom: .75rem; border: 1px solid var(--line); border-radius: 4px; }
+.panel-cover { width: 100%; max-height: 7rem; object-fit: cover; object-position: top; margin-bottom: .75rem; border: 1px solid var(--line); border-radius: 4px; }
 
-.panel { padding: 1rem 1.25rem; background: var(--card); border: 2px solid var(--navy); border-radius: 4px; }
+.panel { padding: 1rem 1.25rem; background: var(--card); border: 2px solid var(--navy); border-radius: 4px; box-shadow: 4px 4px 0 var(--red); }
+.panel-card { max-width: 60ch; }
+.panel-close { position: sticky; top: 0; z-index: 1; float: right; margin: -.25rem -.5rem .25rem .5rem; padding: .3rem .6rem; border: 2px solid var(--navy); border-radius: 4px; background: var(--card); color: var(--navy); font: inherit; font-size: .9375rem; font-weight: 700; cursor: pointer; }
+.panel-close:hover { background: var(--navy); color: #fff; }
+/* Only with the game running (src/game.js adds .is-live): without JS the card stays under the field and covers nothing. */
+@media (min-width: 1000px) {
+  .is-live .panel { position: absolute; top: 12px; right: 12px; z-index: 8; width: min(400px, 44%); max-height: calc(270px * var(--fs) - 24px); overflow: auto; overscroll-behavior: contain; }
+  .is-live .ballpark:has(.panel:not([hidden])) .tour-map { right: auto; left: 6px; } /* the card covers the right side */
+}
+.panel { margin-top: .75rem; }
+.is-live .panel { margin-top: 0; }
+@media (max-width: 999px) {
+  .is-live .panel { margin-top: .75rem; max-height: 60dvh; overflow: auto; overscroll-behavior: contain; }
+  .stage-col { position: sticky; top: 0; z-index: 6; padding-bottom: .25rem; background: var(--paper); } /* the stage stays visible above the sheet */
+}
+.key-numbers { list-style: none; margin: .5rem 0; padding: 0; display: flex; flex-wrap: wrap; gap: .35rem; }
+.key-numbers li { padding: .15rem .5rem; border: 2px solid var(--navy); border-radius: 3px; font-size: .875rem; font-weight: 700; }
+.card-links { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+.pdf-link { font-weight: 700; }
+.card-list { margin: .25rem 0 .75rem; padding-left: 1.25rem; font-size: .9375rem; }
+.panel h4 { margin: 1rem 0 .25rem; font-size: 1rem; color: var(--navy); }
+.uniform-list { list-style: none; margin: .25rem 0 .75rem; padding: 0; display: grid; gap: .5rem; font-size: .9375rem; }
+.uniform-list strong { display: block; }
+.skills-inline { display: block; color: var(--ink); }
 .panel h3 { margin: .25rem 0 .5rem; font-size: 1.375rem; }
 .panel h3 .sub { display: block; margin-top: .25rem; font-size: 1rem; font-weight: 600; color: var(--ink); }
 .panel p { margin: .5rem 0; font-size: 1rem; }
 .panel .button { margin-top: .25rem; }
 
+/* --- Case reader (src/reader.js): the case in a full-screen dialog over the stadium, like a pause menu --- */
+dialog.reader { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 0; border: 0; background: var(--paper); color: var(--ink); overflow: auto; overscroll-behavior: contain; }
+dialog.reader::backdrop { background: rgb(15 26 48 / .6); }
+.reader-band { position: sticky; top: 0; z-index: 2; }
+.reader-name { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.reader-close { margin-left: auto; padding: .4rem .8rem; border: 2px solid #fff; border-radius: 4px; background: transparent; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.reader-close:hover { background: #fff; color: var(--navy); }
+.reader-body { padding-bottom: 3rem; }
+html.reader-open { overflow: hidden; } /* the page under the reader does not scroll */
+
 /* --- Case study --- */
 .case { padding-top: 1.5rem; }
+/* Pixel band on top of every case page (and of the case reader in the stadium): icon of the base, the name in the pixel font,
+   the way back to the ballpark. The name is an SVG (scripts/art/title.js), sharp at any size. */
+.case-band { background: var(--navy); color: #fff; }
+.band-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding-block: .75rem; }
+.case-band .base-icon { --fs: 2; flex: none; }
+.band-name { flex: 1 1 12rem; min-width: 0; } /* a long name shrinks to fit next to the icon (the SVG keeps its shape) */
+.band-name svg { display: block; width: auto; max-width: 100%; height: 32px; }
+.band-back { margin-left: auto; color: #fff; font-weight: 700; }
+.band-back:hover { color: #f2c14e; }
+.case-band a:focus-visible, .case-band button:focus-visible { outline-color: #fff; }
 .crumb { margin: 0 0 1.5rem; font-size: 1rem; }
 .case h1 { margin-top: .25rem; }
 .case h1 .sub { display: block; margin-top: .5rem; font-size: clamp(1.25rem, 3.5vw, 1.6rem); font-weight: 600; color: var(--ink); }
@@ -463,9 +573,9 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
   .facts div { grid-template-columns: 1fr; gap: 0; }
 }
 
-#tl-dr { padding: 1rem 1.25rem; border-left: 4px solid var(--red); background: var(--card); }
-#tl-dr h2 { margin-top: 0; font-size: 1.125rem; }
-#tl-dr p { margin-bottom: 0; }
+.tldr { padding: 1rem 1.25rem; border-left: 4px solid var(--red); background: var(--card); }
+.tldr h2 { margin-top: 0; font-size: 1.125rem; }
+.tldr p { margin-bottom: 0; }
 
 figure { margin: 1.5rem 0; }
 figure img { border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
@@ -513,7 +623,7 @@ th { background: var(--navy); color: #fff; }
 @media print {
   @page { size: A4; margin: 14mm 14mm 16mm; }
   body { background: #fff; font-size: 10.5pt; line-height: 1.45; }
-  .site-header, .skip, .pager, .crumb { display: none; }
+  .site-header, .skip, .pager, .crumb, .case-band { display: none; }
   .print-head { display: block; margin: 0 0 6mm; padding-bottom: 2mm; border-bottom: 1px solid var(--line); font-size: 9pt; color: var(--muted); }
   .wrap, .case { max-width: none; padding: 0; }
   .site-footer { margin-top: 8mm; padding: 3mm 0 0; background: none; color: var(--ink); border-top: 1px solid var(--line); font-size: 9pt; }
@@ -521,7 +631,7 @@ th { background: var(--navy); color: #fff; }
   h1 { font-size: 22pt; }
   h2 { font-size: 14pt; margin: 6mm 0 2mm; break-after: avoid; }
   h3 { break-after: avoid; }
-  figure, img, table, .facts, #tl-dr, .card { break-inside: avoid; }
+  figure, img, table, .facts, .tldr, .card { break-inside: avoid; }
   figure { margin: 4mm 0; }
   figure img { max-height: 110mm; width: auto; margin: 0 auto; }
   .table-wrap { overflow: visible; }

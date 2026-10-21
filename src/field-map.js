@@ -1,6 +1,6 @@
 // Shared map of the ballpark, in field pixels (the field image is 480×270).
 // Used by scripts/art/field.js (draws the image), scripts/pages.js (places the base links)
-// and src/diamond.js (moves the runner). Change a position here and everything follows.
+// and src/game.js (moves the runner). Change a position here and everything follows.
 // On a phone the 480 px wide field is cropped to the screen (about 64 px off each side): every point a visitor can
 // click must stay between x = 64 and x = 416 (tests/field.spec.js checks it).
 export const FIELD = { width: 480, height: 270 };
@@ -14,6 +14,15 @@ export const STOPS = [
   { id: 'levante', x: 240, y: 99, label: '2nd base', name: 'Levante', tag: 'right' },
   { id: 'housing', x: 147, y: 168, label: '3rd base', name: 'Housing', tag: 'below' },
   { id: 'lab', x: 110, y: 225, label: 'Dugout', name: 'Lab', tag: 'right' }, // its label sits beyond the dugout's right edge (style.css)
+];
+
+// Other points a visitor can click (Fase 2). Separate from STOPS and RING: the runner's path and ← → do not change.
+// They open a card over the stadium; without JS they are links to the sections of the page (`href`).
+// `tag` as for STOPS ('upleft' = above and to the left of the point). Their icons follow the 5 of STOPS in icons.png.
+export const SPOTS = [
+  { id: 'about', x: 240, y: 30, label: 'Scoreboard', name: 'About', tag: 'below', href: '#about' },
+  { id: 'how', x: 240, y: 168, label: "Pitcher's mound", name: 'How I design', tag: 'upleft', href: '#how' },
+  { id: 'contact', x: 360, y: 40, label: 'Ticket booth', name: 'Contact & CV', tag: 'below', href: '#contact' },
 ];
 
 // The runner follows the base path (home → 1st → 2nd → 3rd → home); the dugout is reached from home.
@@ -30,7 +39,7 @@ export const CREW = [
   { id: 'mateB', who: 'mateB', x: 140, y: 241, flip: true },
 ];
 
-// The home-run tour: one stop per project, each with a small moment (src/diamond.js), then the last card.
+// The home-run tour: one stop per project, each with a small moment (src/tour.js), then the last card.
 // `moment` = runner animation, `with` = who joins in (crew ids) and how, `corner` = the corner of the tour diamond.
 // The tour never moves on by itself: the visitor presses Next in the card.
 export const TOUR = [

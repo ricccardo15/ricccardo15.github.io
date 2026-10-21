@@ -1,6 +1,6 @@
-// Remembers the uniform picked on the Start screen (per visitor, this browser only).
+// Lobby: remembers the uniform picked in "Select your player" (per visitor, this browser only).
 // The switch itself is CSS (radio + :has() in style.css): without this file it still works, just not remembered.
-// On a change the big batter swings once, as feedback.
+// On a change the big batter swings once, as feedback. On phones ◀ ▶ next to the batter step through the uniforms.
 const KEY = 'uniform';
 const radios = [...document.querySelectorAll('input[name="uniform"]')];
 const batter = document.querySelector('.batter');
@@ -21,3 +21,13 @@ for (const radio of radios) {
   });
 }
 batter.addEventListener('animationend', () => batter.classList.remove('is-swinging'));
+
+for (const button of document.querySelectorAll('.uniform-step')) {
+  button.hidden = false;
+  button.addEventListener('click', () => {
+    const now = radios.findIndex((r) => r.checked);
+    const next = radios[(now + Number(button.dataset.step) + radios.length) % radios.length];
+    next.checked = true;
+    next.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}

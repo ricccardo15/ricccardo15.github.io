@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
 import sharp from 'sharp';
-import { FIELD, STOPS, CREW, CREW_ROWS } from '../src/field-map.js';
+import { FIELD, STOPS, SPOTS, CREW, CREW_ROWS } from '../src/field-map.js';
 import { UNIFORMS } from '../src/uniforms.js';
 import { PALETTE } from '../src/palette.js';
 import { pixelText } from './art/title.js';
@@ -235,6 +235,7 @@ async function casePage(c, i, all) {
   const isLab = data.slug === 'lab';
   let html = figures(await markdown(c.body));
   html = sections(html, isLab ? 'card' : '');
+  html = html.replace('<section id="tl-dr">', '<section id="tl-dr" class="tldr">'); // styled by class: the reader prefixes the ids
   // Lab cards: picture on top, then title and the two lines of text.
   if (isLab) {
     html = html.replace(/(class="card">\n)(<h2>[\s\S]*?)(<img [^>]+>)/g, '$1<figure>$3</figure>\n$2');
@@ -248,11 +249,21 @@ async function casePage(c, i, all) {
   ${next ? `<a rel="next" href="/${next.data.slug}/"><span>Next · ${escape(next.data.base)} →</span>${escape(shortName(next))}</a>` : `<a href="/#work"><span>Back to →</span>All case studies</a>`}
 </nav>`;
 
-  const main = `      <article class="case wrap">
+  const stop = STOPS.find((s) => s.id === data.slug);
+  // A pixel band on top (outside the article, so the case reader in the stadium does not show it twice).
+  const band = `      <div class="case-band">
+        <div class="wrap band-row">
+          <span class="base-icon" style="--icon: ${iconOf(stop)}" aria-hidden="true"></span>
+          <span class="band-name" aria-hidden="true">${pixelText(shortName(c), { color: PALETTE.white, shadow: PALETTE.red })}</span>
+          <a class="band-back" href="/#${data.slug}"><span aria-hidden="true">◀</span> Back to the ballpark · ${escape(stop.label)}</a>
+        </div>
+      </div>`;
+  const main = `${band}
+      <article class="case wrap">
         <p class="print-head">Riccardo Cirillo · UX Research &amp; Design intern · ${EMAIL} · ${SITE.replace('https://', '')}/${data.slug}/</p>
-        <p class="crumb"><a href="/#${data.slug}"><span aria-hidden="true">◀</span> Back to the ballpark · ${escape(STOPS.find((s) => s.id === data.slug).label)}</a> · <a href="/#work">All case studies</a> · <a href="/pdf/${pdfName(data.slug)}">Download PDF<span class="visually-hidden"> of this case study</span></a></p>
+        <p class="crumb"><a href="/#work">All case studies</a> · <a href="/pdf/${pdfName(data.slug)}">Download PDF<span class="visually-hidden"> of this case study</span></a></p>
         <p class="kicker">${escape(data.base)} · ${escape(shortName(c))}</p>
-        <h1>${escape(shortName(c))}${subtitle(c) ? `<span class="sub">${escape(subtitle(c))}</span>` : ''}</h1>
+        <h1 id="case-title" tabindex="-1">${escape(shortName(c))}${subtitle(c) ? `<span class="sub">${escape(subtitle(c))}</span>` : ''}</h1>
         ${isLab ? `<p class="lede">${escape(data.tldr)}</p>` : facts(data)}
         ${html}
         ${pager}
@@ -268,39 +279,62 @@ async function casePage(c, i, all) {
   });
 }
 
-// The ballpark: pixel field + bases as real links + one panel per stop.
-// Without JavaScript the bases are plain links to the case pages; src/diamond.js adds the game:
-// batting, the home-run tour (one project per base) and free running. The game bar stays hidden without JS.
-// Under 1000 px it is shown at 1× with simplified touch labels; on a phone the 480 px picture is cropped (see style.css).
-async function diamond(cases) {
+// The ballpark: pixel field + every point as a real link + one card per point.
+// Without JavaScript the points are plain links (case pages, #about, #how, #contact) and the home card is shown under the
+// field; src/game.js adds the game: batting, the tour, free running, cards over the stadium; src/reader.js the case reader.
+// Under 1000 px the field is at 1× with icon-only labels and the "Stadium map" list under it (see style.css).
+const POINTS = [...STOPS.map((p) => ({ ...p, spot: false })), ...SPOTS.map((p) => ({ ...p, spot: true }))];
+const pointHref = (p) => (p.spot ? p.href : (p.id === 'home' ? '#field-panel' : `/${p.id}/`));
+const pointData = (p) => (p.spot ? `data-spot="${p.id}"` : `data-stop="${p.id}"`);
+const iconOf = (p) => POINTS.findIndex((q) => q.id === p.id);
+
+// The content of one "## Heading" section of content/about.md, without its heading and without its id (no duplicate ids).
+function aboutSection(aboutParts, id) {
+  const part = aboutParts.find((p) => p.startsWith(`<section id="${id}"`));
+  if (!part) throw new Error(`content/about.md: section "${id}" not found`);
+  return part.replace(/^<section[^>]*>\s*<h2>[\s\S]*?<\/h2>\s*/, '').replace(/\s*<\/section>\s*$/, '');
+}
+
+const cvLinks = (primary = 'button') => `<ul class="actions">
+              <li><a class="${primary}" href="mailto:${EMAIL}">${EMAIL}</a></li>
+              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_EN.pdf">CV (English, PDF)</a></li>
+              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">CV en español (PDF)</a></li>
+            </ul>`;
+
+async function ballpark(cases, { aboutParts, how, status }) {
   const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
-  const bases = STOPS.map((stop, i) => {
-    const href = stop.id === 'home' ? '#field-panel' : `/${stop.id}/`;
-    return `          <li><a class="base" href="${href}" data-stop="${stop.id}" data-tag="${stop.tag}" style="--x: ${pct(stop.x, FIELD.width)}; --y: ${pct(stop.y, FIELD.height)}; --icon: ${i}"><span class="base-icon"></span><span class="base-text"><span class="base-label">${stop.label}</span> <span class="base-name">${stop.name}</span></span></a></li>`;
-  });
-  const main = bySlug.nipotyno.data;
+  const facts = await readFile(root('content/facts.md'), 'utf8');
+  const schools = [facts.match(/^- Education: (.+)$/m)?.[1], ...[...facts.matchAll(/^ {2}- (.+)$/gm)].map((m) => m[1])].filter(Boolean);
+  if (schools.length < 4) throw new Error('content/facts.md: the Education lines are missing');
+
+  const points = POINTS.map((p) => `                  <li><a class="base${p.spot ? ' spot' : ''}" href="${pointHref(p)}" ${pointData(p)} data-tag="${p.tag}" style="--x: ${pct(p.x, FIELD.width)}; --y: ${pct(p.y, FIELD.height)}; --icon: ${iconOf(p)}"><span class="base-icon"></span><span class="base-text"><span class="base-label">${escape(p.label)}</span> <span class="base-name">${escape(p.name)}</span></span></a></li>`);
+  const legend = POINTS.map((p) => `          <li><a href="${pointHref(p)}" ${pointData(p)}><span class="base-icon" style="--icon: ${iconOf(p)}" aria-hidden="true"></span> <span class="map-name">${escape(p.name)}</span> <span class="map-label">${escape(p.label)}</span></a></li>`);
   // Crew sprites (coaches, teammates, pitcher): decoration only, so hidden from screen readers.
-  const crew = CREW.map((m) => `              <div class="sprite crew-sprite${m.flip ? ' is-flipped' : ''}" data-crew="${m.id}" style="--x: ${pct(m.x, FIELD.width)}; --y: ${pct(m.y, FIELD.height)}; --row: ${CREW_ROWS.indexOf(m.who)}"></div>`);
+  const crew = CREW.map((m) => `                  <div class="sprite crew-sprite${m.flip ? ' is-flipped' : ''}" data-crew="${m.id}" style="--x: ${pct(m.x, FIELD.width)}; --y: ${pct(m.y, FIELD.height)}; --row: ${CREW_ROWS.indexOf(m.who)}"></div>`);
   const covers = Object.fromEntries(await Promise.all(cases.map(async ({ data }) => [data.slug, { src: data.cover, ...(await imageSize(data.cover)) }])));
+  const nipotyno = bySlug.nipotyno;
+
   const panels = [
     `          <article class="panel-card" data-panel="home">
             <p class="kicker">Home plate · Start here</p>
-            <h3>Every base is a project</h3>
-            <p>Swing at the pitch for a home-run tour of my projects — or click or tap any base (or use the <kbd>←</kbd> <kbd>→</kbd> keys) and I'll run there. Start with my main project:</p>
-            <p><a class="button" href="/nipotyno/">${escape(shortName(bySlug.nipotyno))} — read the case study</a></p>
-            <p class="small">${escape(main.description)}</p>
+            <h3>Every point is a part of the portfolio</h3>
+            <p>Swing at the pitch for a home-run tour of my projects — or click or tap anything in the ballpark (or use the <kbd>←</kbd> <kbd>→</kbd> keys on the bases). Start with my main project:</p>
+            <p><a class="button" href="/nipotyno/" data-read>${escape(shortName(nipotyno))} — read the case study</a></p>
+            <p class="small">${escape(nipotyno.data.description)}</p>
           </article>`,
     ...cases.map(({ data }) => {
       const stop = STOPS.find((s) => s.id === data.slug);
       const cover = covers[data.slug];
+      const numbers = data.stats ? `<ul class="key-numbers" aria-label="Key numbers">${data.stats.split(' · ').map((n) => `<li>${escape(n)}</li>`).join('')}</ul>` : '';
       return `          <article class="panel-card" data-panel="${data.slug}" hidden>
             <img class="panel-cover" src="${cover.src}" alt="" width="${cover.width}" height="${cover.height}" loading="lazy" decoding="async">
             <p class="kicker">${escape(stop.label)} · ${escape(stop.name)}</p>
             <h3>${escape(shortName({ data }))}<span class="sub">${escape(subtitle({ data }))}</span></h3>
+            ${numbers}
+            <p class="card-links"><a class="button" href="/${data.slug}/" data-read>Read the case study<span class="visually-hidden">: ${escape(shortName({ data }))}</span> →</a> <a class="pdf-link" href="/pdf/${pdfName(data.slug)}">PDF<span class="visually-hidden"> of ${escape(shortName({ data }))}</span></a></p>
             <p>${escape(data.tldr)}</p>
             ${data.role ? `<p class="small"><strong>My role:</strong> ${escape(data.role)}</p>` : ''}
-            <p><a class="button" href="/${data.slug}/">Read the case study<span class="visually-hidden">: ${escape(shortName({ data }))}</span> →</a></p>
           </article>`;
     }),
     `          <article class="panel-card" data-panel="done" hidden>
@@ -314,24 +348,58 @@ async function diamond(cases) {
             </ul>
             <p><button class="button ghost" type="button" data-action="again">Take another swing</button></p>
           </article>`,
+    `          <article class="panel-card" data-panel="about" hidden>
+            <p class="kicker">Scoreboard · About</p>
+            <h3>Player stats</h3>
+            ${aboutSection(aboutParts, 'hi-im-riccardo')}
+            <h4>Studies</h4>
+            <ul class="card-list">${schools.map((s) => `<li>${escape(s)}</li>`).join('')}</ul>
+            <h4>Languages and status</h4>
+            <p>${escape(status)}</p>
+            <h4>Why baseball?</h4>
+            ${aboutSection(aboutParts, 'why-baseball')}
+            <h4>Toolbox</h4>
+            ${aboutSection(aboutParts, 'toolbox')}
+          </article>`,
+    `          <article class="panel-card" data-panel="how" hidden>
+            <p class="kicker">Pitcher's mound · How I design</p>
+            <h3>How I design</h3>
+            <h4>Principles</h4>
+            ${how.principles}
+            <h4>Three uniforms, three skill sets</h4>
+            ${how.uniforms}
+            <h4>Moodboard</h4>
+            ${how.moodboard}
+          </article>`,
+    `          <article class="panel-card" data-panel="contact" hidden>
+            <p class="kicker">Ticket booth · Contact &amp; CV</p>
+            <h3>Contact &amp; CV</h3>
+            <p>UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
+            <p class="small">${escape(status)}</p>
+            ${cvLinks()}
+          </article>`,
   ];
-  return `      <section id="field" class="field wrap wide" aria-labelledby="field-title">
-        <h2 id="field-title">Explore the ballpark</h2>
-        <p class="hint">A small game on top of the portfolio. <a href="#work">Prefer a list? Skip to the case studies</a></p>
-        <div class="field-layout">
+
+  return `      <section id="field" class="field" aria-labelledby="field-title">
+        <div class="field-head wrap wide">
+          <h2 id="field-title">Explore the ballpark</h2>
+          <p class="hint">A small game on top of the portfolio. <a href="#work">Prefer a list? Skip to the case studies</a></p>
+        </div>
+        <div class="ballpark">
           <div class="stage-col">
             <div class="stage">
               <div class="field-box">
                 <div class="world">
-                  <img class="field-img" src="/game/field.png" alt="Pixel-art baseball field. Each base links to a project." width="${FIELD.width}" height="${FIELD.height}">
+                  <img class="field-img" src="/game/field.png" alt="Pixel-art baseball stadium. Every base and point links to a part of the portfolio." width="${FIELD.width}" height="${FIELD.height}">
 ${crew.join('\n')}
                   <div class="sprite runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
                   <div class="ball" hidden></div>
                 </div>
-                <ul class="bases" aria-label="Bases">
-${bases.join('\n')}
+                <ul class="bases" aria-label="Stadium">
+${points.join('\n')}
                 </ul>
               </div>
+              <div class="swing-box" hidden><button class="button swing" type="button" data-action="swing"><span aria-hidden="true">⚾</span> Swing!</button></div>
               <p class="banner" aria-hidden="true" hidden>Home run!</p>
               <div class="tour-map" aria-hidden="true" hidden>
                 <span class="tour-diamond"><i data-corner="second"></i><i data-corner="third"></i><i data-corner="first"></i><i data-corner="home"></i></span>
@@ -340,62 +408,36 @@ ${bases.join('\n')}
             </div>
             <div class="game-bar" hidden>
               <div class="bar-row" data-mode="bat">
-                <button class="button swing" type="button" data-action="swing">Swing!</button>
-                <p class="bar-hint">Click or tap the field<span class="no-touch">, or press <kbd>Space</kbd>,</span> to hit the pitch — or click any base to explore.</p>
+                <p class="bar-hint"><strong>…or click anything in the ballpark.</strong><span class="no-touch"> Press <kbd>Space</kbd> to swing.</span></p>
               </div>
               <div class="bar-row" data-mode="tour" hidden>
                 <button class="link" type="button" data-action="free"><span aria-hidden="true">✕</span> Exit tour</button>
               </div>
               <div class="bar-row" data-mode="free" hidden>
                 <button class="button ghost" type="button" data-action="again">Take another swing</button>
-                <p class="bar-hint">Click or tap a base<span class="no-touch">, or use the <kbd>←</kbd> <kbd>→</kbd> keys</span>.</p>
+                <p class="bar-hint">Click or tap anything in the ballpark<span class="no-touch">, or use the <kbd>←</kbd> <kbd>→</kbd> keys on the bases</span>.</p>
               </div>
               <p class="bar-tools"><button class="link sound-toggle" type="button" data-action="sound" aria-pressed="false"><span aria-hidden="true">♪</span> Sound <span class="state" aria-hidden="true">off</span></button></p>
               <p class="visually-hidden" role="status"></p>
             </div>
           </div>
-          <div class="panel" id="field-panel" tabindex="-1">
+          <div class="panel" id="field-panel" tabindex="-1" role="region" aria-label="Card">
+            <button class="panel-close" type="button" data-action="close" hidden><span aria-hidden="true">✕</span> Close</button>
 ${panels.join('\n')}
           </div>
         </div>
+        <nav class="stadium-map wrap wide" aria-labelledby="map-title">
+          <h3 id="map-title">Stadium map</h3>
+          <ul>
+${legend.join('\n')}
+          </ul>
+        </nav>
       </section>`;
 }
 
-// Start screen "At bat": Riccardo at bat + uniform picker on one side, name/CV/contacts on the other.
-// Not a gate: everything a recruiter needs is here at once. The uniform switch is plain CSS
-// (radio + :has() in style.css); src/uniform.js only remembers the choice.
-function startScreen(cases, about, status) {
-  const nipotyno = cases.find((c) => c.data.slug === 'nipotyno');
-  const radios = UNIFORMS.map((u, i) => `            <label><input type="radio" name="uniform" id="u-${u.id}" value="${u.id}"${i === 0 ? ' checked' : ''}> ${u.label}</label>`);
-  return `      <section class="hero wrap wide" aria-labelledby="name">
-        <div class="intro">
-          <h1 id="name"><img class="pixel-title" src="/game/title.svg" alt="" width="128" height="8"><span class="visually-hidden">Riccardo Cirillo</span></h1>
-          <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
-          <p class="status-line">${escape(status)}</p>
-          <p class="motto">“${escape(about.data.motto)}”</p>
-          <ul class="actions">
-            <li><a class="button" href="/cv/CV_Riccardo_Cirillo_EN.pdf">Download CV (English, PDF)</a></li>
-            <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">CV en español (PDF)</a></li>
-            <li><a class="button ghost" href="mailto:${EMAIL}">${EMAIL}</a></li>
-          </ul>
-          <a class="start-here" href="/nipotyno/"><span class="kicker">Start here · Main case</span> <strong>${escape(shortName(nipotyno))} — ${escape(subtitle(nipotyno))}</strong></a>
-          <ul class="play">
-            <li class="play-ball"><a class="button" href="#field">Play ball! <span aria-hidden="true">→</span> <span class="small-label">explore the ballpark</span></a></li>
-            <li><a class="skip-list" href="#work">Skip → Case studies</a></li>
-          </ul>
-        </div>
-        <div class="at-bat">
-          <div class="batter" aria-hidden="true"></div>
-          <fieldset class="uniforms">
-            <legend>Pick my uniform</legend>
-${radios.join('\n')}
-          </fieldset>
-        </div>
-      </section>`;
-}
-
-// "How I design": principles (content/about.md), the skills of the chosen uniform, and the moodboard.
-function howIDesign(cases, principles) {
+// "How I design": principles (content/about.md), the three uniforms and their skills, the moodboard.
+// The pieces are used twice: in the section of the page (#how) and in the mound's card in the stadium (without ids).
+function howPieces(cases, principles) {
   const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const uniformCards = UNIFORMS.map((u) => {
     const c = bySlug[u.suggested];
@@ -405,35 +447,107 @@ function howIDesign(cases, principles) {
               <p>Suggested case: <a href="/${c.data.slug}/">${escape(shortName(c))} — ${escape(subtitle(c))}</a></p>
             </div>`;
   });
+  const uniforms = `<ul class="uniform-list">${UNIFORMS.map((u) => {
+    const c = bySlug[u.suggested];
+    return `<li><strong>${u.label}</strong> <span class="skills-inline">${u.skills.map(escape).join(' · ')}</span> <span class="small">Suggested first base: <a href="/${c.data.slug}/" data-read>${escape(shortName(c))}</a></span></li>`;
+  }).join('')}</ul>`;
   const swatches = ['navy', 'red', 'sky', 'grass', 'dirt', 'yellow'].map(
     (name) => `<li><span class="swatch" style="background: ${PALETTE[name]}"></span>${name} <code>${PALETTE[name]}</code></li>`,
   );
+  const moodboard = `<ul class="swatches" aria-label="Colour palette">${swatches.join('')}</ul>
+            <p><strong>Type:</strong> an original 5×7 pixel font for titles, a plain system font for reading.</p>
+            <p><strong>Mood:</strong> a day game — blue sky, green grass, 16-bit arcade. Style reference: <a href="https://ponywolf.com/retro-pixel-baseball">Retro Pixel Baseball by Ponywolf</a> (all art here is my own).</p>`;
+  return { principles, uniformCards: uniformCards.join('\n'), uniforms, moodboard };
+}
+
+function howIDesign(how) {
   return `      <section id="how" class="how wrap wide" aria-labelledby="how-title">
         <h2 id="how-title">How I design</h2>
         <div class="how-grid">
           <div class="how-block">
             <h3>Principles</h3>
-            ${principles}
+            ${how.principles}
           </div>
           <div class="how-block">
-${uniformCards.join('\n')}
+${how.uniformCards}
           </div>
           <div class="how-block moodboard">
             <h3>Moodboard</h3>
-            <ul class="swatches" aria-label="Colour palette">${swatches.join('')}</ul>
-            <p><strong>Type:</strong> an original 5×7 pixel font for titles, a plain system font for reading.</p>
-            <p><strong>Mood:</strong> a day game — blue sky, green grass, 16-bit arcade. Style reference: <a href="https://ponywolf.com/retro-pixel-baseball">Retro Pixel Baseball by Ponywolf</a> (all art here is my own).</p>
+            ${how.moodboard}
           </div>
         </div>
       </section>`;
 }
 
-async function homePage(cases, about, status) {
+// Lobby (first screen, not a gate): "Select your player" on one side, the player card (a short About) on the other.
+// Everything a recruiter needs is visible at once: name, role, Madrid and dates, status, CV EN/ES, email, Nipotyno.
+// The uniform switch is plain CSS (radio + :has() in style.css); src/uniform.js remembers it and adds ◀ ▶ on phones.
+// Numbers on the card come from content/facts.md and content/about.md, so they can never disagree with the CV.
+async function cardStats() {
+  const facts = await readFile(root('content/facts.md'), 'utf8');
+  const languages = facts.match(/^- Languages: (.+)$/m)?.[1].split(' · ').length;
+  const sus = facts.match(/SUS ([\d.]+)/)?.[1];
+  if (!languages || !sus) throw new Error('content/facts.md: Languages or the SUS score is missing');
+  return [['3', 'countries'], [String(languages), 'languages'], [sus, 'SUS · Nipotyno']];
+}
+
+function startScreen(cases, about, status, stats) {
+  const nipotyno = cases.find((c) => c.data.slug === 'nipotyno');
+  const bio = about.body.match(/## Hi, I'm Riccardo\n([^\n]+)/)?.[1];
+  if (!bio) throw new Error('content/about.md: the "Hi, I\'m Riccardo" paragraph is missing');
+  const suggested = (u) => STOPS.find((s) => s.id === u.suggested).name;
+  const tiles = UNIFORMS.map((u, i) => `            <label class="uniform-tile" style="--row: ${u.row}">
+              <input type="radio" name="uniform" id="u-${u.id}" value="${u.id}"${i === 0 ? ' checked' : ''} aria-labelledby="u-${u.id}-name" aria-describedby="u-${u.id}-desc">
+              <span class="portrait" aria-hidden="true"></span>
+              <span class="tile-name" id="u-${u.id}-name">${u.label}</span>
+              <span class="tile-desc" id="u-${u.id}-desc"><span class="tile-skills">${u.skills.slice(0, 3).map(escape).join(' · ')}</span> <span class="tile-suggest">Suggested first base: ${suggested(u)}</span></span>
+            </label>`);
+  const white = { color: PALETTE.white, shadow: PALETTE.navyDark };
+  return `      <section class="hero lobby wrap wide" aria-labelledby="name">
+        <div class="player-select">
+          <fieldset class="uniforms">
+            <legend><span class="pixel-heading" aria-hidden="true">${pixelText('Select your player', { color: PALETTE.yellow, shadow: PALETTE.red })}</span><span class="visually-hidden">Select your player</span></legend>
+            <div class="player-stage">
+              <button class="uniform-step" type="button" data-step="-1" hidden><span aria-hidden="true">◀</span><span class="visually-hidden">Previous uniform</span></button>
+              <div class="batter" aria-hidden="true"></div>
+              <button class="uniform-step" type="button" data-step="1" hidden><span aria-hidden="true">▶</span><span class="visually-hidden">Next uniform</span></button>
+            </div>
+            <div class="uniform-tiles">
+${tiles.join('\n')}
+            </div>
+          </fieldset>
+        </div>
+        <article class="player-card" aria-labelledby="name">
+          <header class="card-band">
+            <h1 id="name"><span class="pixel-name" aria-hidden="true">${pixelText('Riccardo Cirillo', white)}</span><span class="visually-hidden">Riccardo Cirillo</span></h1>
+          </header>
+          <div class="card-body">
+            <p class="headline">UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
+            <p class="status-line">${escape(status)}</p>
+            <p class="motto">“${escape(about.data.motto)}”</p>
+            <ul class="card-stats">${stats.map(([n, label]) => `<li><strong>${escape(n)}</strong> ${escape(label)}</li>`).join('')}</ul>
+            <p class="card-bio">${escape(bio)}</p>
+            <ul class="actions">
+              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_EN.pdf">Download CV (English, PDF)</a></li>
+              <li><a class="button ghost" href="/cv/CV_Riccardo_Cirillo_ES.pdf" hreflang="es" lang="es">CV en español (PDF)</a></li>
+              <li><a class="button ghost" href="mailto:${EMAIL}">${EMAIL}</a></li>
+            </ul>
+            <a class="start-here" href="/nipotyno/" data-read><span class="kicker">Start here · Main case</span> <strong>${escape(shortName(nipotyno))} — ${escape(subtitle(nipotyno))} <span aria-hidden="true">→</span></strong></a>
+          </div>
+        </article>
+        <p class="lobby-cta">
+          <a class="button enter" href="#field"><span aria-hidden="true">▶</span> Enter the ballpark</a>
+          <a class="skip-list" href="#work">Skip → Case studies</a>
+        </p>
+      </section>`;
+}
+
+async function homePage(cases, about, status, stats) {
   const cards = await Promise.all(
     cases.map(async ({ data }, i) => {
       const { width, height } = await imageSize(data.cover);
       return `<li class="case-card" id="${data.slug}">
-  <a href="/${data.slug}/">
+  <a href="/${data.slug}/" data-read>
     <img src="${data.cover}" alt="" width="${width}" height="${height}"${i > 1 ? ' loading="lazy"' : ''} decoding="async">
     <span class="kicker">${escape(data.base)} · ${escape(shortName({ data }))}</span>
     <h3>${escape(subtitle({ data }) || shortName({ data }))}</h3>
@@ -451,9 +565,10 @@ async function homePage(cases, about, status) {
     .replace(/<h2>/g, '<h3>').replace(/<\/h2>/g, '</h3>');
   const principles = aboutParts.find((part) => part.includes('id="how-i-design"')).match(/<ol>[\s\S]*<\/ol>/)[0];
 
-  const main = `${startScreen(cases, about, status)}
-${await diamond(cases)}
-${howIDesign(cases, principles)}
+  const how = howPieces(cases, principles);
+  const main = `${startScreen(cases, about, status, stats)}
+${await ballpark(cases, { aboutParts, how, status })}
+${howIDesign(how)}
       <section id="work" class="work wrap" aria-labelledby="work-title" tabindex="-1">
         <h2 id="work-title">Case studies</h2>
         <ul class="case-list">
@@ -464,6 +579,11 @@ ${cards.join('\n')}
         <h2 id="about-title">About me</h2>
         <p class="status-line">${escape(status)}</p>
 ${aboutHtml}
+      </section>
+      <section id="contact" class="contact wrap" aria-labelledby="contact-title">
+        <h2 id="contact-title">Contact &amp; CV</h2>
+        <p>UX Research &amp; Design intern · Madrid · Feb–Jul 2027</p>
+        ${cvLinks()}
       </section>`;
 
   return layout({
@@ -478,7 +598,7 @@ ${aboutHtml}
     scripts: [
       '<link rel="preload" as="image" href="/game/runner.png">',
       '<link rel="preload" as="image" href="/game/crew.png">',
-      '<script type="module" src="/src/diamond.js"></script>',
+      '<script type="module" src="/src/game.js"></script>',
       '<script type="module" src="/src/uniform.js"></script>',
     ].join('\n    '),
   });
@@ -489,7 +609,7 @@ export async function generate() {
   const cases = await Promise.all(CASES.map(load));
   const about = await load('about');
 
-  await writeFile(root('index.html'), await homePage(cases, about, await statusLine()));
+  await writeFile(root('index.html'), await homePage(cases, about, await statusLine(), await cardStats()));
   for (const [i, c] of cases.entries()) {
     await mkdir(root(c.data.slug), { recursive: true });
     await writeFile(root(`${c.data.slug}/index.html`), await casePage(c, i, cases));

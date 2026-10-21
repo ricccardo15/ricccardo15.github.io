@@ -6,6 +6,7 @@ description: "Short UX studies: a heuristic evaluation of a booking site, an iOS
 og_image: /assets/lab/heuristic.webp
 cover: /assets/lab/cover.webp
 tldr: "Smaller pieces of work that show how I look at interfaces: evaluation, platform guidelines and sketching."
+stats: "3 short studies"
 ---
 
 <!-- Each item = a card: image + 2 lines. -->

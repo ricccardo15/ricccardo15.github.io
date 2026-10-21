@@ -83,18 +83,18 @@ test.describe('Fase 1 art in the page', () => {
 
   test('the sprite sheets load at their real size and the big batter shows a 48 px frame', async ({ page, request }) => {
     await page.goto('/');
-    for (const [file, w, h] of [['field.png', 480, 270], ['runner.png', 720, 144], ['crew.png', 384, 192], ['icons.png', 120, 24]]) {
+    for (const [file, w, h] of [['field.png', 480, 270], ['runner.png', 720, 144], ['crew.png', 384, 192], ['icons.png', 192, 24]]) {
       const size = await page.evaluate((src) => new Promise((resolve) => { const i = new Image(); i.onload = () => resolve([i.naturalWidth, i.naturalHeight]); i.src = src; }), `/game/${file}`);
       expect(size, file).toEqual([w, h]);
     }
     const batter = await page.locator('.batter').boundingBox();
-    expect([batter.width, batter.height]).toEqual([48 * 4 + 4, 48 * 4 + 4]); // 4× at this width, plus the 2 px border
+    expect([batter.width, batter.height]).toEqual([48 * 5, 48 * 5]); // 5× in the lobby at this width
     expect((await request.get('/og/home.jpg')).status()).toBe(200);
   });
 
   test('the Uniform picked on the start screen shows on the field (a row of the 48 px sheet)', async ({ page }) => {
     await page.goto('/');
-    await page.getByText('Maker', { exact: true }).click();
+    await page.locator('.uniform-tiles').getByText('Maker', { exact: true }).click();
     const position = await page.locator('.runner').evaluate((el) => getComputedStyle(el).backgroundPositionY);
     expect(position).toBe(`${-48 * 2 * 2}px`); // row 2 at 2×
   });

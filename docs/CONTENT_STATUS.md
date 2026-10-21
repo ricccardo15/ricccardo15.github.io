@@ -10,6 +10,7 @@ Contact sheets of all images: `docs/assets-preview/`.
 | content/levante.md | ✅ final (7 images; personas AI-generated, labelled) | — |
 | content/housing.md | ✅ final (4 images) | — |
 | content/lab.md | ✅ final, 3 cards (colour observation and type study removed 21/10) | — |
+| `stats:` in each case's frontmatter | ✅ key numbers for the stadium cards, confirmed by Riccardo 21/10 (Nipotyno: "13 interviews · 6 testers · SUS 78.75", avoiding the open "6/6" question) | — |
 | content/about.md | ✅ final (motto by Riccardo) | — |
 | content/facts.md | ✅ single source of truth | — |
 | public/cv/*_ES.pdf | ⚠️ current version, replace after native review | — |

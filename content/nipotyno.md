@@ -6,6 +6,7 @@ description: "UX research and design of a guided, dual-screen assistant that hel
 og_image: /assets/nipotyno/home_05.webp
 cover: /assets/nipotyno/home_05.webp
 tldr: "Older adults in Italy must use online public services they find stressful. With a team of 4, I researched how they cope, co-designed two competing concepts and turned the winner into a dual-screen 'digital mentor'. In testing with 6 older adults, everyone completed both tasks; SUS 78.75 (Good)."
+stats: "13 interviews · 6 testers · SUS 78.75"
 role: "UX researcher & designer (team of 4)"
 team: "Riccardo Cirillo, Fabio Vito Papapicco, Andrea Ramaglia Bianchino, Ilaria Salami"
 context: "HCI Project — MSc Human-Computer Interaction and Design, Universidad Politécnica de Madrid"

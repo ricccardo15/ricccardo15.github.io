@@ -1,8 +1,9 @@
-// 24×24 icons for the stops on the field, in one strip of 120×24 (order = STOPS in src/field-map.js):
+// 24×24 icons for the points of the stadium, in one strip of 192×24 (order = STOPS, then SPOTS in src/field-map.js):
 //   home plate · Nipotyno (phone with the assistant) · Levante (sensor buoy) · Housing (house) · Lab (flask)
+//   · About (scoreboard) · How I design (pitcher's mound with a ball) · Contact & CV (a ticket)
 // Drawn with shapes in the site palette; every icon gets a 1 px dark outline so it reads on any background.
 import { canvas } from './canvas.js';
-import { STOPS } from '../../src/field-map.js';
+import { STOPS, SPOTS } from '../../src/field-map.js';
 
 const CELL = 24;
 
@@ -96,11 +97,48 @@ export const ICONS = {
     c.rect(ox + 4, 22, 16, 1, 'grey');
     c.line(ox + 10, 3, ox + 10, 7, 'white');
   },
+  // The scoreboard: lights, two rows of numbers, a red band (About = the player's stats).
+  about(c, ox) {
+    c.rect(ox + 2, 3, 20, 16, 'navy');
+    c.rect(ox + 2, 3, 20, 1, 'navyMid');
+    c.rect(ox + 4, 5, 16, 12, 'navyDark');
+    for (const x of [5, 9, 13, 17]) c.rect(ox + x, 6, 2, 2, x < 13 ? 'yellow' : 'greyDark');
+    c.rect(ox + 6, 10, 3, 4, 'white'); c.rect(ox + 7, 11, 1, 2, 'navyDark'); // a "0"
+    c.rect(ox + 11, 10, 1, 4, 'white'); // a "1"
+    c.rect(ox + 14, 10, 4, 1, 'white'); c.rect(ox + 17, 10, 1, 4, 'white'); // a "7"
+    c.rect(ox + 4, 15, 16, 1, 'red');
+    c.rect(ox + 11, 19, 2, 4, 'navy'); // the post
+    c.rect(ox + 7, 22, 10, 1, 'navy');
+  },
+  // The pitcher's mound with the rubber and a ball above it (How I design: where every play starts).
+  how(c, ox) {
+    ellipse(12, 18, 11, 4.5, (x, y) => c.set(ox + x, y, 'dirtDark'));
+    ellipse(12, 17, 10, 4, (x, y) => c.set(ox + x, y, 'dirt'));
+    ellipse(10, 16, 6, 2, (x, y) => c.set(ox + x, y, 'dirtLight'));
+    c.rect(ox + 9, 16, 6, 1, 'white');
+    ellipse(12, 7, 5, 5, (x, y) => c.set(ox + x, y, 'white')); // the ball
+    for (const [x, y] of [[9, 4], [9, 6], [9, 8], [10, 10], [15, 4], [15, 6], [15, 8], [14, 10]]) c.set(ox + x, y, 'red'); // stitches
+    c.set(ox + 10, 4, 'greyLight'); c.set(ox + 11, 3, 'greyLight');
+  },
+  // A ticket with a perforated stub (Contact & CV: the ticket booth).
+  contact(c, ox) {
+    c.rect(ox + 1, 6, 22, 12, 'yellow');
+    c.rect(ox + 1, 6, 22, 1, 'white');
+    c.rect(ox + 1, 17, 22, 1, 'dirt');
+    for (let y = 7; y < 17; y += 2) c.set(ox + 16, y, 'dirtDark'); // perforation
+    c.rect(ox + 3, 9, 11, 2, 'red'); // "ADMIT ONE"
+    c.rect(ox + 3, 12, 8, 1, 'dirtDark');
+    c.rect(ox + 3, 14, 10, 1, 'dirtDark');
+    c.rect(ox + 18, 10, 3, 4, 'red'); // the stub's number
+    c.set(ox + 1, 11, 'navyDark'); c.set(ox + 1, 12, 'navyDark'); // notches
+    c.set(ox + 22, 11, 'navyDark'); c.set(ox + 22, 12, 'navyDark');
+  },
 };
 
 export async function icons(out) {
-  const c = canvas(CELL * STOPS.length, CELL);
-  STOPS.forEach((stop, i) => {
+  const points = [...STOPS, ...SPOTS];
+  const c = canvas(CELL * points.length, CELL);
+  points.forEach((stop, i) => {
     ICONS[stop.id](c, i * CELL);
     c.outline('navyDark', { x: i * CELL, y: 0, w: CELL, h: CELL });
   });

@@ -61,7 +61,7 @@ for (const width of [1280, 390]) {
     test('reduced motion: nothing keeps moving', async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/');
-      await page.getByText('Designer', { exact: true }).click(); // would make the batter swing
+      await page.locator('.uniform-tiles').getByText('Designer', { exact: true }).click(); // would make the batter swing
       await page.getByRole('button', { name: 'Swing!' }).click();
       await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
       await page.waitForTimeout(100);

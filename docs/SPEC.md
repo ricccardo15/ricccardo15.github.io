@@ -25,6 +25,7 @@ Draft prepared in the "Internship" project. Open points are marked **[OPEN]**: i
 
 ## 3. Scenes
 ### 3.1 Start — "At bat" (home plate)
+> **Decided (Fase 2, 21/10): the lobby is the first screen, never a gate.** Left: "SELECT YOUR PLAYER" in a clubhouse (pixel lockers, public/game/lobby.png), the batter at 5× on a home plate, 3 character tiles (portrait, name, 3 skills, "Suggested first base"; ▶ cursor on the chosen one). Right: the player card = a short About (pixel name, role, motto, status line, `3 countries · 3 languages · SUS 78.75`, 2-line bio, CV EN/ES, email, "Start here: Nipotyno"); its colour follows the uniform. One main button **▶ Enter the ballpark** + "Skip → Case studies". Phone: card first, then the button, then the player with ◀ ▶.
 - **Left:** Riccardo's pixel character as the batter, big, in the foreground. Choose a **uniform** (Researcher / Designer / Maker); each uniform highlights a skill set. **Decided (B5):** the uniform changes the look (palette swap + accessory: lens / yellow pencil / wrench), the skills shown and a suggested case — never the order of the cases.
 - **Right:** "How I design" panel: 3-line intro, 3 design principles, moodboard (palette, type, references), download CV (EN / ES), contacts.
 - Buttons: **Play ball!** → field. **Skip → Case studies** (list view), always visible.
@@ -37,11 +38,15 @@ Draft prepared in the "Internship" project. Open points are marked **[OPEN]**: i
 | 2nd base | **Levante** |
 | 3rd base | **Student housing research** |
 | Dugout | **Lab** (short works) |
-| (Dec) Bullpen / scoreboard | Multisensory — later |
+| Scoreboard | **About** — player stats: bio, studies, languages and status, why baseball, toolbox (Fase 2) |
+| Pitcher's mound | **How I design** — principles, the 3 uniforms and their skills, moodboard (Fase 2) |
+| Ticket booth | **Contact & CV** — email, CV EN/ES (Fase 2) |
+| (Dec) Bullpen | Multisensory — later (drawn, not clickable) |
 
 Running the bases = the design process. Arriving on a base opens that case study.
 
 ### 3.3 Case study (on a base)
+> **Decided (Fase 2):** every point opens its card **over the stadium** (desktop: drawer on the right ≈400 px, the "camera" slides the field so the point stays visible; phone: under the stage, which stays on screen) with ✕ Close, Esc, focus back to the point. Case cards: cover, title, key numbers (`stats` in the case's frontmatter), **Read the case study** + PDF, then TL;DR and role (the tour controls sit right under Read). "Read the case study" opens the real page in a full-screen **reader** dialog (pause-menu band with the pixel name and "✕ Back to the ballpark"); the address becomes /nipotyno/, Back or Esc closes it; without JS it is a normal link. Case pages start with the same pixel band.
 - HTML panel over the game, pixel frame, normal readable text, scrollable.
 - Same structure for every case ("innings"): **Problem → Research → Ideas → Prototype → Test → Result → My role / team**.
 - "◀ Back to the ballpark · 1st base" (and "All case studies") at the top of every case page return to the same base / to the list. Deep link per case (`#nipotyno`, `#levante`, `#housing`, `#lab`).

@@ -83,7 +83,8 @@ test.describe('0.7 case pages', () => {
     test(`/${slug}/: the link goes back to the ballpark (${label}), another one to the list`, async ({ page }) => {
       await page.goto(`/${slug}/`);
       const crumb = page.locator('.crumb');
-      await expect(crumb.getByRole('link', { name: `Back to the ballpark · ${label}` })).toHaveAttribute('href', `/#${slug}`);
+      // Fase 2: the way back is in the pixel band on top of the page
+      await expect(page.locator('.case-band').getByRole('link', { name: `Back to the ballpark · ${label}` })).toHaveAttribute('href', `/#${slug}`);
       await expect(crumb.getByRole('link', { name: 'All case studies' })).toHaveAttribute('href', '/#work');
       await expect(crumb).not.toContainText('← All case studies');
     });

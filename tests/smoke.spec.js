@@ -90,15 +90,15 @@ test.describe('phone (390 px): simplified touch field', () => {
     await page.goto('/');
     for (const locator of [
       page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
-      page.getByRole('link', { name: 'Download CV (English, PDF)' }),
-      page.getByRole('link', { name: 'CV en español (PDF)' }),
+      page.locator('.player-card').getByRole('link', { name: 'Download CV (English, PDF)' }),
+      page.locator('.player-card').getByRole('link', { name: 'CV en español (PDF)' }),
       page.locator('.hero a[href^="mailto:"]'),
-      page.getByRole('link', { name: /^Start here/ }),
+      page.locator('.player-card').getByRole('link', { name: /^Start here/ }),
     ]) {
       await expect(locator).toBeInViewport();
     }
     await expect(page.locator('#field')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Play ball!' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Enter the ballpark' })).toBeVisible();
   });
 
   test('field at 1× (480×270, sharp pixels, cropped by the stage), touch bases at least 24 px high', async ({ page }) => {
@@ -125,7 +125,7 @@ test.describe('phone (390 px): simplified touch field', () => {
       await expect(page.locator('#field')).toBeInViewport();
       await panel(page).getByRole('link', { name: /Read the case study/ }).click();
       await expect(page).toHaveURL(new RegExp(`/${slug}/$`));
-      await expect(page.locator('h1')).toBeVisible();
+      await expect(page.locator('dialog.reader article.case h1')).toBeVisible(); // Fase 2: the case opens in the reader
     }
   });
 });
@@ -155,11 +155,11 @@ test.describe('desktop (1280 px): the ballpark', () => {
     for (const locator of [
       page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
       page.getByText('UX Research & Design intern · Madrid · Feb–Jul 2027').first(),
-      page.getByRole('link', { name: 'Download CV (English, PDF)' }),
-      page.getByRole('link', { name: 'CV en español (PDF)' }),
+      page.locator('.player-card').getByRole('link', { name: 'Download CV (English, PDF)' }),
+      page.locator('.player-card').getByRole('link', { name: 'CV en español (PDF)' }),
       page.locator('.hero a[href^="mailto:"]'),
-      page.getByRole('link', { name: /^Start here/ }),
-      page.getByRole('link', { name: 'Play ball!' }),
+      page.locator('.player-card').getByRole('link', { name: /^Start here/ }),
+      page.getByRole('link', { name: 'Enter the ballpark' }),
       page.getByRole('link', { name: 'Skip → Case studies' }),
       page.getByRole('radio', { name: 'Researcher' }),
     ]) {
@@ -199,6 +199,7 @@ test.describe('desktop (1280 px): the ballpark', () => {
     // the address is replaced when a base is clicked (never added to): one Back press goes to the page before
     await page.goto('/lab/');
     await page.goto('/#housing');
+    await page.keyboard.press('Escape'); // the card opened by the deep link covers 1st base: close it
     await page.locator('.base[data-stop="nipotyno"]').click();
     await expect(page).toHaveURL(/#nipotyno$/);
     await page.goBack();
@@ -231,7 +232,7 @@ test.describe('Start screen: uniforms', () => {
     await expect(card(page)).toHaveCount(1);
     await expect(card(page)).toHaveAttribute('data-uniform', 'researcher');
 
-    await page.getByText('Maker', { exact: true }).click();
+    await page.locator('.uniform-tiles').getByText('Maker', { exact: true }).click();
     await expect(card(page)).toHaveAttribute('data-uniform', 'maker');
     await expect(card(page)).toContainText('Arduino');
     await expect(card(page).getByRole('link')).toHaveAttribute('href', '/levante/');
@@ -256,9 +257,9 @@ test.describe('Start screen: uniforms', () => {
     expect(outline).not.toBe('none');
   });
 
-  test('Play ball! goes to the field, Skip goes to the list', async ({ page }) => {
+  test('Enter the ballpark goes to the field, Skip goes to the list', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Play ball!' }).click();
+    await page.getByRole('link', { name: 'Enter the ballpark' }).click();
     await expect(page.locator('#field')).toBeInViewport();
     await page.goto('/');
     await page.getByRole('link', { name: 'Skip → Case studies' }).click();

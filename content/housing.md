@@ -6,6 +6,7 @@ description: "Qualitative research with international master's students in Madri
 og_image: /assets/housing/wireflow-contract-pay.webp
 cover: /assets/housing/wireflow-filters-visit.webp
 tldr: "UPM has no student residences, so international students face Madrid's rental market alone — with scams, language barriers and little time. With a team of 6, we interviewed 6 students, coded 615 sentences into 441 codes and 6 themes, built personas, and co-designed a wireflow for a safer search, visit and contract flow."
+stats: "6 interviews · 615 sentences coded · 6 themes"
 role: "UX researcher & co-designer (team of 6)"
 team: "Riccardo Cirillo, Nasim Roshan Ghorbani Elizeh, Fabio Vito Papapicco, Andrea Ramaglia Bianchino, Ilaria Salami, Lakmi Weerapperuma"
 context: "HCI: Introduction and Design Methods + Ethics for User Research — Universidad Politécnica de Madrid"

@@ -6,6 +6,7 @@ description: "Service and dashboard design for an edge-AI buoy that detects bact
 og_image: /assets/levante/dashboard.webp
 cover: /assets/levante/buoy-0.webp
 tldr: "Today it takes 24–48 hours to confirm that bathing water is contaminated. In a one-week EIT Digital challenge, our team of 6 designed Levante: a solar-powered sensing buoy with edge AI plus a monitoring service. I researched the rules, co-created personas and journeys, and designed the monitoring dashboard."
+stats: "~48 h → ~3 h (concept) · team of 6 · grade 9/10"
 role: "UX & service designer — designed the monitoring dashboard (team of 6)"
 team: "Team of 6"
 context: "EIT Digital Summer School 2026 · ISEN Méditerranée, France · Challenge 4 \"The Invisible Contamination\""

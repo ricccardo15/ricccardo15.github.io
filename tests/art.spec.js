@@ -18,7 +18,7 @@ test('palette has exactly 24 colours (16 + 8 added for the 480×270 art)', () =>
   expect(allowed.size).toBe(24);
 });
 
-for (const [file, size] of [['field.png', [480, 270]], ['runner.png', [720, 144]], ['crew.png', [384, 192]], ['icons.png', [120, 24]]]) {
+for (const [file, size] of [['field.png', [480, 270]], ['runner.png', [720, 144]], ['crew.png', [384, 192]], ['icons.png', [192, 24]], ['lobby.png', [200, 150]]]) {
   test(`${file}: ${size.join('×')} and only palette colours`, async () => {
     const { found, info } = await colours(`public/game/${file}`);
     expect([info.width, info.height]).toEqual(size);
