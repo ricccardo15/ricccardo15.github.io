@@ -460,14 +460,17 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
 .bar-hint { margin: 0; font-size: .9375rem; color: var(--muted); }
 .game-bar .button { padding: .4rem .8rem; font-size: 1rem; }
-.swing-box { position: absolute; z-index: 5; left: calc(50% - 20px * var(--fs)); bottom: 6px; transform: translateX(-50%); }
+.swing-box { position: absolute; z-index: 5; left: calc(50% - 60px * var(--fs)); bottom: 6px; transform: translateX(-50%); } /* under and left of home plate: clear of the Home plate and Lab labels, even with wider fonts */
 @media (max-width: 999px) {
-  .swing-box { left: auto; right: 8px; bottom: 6px; transform: none; } /* bottom-right: only grass and the bullpen there */
+  .swing-box { left: 8px; top: 8px; bottom: auto; transform: none; } /* top-left, over the stands: no point there, whatever the crop or the font */
 }
 .swing { padding: .35rem .9rem; border: 3px solid var(--navyDark, #0f1a30); border-radius: 4px; background: var(--red); color: #fff; font-size: 1.125rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; box-shadow: 3px 3px 0 #0f1a30; }
 .swing:hover { background: var(--navy); color: #fff; }
 @media (max-width: 999px) {
   .swing { padding: .2rem .6rem; font-size: .9375rem; }
+}
+@media (max-width: 359px) {
+  .swing { padding: .15rem .45rem; font-size: .8125rem; } /* the smallest phones: stays clear of the scoreboard icon */
 }
 button.link { padding: 0; border: 0; background: none; color: var(--navy); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
 button.link:hover { color: var(--red); }
