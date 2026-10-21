@@ -13,7 +13,8 @@ import { atBat } from './batting.js';
 import { sound } from './sound.js';
 import { createTour } from './tour.js';
 import { createSpots } from './spots.js';
-import './reader.js'; // the case reader (its popstate runs first and marks the events it handles)
+import './reader.js';
+import { T } from './strings.js'; // the sentences in the page's language // the case reader (its popstate runs first and marks the events it handles)
 
 const stage = document.querySelector('.stage');
 const field = document.querySelector('#field');
@@ -51,6 +52,9 @@ function start() {
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const say = (text) => { status.textContent = text; };
+  // Names and labels as written on the page (already in its language): "Levante", "2nd base".
+  const textOf = (attr, id, part) => field.querySelector(`.base[data-${attr}="${id}"] .base-${part}`).textContent;
+  const nameOf = (id) => textOf('stop', id, 'name');
 
   const place = ({ x, y }) => {
     runner.style.setProperty('--x', `${(Math.round(x) / FIELD.width) * 100}%`);
@@ -144,7 +148,7 @@ function start() {
   // Replace (never add) the history entry, so the address can be shared and one Back press leaves the page.
   const setHash = (id) => { if (location.hash !== `#${id}`) history.replaceState({ stop: id }, '', `#${id}`); };
 
-  const tour = createTour({ stage, panel, bar, runner, crew, crewAt, byId, reduceMotion, sound, sleep, say, setHash, runTo });
+  const tour = createTour({ stage, panel, bar, runner, crew, crewAt, byId, nameOf, reduceMotion, sound, sleep, say, setHash, runTo });
 
   function setMode(next) {
     if (mode === 'bat' && next !== 'bat') batting.stop();
@@ -166,7 +170,7 @@ function start() {
 
   function batUp() {
     setMode('bat');
-    say('At bat. Swing to hit the pitch.');
+    say(T.atBat);
     runTo('home', { panelId: null }).then(() => {
       if (mode !== 'bat') return;
       runner.classList.remove('is-flipped');
@@ -190,7 +194,7 @@ function start() {
     if (mode !== 'free') setMode('free');
     setHash(id);
     const arrived = runTo(id);
-    const note = `${wasTour ? 'Tour ended. Free mode. ' : ''}${byId[id].name}, ${byId[id].label}.`;
+    const note = `${wasTour ? `${T.tourEnded} ` : ''}${nameOf(id)}, ${textOf('stop', id, 'label')}.`;
     arrived.then(() => say(note));
     if (focus === 'base') links.find((l) => l.dataset.stop === id).focus();
     else arrived.then(() => panel.focus({ preventScroll: true }));
@@ -210,7 +214,7 @@ function start() {
     if (wasTour) setMode('free');
     opener = from;
     showPanel(id);
-    say(`${wasTour ? 'Tour ended. Free mode. ' : ''}${spotById[id].name}.`);
+    say(`${wasTour ? `${T.tourEnded} ` : ''}${textOf('spot', id, 'name')}.`);
     panel.focus({ preventScroll: true });
   }
   createSpots({ field, openSpot });
@@ -225,12 +229,12 @@ function start() {
     else if (action === 'back' && mode === 'tour') tour.back();
     else if (action === 'sound') { sound.set(!sound.on); showSound(); }
     else if (action === 'close') {
-      if (mode === 'tour') { setMode('free'); say('Tour ended. Free mode.'); }
+      if (mode === 'tour') { setMode('free'); say(T.tourEnded); }
       closePanel();
     }
     else if (action === 'free') {
       setMode('free');
-      say('Tour ended. Free mode.');
+      say(T.tourEnded);
       refocus(links.find((l) => l.dataset.stop === current));
     } else if (action === 'again') {
       closePanel({ focus: false });
@@ -279,7 +283,7 @@ function start() {
       go(STOPS[(index + dir + STOPS.length) % STOPS.length].id, { focus: 'base' });
     } else if (event.key === 'Escape' && !panel.hidden) {
       // Esc closes the card; in the tour that also ends it (without its card there are no tour controls).
-      if (mode === 'tour') { setMode('free'); say('Tour ended. Free mode.'); }
+      if (mode === 'tour') { setMode('free'); say(T.tourEnded); }
       history.replaceState(null, '', location.pathname + location.search);
       closePanel();
     }
@@ -317,7 +321,7 @@ function start() {
   const soundToggle = bar.querySelector('[data-action="sound"]');
   const showSound = () => {
     soundToggle.setAttribute('aria-pressed', String(sound.on));
-    soundToggle.querySelector('.state').textContent = sound.on ? 'on' : 'off';
+    soundToggle.querySelector('.state').textContent = sound.on ? T.on : T.off;
   };
   showSound();
   bar.hidden = false;

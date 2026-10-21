@@ -16,7 +16,7 @@ tools: "6W planning, semi-structured interviews, contextual inquiry, informed co
 
 <!-- Sources: HCI_FinalReport_Accomodation.pdf, USER INTERACTION sketches (co-designed, confirmed 20/10). -->
 
-## TL;DR
+## TL;DR {#tl-dr}
 UPM has no dormitories, so international students must find a room in Madrid's private market — fast, often in another language, and with real risk of scams. We interviewed 6 students, coded **615 sentences into 441 codes, 57 categories and 6 themes**, defined personas and tasks, and designed a **safer search → visit → contract** flow.
 
 ## My role

@@ -16,7 +16,7 @@ tools: "Interviews, observation, personas, task model, Figma, think-aloud testin
 
 <!-- Sources: HCI Project reports 4, 5, 6, 7 (credits tables). Interviews and business plan: team work (confirmed by Riccardo 20/10). -->
 
-## TL;DR
+## TL;DR {#tl-dr}
 Older adults in Italy are pushed to book medical visits (CUP) and pay public bills (pagoPA) online, and many depend on their children to do it. With a team of 4, I researched how they cope, we designed two competing concepts and evolved the winner into a dual-screen "digital mentor". **6/6 participants completed both tasks · SUS 78.75 (Good) · all 6 UEQ scales Good or Excellent.**
 
 ## My role

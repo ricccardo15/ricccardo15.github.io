@@ -3,11 +3,12 @@
 // button ("Next base: Levante →") and a small "◀ Back"; the diamond in the corner shows the bases visited.
 // With reduced motion there is no zoom and no animation: the tour is the same, just still.
 import { FIELD, TOUR } from './field-map.js';
+import { T, fill } from './strings.js';
 
 const MOMENT = 2000; // zoom + high five / cheer / wave (ms)
 const PROJECTS = TOUR.filter((s) => !s.panel).length; // stops that count in "2 of 4"
 
-// ctx (from game.js): stage, panel, bar, runner, crew, crewAt, byId, reduceMotion, sound, sleep, say, setHash, runTo
+// ctx (from game.js): stage, panel, bar, runner, crew, crewAt, byId, nameOf, reduceMotion, sound, sleep, say, setHash, runTo
 export function createTour(ctx) {
   const { stage, panel, bar, runner, crew, crewAt, byId, reduceMotion, sound } = ctx;
   const map = stage.querySelector('.tour-map');
@@ -19,7 +20,7 @@ export function createTour(ctx) {
   let run = 0;
   let visited = new Set();
 
-  const stopName = (s) => byId[s.stop].name;
+  const stopName = (s) => ctx.nameOf(s.stop);
 
   // Zoom 2× on a point (field pixels), kept inside the field.
   function zoomOn({ x, y }) {
@@ -58,8 +59,9 @@ export function createTour(ctx) {
       el.classList.toggle('is-visited', visited.has(el.dataset.corner));
       el.classList.toggle('is-current', el.dataset.corner === s.corner);
     }
-    count.textContent = s.panel ? 'Tour complete' : `${i + 1} of ${PROJECTS} · ${stopName(s)}`;
-    ctx.say(s.panel ? 'Tour complete.' : `Tour ${i + 1} of ${PROJECTS}: ${stopName(s)}.`);
+    const values = { i: i + 1, n: PROJECTS, name: s.panel ? '' : stopName(s) };
+    count.textContent = s.panel ? T.tourDone : fill(T.count, values);
+    ctx.say(s.panel ? `${T.tourDone}.` : fill(T.countSay, values));
   }
 
   function clearNav() {
@@ -78,7 +80,7 @@ export function createTour(ctx) {
       next.type = 'button';
       next.className = 'button';
       next.dataset.action = 'next';
-      next.append(i === TOUR.length - 2 ? 'Finish the tour ' : `Next base: ${stopName(TOUR[i + 1])} `);
+      next.append(`${i === TOUR.length - 2 ? T.finish : fill(T.nextBase, { name: stopName(TOUR[i + 1]) })} `);
       next.insertAdjacentHTML('beforeend', '<span aria-hidden="true">→</span>');
       nav.append(next);
     }
@@ -87,7 +89,8 @@ export function createTour(ctx) {
       back.type = 'button';
       back.className = 'link';
       back.dataset.action = 'back';
-      back.innerHTML = '<span aria-hidden="true">◀</span> Back';
+      back.innerHTML = '<span aria-hidden="true">◀</span> ';
+      back.append(T.back);
       nav.append(back);
     }
     const card = panel.querySelector(`[data-panel="${s.panel ?? s.stop}"]`);

@@ -9,7 +9,8 @@ test.describe('0.3 accessibility', () => {
     test(`${path}: every link to the Spanish CV says lang="es"`, async ({ page }) => {
       await page.goto(path);
       const links = page.locator('a[href$="CV_Riccardo_Cirillo_ES.pdf"]');
-      expect(await links.count()).toBeGreaterThanOrEqual(2);
+      // Fase 3: the header shows only the CV of the page's language, so a case page has the Spanish CV in the footer only.
+      expect(await links.count()).toBeGreaterThanOrEqual(path === '/' ? 2 : 1);
       for (const link of await links.all()) await expect(link).toHaveAttribute('lang', 'es');
     });
   }

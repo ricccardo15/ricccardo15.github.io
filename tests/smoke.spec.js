@@ -6,7 +6,9 @@ const viewports = [
   { name: 'desktop', width: 1280, height: 800 },
   { name: 'mobile', width: 390, height: 844 },
 ];
-const pages = ['/', '/nipotyno/', '/levante/', '/housing/', '/lab/'];
+// Every page in every language (Fase 3): /, /es/, /it/ and their cases.
+const homes = ['/', '/es/', '/it/'];
+const pages = homes.flatMap((home) => [home, ...['nipotyno', 'levante', 'housing', 'lab'].map((slug) => `${home}${slug}/`)]);
 
 for (const vp of viewports) {
   for (const path of pages) {
@@ -27,7 +29,7 @@ for (const vp of viewports) {
 
         // Load lazy images too, so the full-page screenshot shows them.
         await page.evaluate(() => Promise.all([...document.images].map((img) => { img.loading = 'eager'; return img.decode().catch(() => {}); })));
-        const slug = path === '/' ? 'home' : path.replaceAll('/', '');
+        const slug = path === '/' ? 'home' : path.slice(1, -1).replaceAll('/', '-'); // es-nipotyno
         await page.screenshot({ path: `tests/screenshots/${slug}-${vp.width}.png`, fullPage: true });
       });
 
@@ -63,7 +65,7 @@ test('CV files are served', async ({ request }) => {
   }
 });
 
-for (const path of pages.filter((p) => p !== '/')) {
+for (const path of pages.filter((p) => !homes.includes(p))) {
   test(`${path} has Open Graph tags and every image loads`, async ({ page, request }) => {
     await page.goto(path);
     for (const prop of ['og:title', 'og:description', 'og:url', 'og:image']) {

@@ -5,7 +5,12 @@
 // so a reload opens the normal static page (Open Graph, PDF and all). Esc, ✕ or the browser Back close it:
 // the focus goes back to the link that opened it and the page is where it was.
 // Without JS, or if the page cannot be fetched, the link simply navigates.
+import { T } from './strings.js';
+
 const PREFIX = 'reader-'; // ids inside the dialog get it, so no id is ever duplicated in the page
+// The home of this language (/, /es/, /it/) = where the name in the header leads; case pages are /es/nipotyno/ etc.
+const HOME = new URL(document.querySelector('.brand')?.href ?? '/', location.href).pathname;
+const CASE_PATH = new RegExp(`^${HOME}[a-z]+/$`);
 
 let dialog = null;
 let origin = null; // the link that opened the reader
@@ -18,10 +23,11 @@ function build() {
   dialog.innerHTML = `<div class="reader-band case-band">
       <div class="wrap band-row">
         <span class="reader-name"></span>
-        <button class="reader-close" type="button"><span aria-hidden="true">✕</span> Back to the ballpark</button>
+        <button class="reader-close" type="button"><span aria-hidden="true">✕</span> </button>
       </div>
     </div>
     <div class="reader-body"></div>`;
+  dialog.querySelector('.reader-close').append(T.backToBallpark);
   document.body.append(dialog);
   dialog.querySelector('.reader-close').addEventListener('click', () => history.back());
   // Esc: the dialog would close itself; go back in the history instead, popstate closes it.
@@ -87,7 +93,7 @@ async function onLinkInside(event) {
   if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   const url = new URL(link.href, location.href);
   if (url.origin !== location.origin) return;
-  if (link.closest('.pager') && /^\/[a-z]+\/$/.test(url.pathname)) {
+  if (link.closest('.pager') && CASE_PATH.test(url.pathname)) {
     event.preventDefault();
     try {
       fill(await load(url.pathname));
@@ -96,7 +102,7 @@ async function onLinkInside(event) {
     } catch {
       location.href = url.pathname;
     }
-  } else if (url.pathname === '/' && url.hash) {
+  } else if (url.pathname === HOME && url.hash) {
     event.preventDefault();
     const target = url.hash.slice(1);
     history.back(); // closes the reader

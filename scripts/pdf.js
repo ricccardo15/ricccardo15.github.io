@@ -1,5 +1,5 @@
 // Case-study PDFs: after `vite build`, open each case page from dist/ in Chromium (the browser of the tests)
-// and print it with the print CSS of src/style.css → dist/pdf/Riccardo_Cirillo_<Case>.pdf
+// and print it with the print CSS of src/style.css → dist/pdf/Riccardo_Cirillo_<Case>.pdf (+ _ES, _IT for /es/, /it/)
 // Runs as part of `npm run build`. Manual run (after a build): node scripts/pdf.js
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import sharp from 'sharp';
 import { CASES, pdfName } from './pages.js';
+import { LANGS, PREFIX } from '../src/i18n.js';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json' };
@@ -37,13 +38,14 @@ try {
       .flatten({ background: '#ffffff' }).jpeg({ quality: 74 }).toBuffer();
     await route.fulfill({ response, body, headers: { ...response.headers(), 'content-type': 'image/jpeg' } });
   });
-  for (const slug of CASES) {
-    await page.goto(`${base}/${slug}/`, { waitUntil: 'load' });
+  const jobs = LANGS.flatMap((lang) => CASES.map((slug) => ({ slug, lang })));
+  for (const { slug, lang } of jobs) {
+    await page.goto(`${base}${PREFIX[lang]}/${slug}/`, { waitUntil: 'load' });
     // Lazy images: load them all before printing.
     await page.evaluate(() => Promise.all([...document.images].map((img) => { img.loading = 'eager'; return img.decode().catch(() => {}); })));
-    await page.pdf({ path: join(dist, 'pdf', pdfName(slug)), preferCSSPageSize: true, printBackground: true });
+    await page.pdf({ path: join(dist, 'pdf', pdfName(slug, lang)), preferCSSPageSize: true, printBackground: true });
   }
-  console.log(`✓ PDFs: ${CASES.map(pdfName).join(', ')}`);
+  console.log(`✓ PDFs: ${jobs.map(({ slug, lang }) => pdfName(slug, lang)).join(', ')}`);
 } finally {
   await browser.close();
   server.close();

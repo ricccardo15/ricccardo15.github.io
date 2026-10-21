@@ -1,4 +1,4 @@
-// Original 5×7 pixel font (A–Z, 0–9, ! & · - –), drawn here letter by letter: no third-party font.
+// Original 5×7 pixel font (A–Z, 0–9, ! & · - –, accented letters for ES/IT), drawn here letter by letter: no third-party font.
 // pixelText() returns an SVG: bold navy letters (each pixel doubled sideways) with a red drop shadow, sharp at any size.
 import { writeFile } from 'node:fs/promises';
 import { PALETTE } from '../../src/palette.js';
@@ -46,6 +46,20 @@ export const GLYPHS = {
   '·': '.....|.....|.....|..#..|.....|.....|.....',
   '-': '.....|.....|.....|.###.|.....|.....|.....',
   '–': '.....|.....|.....|.###.|.....|.....|.....',
+  // Spanish and Italian (Fase 3): the accent on the top row, the letter shortened to 5 rows under it.
+  Á: '...#.|.....|.###.|#...#|#####|#...#|#...#',
+  É: '...#.|.....|#####|#....|####.|#....|#####',
+  Í: '...#.|.....|#####|..#..|..#..|..#..|#####',
+  Ó: '...#.|.....|.###.|#...#|#...#|#...#|.###.',
+  Ú: '...#.|.....|#...#|#...#|#...#|#...#|.###.',
+  À: '.#...|.....|.###.|#...#|#####|#...#|#...#',
+  È: '.#...|.....|#####|#....|####.|#....|#####',
+  Ì: '.#...|.....|#####|..#..|..#..|..#..|#####',
+  Ò: '.#...|.....|.###.|#...#|#...#|#...#|.###.',
+  Ù: '.#...|.....|#...#|#...#|#...#|#...#|.###.',
+  Ñ: '.##.#|#..#.|#...#|##..#|#.#.#|#..##|#...#',
+  '¿': '..#..|.....|..#..|.#...|#....|#...#|.###.',
+  '¡': '..#..|.....|..#..|..#..|..#..|..#..|..#..',
 };
 
 export function pixelText(text, { color = PALETTE.navy, shadow = PALETTE.red } = {}) {

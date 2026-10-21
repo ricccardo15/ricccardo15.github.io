@@ -56,8 +56,9 @@ for (const { width, height } of [{ width: 390, height: 844 }, { width: 320, heig
   test.describe(`bases @ ${width}×${height}`, () => {
     test.use({ viewport: { width, height } });
 
-    test('every base label is completely inside the visible field, and no two labels overlap', async ({ page }) => {
-      await page.goto('/');
+    // In every language (Fase 3): the Spanish and Italian labels are longer.
+    for (const home of ['/', '/es/', '/it/']) test(`${home}: every base label is completely inside the visible field, and no two labels overlap`, async ({ page }) => {
+      await page.goto(home);
       const stage = await page.locator('.stage').boundingBox();
       const boxes = [];
       for (const base of await page.locator('.base').all()) {

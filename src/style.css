@@ -74,9 +74,31 @@ kbd { padding: 0 .3em; border: 1px solid var(--line); border-bottom-width: 2px; 
   gap: .25rem 1rem;
   padding-block: .75rem;
 }
-.brand { font-weight: 800; text-decoration: none; }
+.brand { font-weight: 800; text-decoration: none; margin-right: auto; } /* the menu and the language switch sit on the right */
 .site-header ul { list-style: none; display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: 0; padding: 0; font-size: 1rem; }
 .site-header nav a { font-weight: 600; }
+
+/* Language switch EN · ES · IT, like a scoreboard: navy strip, the current language lit in palette yellow (8.5:1),
+   the others white (14:1). Text only, no flags. The focus ring sits inside the strip so it shows on navy and on yellow. */
+.lang-switch ul { gap: 2px; padding: 2px; background: var(--navy); border-radius: 4px; }
+.site-header .lang-switch a {
+  display: block;
+  padding: .1rem .5rem;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-decoration: none;
+}
+.lang-switch a:hover { text-decoration: underline; }
+.lang-switch a[aria-current] { background: #f2c14e; color: var(--navy); }
+.lang-switch a:focus-visible { outline: 3px solid #f2c14e; outline-offset: -3px; }
+.lang-switch a[aria-current]:focus-visible { outline-color: var(--navy); }
+/* Phones: the switch shares the line of the name, the menu wraps under them (no extra line in the header). */
+@media (max-width: 700px) {
+  .lang-switch { order: -1; }
+  .brand { order: -2; }
+}
 abbr { text-decoration: none; }
 
 .site-footer { margin-top: 4rem; padding-block: 2rem; background: var(--navy); color: #fff; font-size: 1rem; }

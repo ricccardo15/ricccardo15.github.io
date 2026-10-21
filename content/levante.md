@@ -16,7 +16,7 @@ tools: "Desk research, personas, user journeys, dashboard UI design, business mo
 
 <!-- Sources: final slides, pitch script, personas, CV text approved on 18/10. Persona portraits are AI-generated. Final grade 9 (confirmed by Riccardo 20/10). -->
 
-## TL;DR
+## TL;DR {#tl-dr}
 When a beach is contaminated, lab confirmation arrives **24–48 hours** later — after people have already swum. In a one-week challenge our team of 6 designed **Levante**: a solar-powered buoy with on-board AI that predicts contamination, plus a dashboard for labs and municipalities. The concept cuts confirmation from **~48 to ~3 hours** with on-site qPCR. **I designed the monitoring dashboard.**
 
 ## My role
