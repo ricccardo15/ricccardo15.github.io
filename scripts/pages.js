@@ -113,17 +113,20 @@ async function saveOg(name, image) {
 
 // Home: the pixel ballpark at 4× (with Riccardo at bat on home plate) under a navy band with the pixel name and role.
 async function ogHome() {
+  // The 480×270 field at 3× (1440×810, a whole-number scale) cropped to 1200×630, Riccardo (48 px sprite at 3×) at bat.
+  const SCALE = 3, CROP = { left: 120, top: 180 };
   const home = STOPS.find((s) => s.id === 'home');
   const batter = await sharp(root('public/game/runner.png'))
-    .extract({ left: 6 * 32, top: 0, width: 32, height: 32 }) // swing stance, Researcher uniform
-    .resize(128, 128, { kernel: 'nearest' })
+    .extract({ left: 6 * 48, top: 0, width: 48, height: 48 }) // swing stance, Researcher uniform
+    .resize(48 * SCALE, 48 * SCALE, { kernel: 'nearest' })
     .toBuffer();
   const field = await sharp(root('public/game/field.png'))
-    .resize(1280, 720, { kernel: 'nearest' })
-    .extract({ left: 40, top: 90, width: OG.width, height: OG.height })
+    .resize(FIELD.width * SCALE, FIELD.height * SCALE, { kernel: 'nearest' })
+    .extract({ ...CROP, width: OG.width, height: OG.height })
     .toBuffer();
   return saveOg('home', sharp(field).composite([
-    { input: batter, left: home.x * 4 - 40 - 64, top: (home.y + 3) * 4 - 90 - 128 },
+    // feet (row 46 of 48) on home plate
+    { input: batter, left: home.x * SCALE - CROP.left - 24 * SCALE, top: home.y * SCALE - CROP.top - 46 * SCALE },
     band(190),
     await pixelLayer('Riccardo Cirillo', 7, { color: PALETTE.white, shadow: PALETTE.red }, undefined, 42),
     await pixelLayer('UX Research & Design · Madrid 2027', 3, { color: PALETTE.yellow, shadow: PALETTE.navyDark }, undefined, 128),
@@ -268,7 +271,7 @@ async function casePage(c, i, all) {
 // The ballpark: pixel field + bases as real links + one panel per stop.
 // Without JavaScript the bases are plain links to the case pages; src/diamond.js adds the game:
 // batting, the home-run tour (one project per base) and free running. The game bar stays hidden without JS.
-// Under 700 px it is shown at 1× with simplified touch labels (see style.css).
+// Under 1000 px it is shown at 1× with simplified touch labels; on a phone the 480 px picture is cropped (see style.css).
 async function diamond(cases) {
   const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
@@ -318,15 +321,17 @@ async function diamond(cases) {
         <div class="field-layout">
           <div class="stage-col">
             <div class="stage">
-              <div class="world">
-                <img class="field-img" src="/game/field.png" alt="Pixel-art baseball field. Each base links to a project." width="${FIELD.width}" height="${FIELD.height}">
+              <div class="field-box">
+                <div class="world">
+                  <img class="field-img" src="/game/field.png" alt="Pixel-art baseball field. Each base links to a project." width="${FIELD.width}" height="${FIELD.height}">
 ${crew.join('\n')}
-                <div class="sprite runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
-                <div class="ball" hidden></div>
-              </div>
-              <ul class="bases" aria-label="Bases">
+                  <div class="sprite runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
+                  <div class="ball" hidden></div>
+                </div>
+                <ul class="bases" aria-label="Bases">
 ${bases.join('\n')}
-              </ul>
+                </ul>
+              </div>
               <p class="banner" aria-hidden="true" hidden>Home run!</p>
               <div class="tour-map" aria-hidden="true" hidden>
                 <span class="tour-diamond"><i data-corner="second"></i><i data-corner="third"></i><i data-corner="first"></i><i data-corner="home"></i></span>

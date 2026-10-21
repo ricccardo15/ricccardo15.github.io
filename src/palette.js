@@ -1,4 +1,5 @@
-// The one 16-colour palette of all the pixel art (field, runner, icons, title).
+// The one 24-colour palette of all the pixel art (field, runner, crew, icons, title, Lab cover).
+// 16 base colours + 8 added for the 480×270 art (Fase 1): light/dark tones for volume, wood and hair.
 // The art scripts may only use these colours: tests/art.spec.js checks every PNG.
 // navy + red match the UI colours in src/style.css.
 export const PALETTE = {
@@ -18,4 +19,13 @@ export const PALETTE = {
   skinDark: '#a8704f',
   black: '#2a1d18',
   grey: '#8a94a6',
+  // added in Fase 1 (480×270)
+  grassLight: '#5db648',
+  dirtLight: '#dca566',
+  navyMid: '#2c4170',
+  redDark: '#8a1c16',
+  greyDark: '#5b6577',
+  greyLight: '#b9c1cf',
+  wood: '#7a4a28',
+  hair: '#4a3426',
 };

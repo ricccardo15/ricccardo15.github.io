@@ -183,7 +183,7 @@ function start() {
     const base = byId[s.stop];
     const others = Object.keys(s.with).map((id) => crewAt[id]);
     const xs = [base.x, ...others.map((m) => m.x)];
-    zoomOn({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: base.y - 14 });
+    zoomOn({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: base.y - 21 });
     runner.classList.add(`is-${s.moment}`);
     sound.play(s.moment === 'highfive' ? 'clap' : 'cheer');
     for (const [id, anim] of Object.entries(s.with)) crew[id].classList.add(`is-${anim}`);

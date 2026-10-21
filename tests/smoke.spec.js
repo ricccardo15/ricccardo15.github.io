@@ -101,10 +101,10 @@ test.describe('phone (390 px): simplified touch field', () => {
     await expect(page.getByRole('link', { name: 'Play ball!' })).toBeVisible();
   });
 
-  test('field at 1× (320×180, sharp pixels), touch bases at least 24 px high', async ({ page }) => {
+  test('field at 1× (480×270, sharp pixels, cropped by the stage), touch bases at least 24 px high', async ({ page }) => {
     await page.goto('/');
     const box = await page.locator('.field-img').boundingBox();
-    expect([box.width, box.height]).toEqual([320, 180]);
+    expect([box.width, box.height]).toEqual([480, 270]);
     for (const base of await page.locator('.base').all()) {
       expect((await base.boundingBox()).height).toBeGreaterThanOrEqual(24);
     }
@@ -210,14 +210,14 @@ test.describe('desktop (1280 px): the ballpark', () => {
     await expect(panel(page)).toHaveAttribute('data-panel', 'lab');
     await expect(page.locator('#field')).toBeInViewport();
     const runner = await page.locator('.runner').evaluate((el) => el.style.getPropertyValue('--x'));
-    expect(runner).toBe(`${(36 / 320) * 100}%`);
+    expect(runner).toBe(`${(110 / 480) * 100}%`); // the dugout is at x = 110
   });
 
-  test('field art is pixel-perfect: 320×180 shown at an integer scale', async ({ page }) => {
+  test('field art is pixel-perfect: 480×270 shown at an integer scale', async ({ page }) => {
     await page.goto('/');
     const box = await page.locator('.field-img').boundingBox();
-    expect(box.width / 320).toBe(Math.round(box.width / 320));
-    expect(box.height / 180).toBe(box.width / 320);
+    expect(box.width / 480).toBe(Math.round(box.width / 480));
+    expect(box.height / 270).toBe(box.width / 480);
   });
 });
 

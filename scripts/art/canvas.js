@@ -1,6 +1,7 @@
 // Tiny pixel canvas used by the art scripts: set pixels by palette name, then save as PNG.
 import sharp from 'sharp';
 import { PALETTE } from '../../src/palette.js';
+import { GLYPHS } from './title.js';
 
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 
@@ -50,11 +51,18 @@ export function canvas(width, height) {
     for (const [x, y] of add) set(x, y, color);
   };
 
+  // Text in the 5×7 pixel font of the title (scripts/art/title.js), `scale` pixels per font pixel; letters are 6 pixels apart.
+  const text = (str, x, y, color, scale = 1) => {
+    [...str.toUpperCase()].forEach((ch, n) => GLYPHS[ch].split('|').forEach((row, j) => [...row].forEach((p, i) => {
+      if (p === '#') rect(x + (n * 6 + i) * scale, y + j * scale, scale, scale, color);
+    })));
+  };
+
   const png = (file) => sharp(data, { raw: { width, height, channels: 4 } }).png().toFile(file);
   // Lossless WebP at `scale`× with nearest neighbour: sharp pixels and exactly the palette colours.
   const webp = (file, scale = 1) => sharp(data, { raw: { width, height, channels: 4 } })
     .resize(width * scale, height * scale, { kernel: 'nearest' }).webp({ lossless: true }).toFile(file);
-  return { width, height, set, isSet, rect, line, map, outline, png, webp };
+  return { width, height, set, isSet, rect, line, map, outline, text, png, webp };
 }
 
 // Same "random" numbers on every run, so the art never changes unless the code does.

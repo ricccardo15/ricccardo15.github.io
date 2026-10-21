@@ -5,11 +5,11 @@
 import { FIELD } from './field-map.js';
 import { sound } from './sound.js';
 
-// Field pixels (320×180), like src/field-map.js.
-const RELEASE = { x: 150, y: 100 }; // the pitcher's hand
-const PLATE = { x: 168, y: 145 }; // where the bat meets the ball
-const CATCHER = { x: 172, y: 176 };
-const OUT = { x: 236, y: -12 }; // over the stands
+// Field pixels (480×270), like src/field-map.js.
+const RELEASE = { x: 225, y: 150 }; // the pitcher's hand
+const PLATE = { x: 252, y: 218 }; // where the bat meets the ball
+const CATCHER = { x: 258, y: 264 };
+const OUT = { x: 354, y: -18 }; // over the stands
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -38,7 +38,7 @@ export function atBat({ stage, runner, pitcher, ball, banner, reduceMotion }) {
   async function homeRun(run) {
     runner.classList.replace('is-batting', 'is-swinging');
     sound.play('crack');
-    if (!(await fly(PLATE, OUT, 900, 40, run))) return;
+    if (!(await fly(PLATE, OUT, 900, 60, run))) return;
     ball.hidden = true;
     banner.hidden = false;
     sound.play('crowd');
@@ -56,7 +56,7 @@ export function atBat({ stage, runner, pitcher, ball, banner, reduceMotion }) {
       if (run.cancelled) return;
       put(RELEASE);
       ball.hidden = false;
-      if (!(await fly(RELEASE, PLATE, 550, 6, run))) return;
+      if (!(await fly(RELEASE, PLATE, 550, 9, run))) return;
       pitcher.classList.remove('is-pitching');
       if (swing) return homeRun(run);
       await fly(PLATE, CATCHER, 200, 0, run); // no swing: the catcher gets it, here comes another one

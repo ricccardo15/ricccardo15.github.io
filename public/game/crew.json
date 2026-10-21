@@ -5,174 +5,174 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 500
     },
     {
       "filename": "crew 1.aseprite",
       "frame": {
-        "x": 32,
+        "x": 48,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 500
     },
     {
       "filename": "crew 2.aseprite",
       "frame": {
-        "x": 64,
+        "x": 96,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 400
     },
     {
       "filename": "crew 3.aseprite",
       "frame": {
-        "x": 96,
+        "x": 144,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 200
     },
     {
       "filename": "crew 4.aseprite",
       "frame": {
-        "x": 128,
+        "x": 192,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 200
     },
     {
       "filename": "crew 5.aseprite",
       "frame": {
-        "x": 160,
+        "x": 240,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 250
     },
     {
       "filename": "crew 6.aseprite",
       "frame": {
-        "x": 192,
+        "x": 288,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 250
     },
     {
       "filename": "crew 7.aseprite",
       "frame": {
-        "x": 224,
+        "x": 336,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 48,
+        "h": 48
       },
       "duration": 250
     }
@@ -182,8 +182,8 @@
     "image": "crew.png",
     "format": "RGBA8888",
     "size": {
-      "w": 256,
-      "h": 128
+      "w": 384,
+      "h": 192
     },
     "scale": "1",
     "frameTags": [

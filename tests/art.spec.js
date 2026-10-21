@@ -14,11 +14,11 @@ async function colours(file) {
   return { found, info };
 }
 
-test('palette has exactly 16 colours', () => {
-  expect(allowed.size).toBe(16);
+test('palette has exactly 24 colours (16 + 8 added for the 480×270 art)', () => {
+  expect(allowed.size).toBe(24);
 });
 
-for (const [file, size] of [['field.png', [320, 180]], ['runner.png', [480, 96]], ['crew.png', [256, 128]], ['icons.png', [80, 16]]]) {
+for (const [file, size] of [['field.png', [480, 270]], ['runner.png', [720, 144]], ['crew.png', [384, 192]], ['icons.png', [120, 24]]]) {
   test(`${file}: ${size.join('×')} and only palette colours`, async () => {
     const { found, info } = await colours(`public/game/${file}`);
     expect([info.width, info.height]).toEqual(size);
@@ -39,17 +39,21 @@ test('Lab cover: 640×480 (160×120 at 4×), original, only palette colours', as
   }
 });
 
-test('runner.json describes 15 frames: idle, run, swing, high five, cheer, wave', async () => {
+test('runner.json describes 15 frames of 48×48: idle, run, swing, high five, cheer, wave', async () => {
   const sheet = JSON.parse(await readFile('public/game/runner.json', 'utf8'));
   expect(sheet.frames).toHaveLength(15);
+  expect(sheet.frames.every((f) => f.frame.w === 48 && f.frame.h === 48)).toBe(true);
+  expect(sheet.meta.size).toEqual({ w: 720, h: 144 });
   expect(sheet.meta.frameTags.map((t) => [t.name, t.from, t.to])).toEqual([
     ['idle', 0, 1], ['run', 2, 5], ['swing', 6, 9], ['highfive', 10, 10], ['cheer', 11, 12], ['wave', 13, 14],
   ]);
 });
 
-test('crew.json describes 8 frames: idle, high five, cheer, pitch', async () => {
+test('crew.json describes 8 frames of 48×48: idle, high five, cheer, pitch', async () => {
   const sheet = JSON.parse(await readFile('public/game/crew.json', 'utf8'));
   expect(sheet.frames).toHaveLength(8);
+  expect(sheet.frames.every((f) => f.frame.w === 48 && f.frame.h === 48)).toBe(true);
+  expect(sheet.meta.size).toEqual({ w: 384, h: 192 });
   expect(sheet.meta.frameTags.map((t) => [t.name, t.from, t.to])).toEqual([['idle', 0, 1], ['highfive', 2, 2], ['cheer', 3, 4], ['pitch', 5, 7]]);
 });
 

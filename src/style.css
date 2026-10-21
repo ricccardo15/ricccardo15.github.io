@@ -123,20 +123,18 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   .at-bat { flex-direction: column; align-items: center; }
 }
 .batter {
-  --s: 4;
+  --s: 3; /* sizes and sprite sheet: see the "Sprites" block below */
   flex: none;
-  width: calc(32px * var(--s));
-  height: calc(32px * var(--s));
-  background:
-    url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(480px * var(--s)) calc(96px * var(--s)) no-repeat,
-    linear-gradient(#8fd3ff 70%, #3f9b3a 70%); /* palette sky + grass: a day game */
+  box-sizing: content-box;
+  background-image: url("/game/runner.png"), linear-gradient(#8fd3ff 70%, #3f9b3a 70%); /* palette sky + grass: a day game */
+  background-repeat: no-repeat;
+  background-position: 0 calc(var(--uniform-row, 0) * var(--step)), 0 0;
+  background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px), 100% 100%;
   border: 2px solid var(--navy);
   border-radius: 4px;
-  image-rendering: pixelated;
-  animation: idle 1s steps(2, jump-none) infinite;
 }
 @media (min-width: 900px) {
-  .batter { --s: 6; }
+  .batter { --s: 4; }
 }
 .uniforms { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: .4rem; }
 @media (min-width: 900px) {
@@ -200,23 +198,40 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 
 .about h3 { font-size: 1.25rem; margin: 2rem 0 .5rem; }
 
-/* --- Ballpark (home). Field = 320×180 pixel image at an integer scale --fs (sharp pixels):
-   2× from 700 px, 1× below (simplified touch version). Positions come from src/field-map.js as --x / --y percentages. --- */
-.field { --fs: 2; padding-block: 1.5rem 0; }
-@media (max-width: 699px) {
-  .field { --fs: 1; }
+/* --- Ballpark (home). The field is a 480×270 pixel picture shown at a whole-number scale --fs (sharp pixels):
+   2× (960×540) from 1000 px wide, 1× (480×270) below. Positions come from src/field-map.js as --x / --y percentages.
+   On a phone the stage is as wide as the screen and the 480 px picture is centred and cropped (about 64 px off each side):
+   everything a visitor can click lives between x = 64 and x = 416 (tests/field.spec.js checks it). --- */
+.field { --fs: 1; padding-block: 1.5rem 0; }
+@media (min-width: 1000px) {
+  .field { --fs: 2; }
 }
 .field h2 { margin: 0; }
 .hint { margin: .25rem 0 1rem; font-size: 1rem; color: var(--muted); }
 .field-layout { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 1100px) {
-  .field-layout { grid-template-columns: 644px 1fr; align-items: start; }
+.stage {
+  position: relative;
+  box-sizing: content-box;
+  width: calc(480px * var(--fs));
+  max-width: calc(100% - 4px);
+  height: calc(270px * var(--fs));
+  margin-inline: auto;
+  border: 2px solid var(--navy);
+  border-radius: 4px;
+  overflow: hidden;
 }
-/* max-width: on phones under ~360 px the field shrinks to the screen (the only non-integer case). */
-.stage { position: relative; box-sizing: content-box; width: calc(320px * var(--fs)); max-width: calc(100% - 4px); aspect-ratio: 16 / 9; border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
+/* The picture's own box: centred in the stage, so it can be wider than the stage (the crop on phones). */
+.field-box {
+  position: absolute;
+  top: 0;
+  left: calc((100% - 480px * var(--fs)) / 2);
+  width: calc(480px * var(--fs));
+  height: calc(270px * var(--fs));
+}
 .field-img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .bases { list-style: none; margin: 0; padding: 0; transition: visibility 0s .5s; }
 .base {
+  --gap: 10px; /* space between a label and the sprite on its base */
   position: absolute;
   left: var(--x);
   top: var(--y);
@@ -233,20 +248,21 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   text-decoration: none;
   white-space: nowrap;
 }
-/* Label position (src/field-map.js `tag`) + a little pointer towards the base. */
+/* Label position (src/field-map.js `tag`) + a little pointer towards the base.
+   The players are 48 px tall (× --fs) with their feet 4 px (× --fs) below the base's centre. */
 .base::after { content: ""; position: absolute; border: 6px solid transparent; }
-.base[data-tag="below"] { transform: translate(-50%, 12px); }
+.base[data-tag="below"] { transform: translate(-50%, calc(4px * var(--fs) + 8px)); }
 .base[data-tag="below"]::after { left: 50%; top: -14px; margin-left: -6px; border-bottom-color: var(--navy); }
-.base[data-tag="above"] { transform: translate(-50%, calc(-100% - 74px)); }
+.base[data-tag="above"] { transform: translate(-50%, calc(-100% - 48px * var(--fs) - var(--gap))); }
 .base[data-tag="above"]::after { left: 50%; bottom: -14px; margin-left: -6px; border-top-color: var(--navy); }
-.base[data-tag="right"] { transform: translate(18px, -50%); }
+.base[data-tag="right"] { transform: translate(calc(12px * var(--fs) + 8px), -50%); }
 .base[data-tag="right"]::after { top: 50%; left: -14px; margin-top: -6px; border-right-color: var(--navy); }
-/* 16×16 icons from public/game/icons.png, shown at 2× */
+/* 24×24 icons from public/game/icons.png, shown at --fs× */
 .base-icon {
-  width: 32px;
-  height: 32px;
+  width: calc(24px * var(--fs));
+  height: calc(24px * var(--fs));
   flex: none;
-  background: url("/game/icons.png") calc(var(--icon) * -32px) 0 / auto 32px no-repeat;
+  background: url("/game/icons.png") calc(var(--icon) * -24px * var(--fs)) 0 / auto calc(24px * var(--fs)) no-repeat;
   image-rendering: pixelated;
 }
 .base-label { display: block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--red); }
@@ -256,17 +272,18 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .base:hover, .base[aria-current] { background: var(--navy); color: #fff; }
 .base:hover .base-label, .base[aria-current] .base-label { color: #fff; }
 .base:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
-/* Simplified touch bases at 1×: icon + name only ("1st base" stays for screen readers), no pointer,
-   labels closer to the base. Height >= 24 px (WCAG 2.5.8 target size). */
-@media (max-width: 699px) {
-  .base { gap: 4px; padding: 3px 6px 3px 3px; font-size: .75rem; line-height: 1.2; }
+/* At 1× (under 1000 px) the bases are simplified for touch: icon + name only ("1st base" stays for screen readers),
+   no pointer, labels closer to the base. Height >= 24 px (WCAG 2.5.8 target size). */
+@media (max-width: 999px) {
+  .base { --gap: 5px; gap: 4px; padding: 3px 6px 3px 3px; font-size: .75rem; line-height: 1.2; }
   .base::after { display: none; }
-  .base[data-tag="below"] { transform: translate(-50%, 6px); }
-  .base[data-tag="above"] { transform: translate(-50%, calc(-100% - 37px)); }
-  .base[data-tag="right"] { transform: translate(12px, -50%); }
-  .base-icon { width: 16px; height: 16px; background-position: calc(var(--icon) * -16px) 0; background-size: auto 16px; }
+  .base[data-tag="below"] { transform: translate(-50%, calc(4px * var(--fs) + 3px)); }
+  .base[data-tag="right"] { transform: translate(calc(12px * var(--fs) + 4px), -50%); }
   .base-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+/* The Lab label goes to the right of the dugout (46 field pixels from its centre, so it starts just past the dugout's edge):
+   above it, it would cover the coach on 3rd base. It stays inside the crop even on a 320 px phone (x = 156 …). */
+.base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% + 6px)); } /* a little lower: clear of the 3rd-base label */
 
 /* World = everything drawn on the field (image + people + ball). The tour zooms it 2× (integer = sharp);
    the base links stay outside, so they never scale. --tx / --ty come from src/diamond.js. */
@@ -274,52 +291,73 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .stage.is-zoomed .world { transform: translate(var(--tx, 0), var(--ty, 0)) scale(2); }
 .stage.is-zoomed .bases { visibility: hidden; transition: none; }
 
-/* Sprites: 32×32 frames at --s, feet on (--x, --y). Runner = public/game/runner.png (15 frames × 3 uniforms),
-   crew = public/game/crew.png (8 frames × 4 people, see crew.json). The big batter on the Start screen uses the runner frames too. */
+/* Sprites: square cells of --cell px at --s×, feet on (--x, --y). A sheet is --frames cells wide and --rows cells high.
+   Runner = public/game/runner.png (15 frames × 3 uniforms), crew = public/game/crew.png (8 frames × 4 people),
+   see runner.json / crew.json. The big batter on the Start screen uses the runner sheet too.
+   To change the size of the art again, change --cell (and the sheets): nothing else here has a number in pixels. */
+.sprite, .batter {
+  --cell: 48;
+  --step: calc(var(--cell) * var(--s) * -1px); /* how far one frame moves the sheet */
+  width: calc(var(--cell) * var(--s) * 1px);
+  height: calc(var(--cell) * var(--s) * 1px);
+  image-rendering: pixelated;
+  animation: idle 1s steps(2, jump-none) infinite;
+}
+.runner, .batter { --frames: 15; --rows: 3; }
+.crew-sprite { --frames: 8; --rows: 4; }
 .sprite {
   --s: var(--fs);
+  --foot: 4; /* px of the cell between the soles and the bottom edge of the cell, minus the shadow on the base */
   position: absolute;
   left: var(--x);
   top: var(--y);
   z-index: 2;
-  width: calc(32px * var(--s));
-  height: calc(32px * var(--s));
-  transform: translate(-50%, calc(-100% + 3px * var(--s)));
-  image-rendering: pixelated;
+  transform: translate(-50%, calc(-100% + var(--foot) * var(--s) * 1px));
   pointer-events: none;
-  animation: idle 1s steps(2, jump-none) infinite;
 }
-.sprite.is-flipped { transform: translate(-50%, calc(-100% + 3px * var(--s))) scaleX(-1); }
-.runner { z-index: 3; background: url("/game/runner.png") 0 calc(var(--uniform-row, 0) * -32px * var(--s)) / calc(480px * var(--s)) calc(96px * var(--s)) no-repeat; }
-.crew-sprite { background: url("/game/crew.png") 0 calc(var(--row) * -32px * var(--s)) / calc(256px * var(--s)) calc(128px * var(--s)) no-repeat; }
+.sprite.is-flipped { transform: translate(-50%, calc(-100% + var(--foot) * var(--s) * 1px)) scaleX(-1); }
+.runner, .batter {
+  background-image: url("/game/runner.png");
+  background-position: 0 calc(var(--uniform-row, 0) * var(--step));
+  background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px);
+  background-repeat: no-repeat;
+}
+.runner { z-index: 3; }
+.crew-sprite {
+  background-image: url("/game/crew.png");
+  background-position: 0 calc(var(--row) * var(--step));
+  background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px);
+  background-repeat: no-repeat;
+}
 
 /* Runner frames: idle 0–1 · run 2–5 · swing 6–9 · high five 10 · cheer 11–12 · wave 13–14 */
 .is-running .runner { animation: run .4s steps(4, jump-none) infinite; }
-.runner.is-batting { animation: none; background-position-x: calc(-192px * var(--s)); }
+.runner.is-batting { animation: none; background-position-x: calc(var(--step) * 6); }
 .runner.is-swinging { animation: swing .44s steps(4, jump-none) 1 forwards; }
-.runner.is-highfive { animation: none; background-position-x: calc(-320px * var(--s)); }
+.runner.is-highfive { animation: none; background-position-x: calc(var(--step) * 10); }
 .runner.is-cheer { animation: cheer .4s steps(2, jump-none) infinite; }
 .runner.is-wave { animation: wave .5s steps(2, jump-none) infinite; }
-@keyframes idle { from { background-position-x: 0; } to { background-position-x: calc(-32px * var(--s)); } }
-@keyframes run { from { background-position-x: calc(-64px * var(--s)); } to { background-position-x: calc(-160px * var(--s)); } }
-@keyframes swing { from { background-position-x: calc(-192px * var(--s)); } to { background-position-x: calc(-288px * var(--s)); } }
-@keyframes cheer { from { background-position-x: calc(-352px * var(--s)); } to { background-position-x: calc(-384px * var(--s)); } }
-@keyframes wave { from { background-position-x: calc(-416px * var(--s)); } to { background-position-x: calc(-448px * var(--s)); } }
+/* `, 0` = the second background layer (the sky of the big batter) stays put; sprites have one layer and ignore it. */
+@keyframes idle { from { background-position-x: 0, 0; } to { background-position-x: var(--step), 0; } }
+@keyframes run { from { background-position-x: calc(var(--step) * 2); } to { background-position-x: calc(var(--step) * 5); } }
+@keyframes swing { from { background-position-x: calc(var(--step) * 6), 0; } to { background-position-x: calc(var(--step) * 9), 0; } }
+@keyframes cheer { from { background-position-x: calc(var(--step) * 11); } to { background-position-x: calc(var(--step) * 12); } }
+@keyframes wave { from { background-position-x: calc(var(--step) * 13); } to { background-position-x: calc(var(--step) * 14); } }
 /* Crew frames: idle 0–1 · high five 2 · cheer 3–4 · pitch 5–7 */
-.crew-sprite.is-highfive { animation: none; background-position-x: calc(-64px * var(--s)); }
+.crew-sprite.is-highfive { animation: none; background-position-x: calc(var(--step) * 2); }
 .crew-sprite.is-cheer { animation: crew-cheer .4s steps(2, jump-none) infinite; }
 .crew-sprite.is-pitching { animation: pitch .75s steps(3, jump-none) 1 forwards; }
-@keyframes crew-cheer { from { background-position-x: calc(-96px * var(--s)); } to { background-position-x: calc(-128px * var(--s)); } }
-@keyframes pitch { from { background-position-x: calc(-160px * var(--s)); } to { background-position-x: calc(-224px * var(--s)); } }
+@keyframes crew-cheer { from { background-position-x: calc(var(--step) * 3); } to { background-position-x: calc(var(--step) * 4); } }
+@keyframes pitch { from { background-position-x: calc(var(--step) * 5); } to { background-position-x: calc(var(--step) * 7); } }
 
-/* Ball: one 2×2 pixel ball with a dark outline, moved by src/batting.js. */
+/* Ball: one 3×3 pixel ball with a dark outline, moved by src/batting.js. */
 .ball {
   position: absolute;
   left: var(--x);
   top: var(--y);
   z-index: 4;
-  width: calc(2px * var(--fs));
-  height: calc(2px * var(--fs));
+  width: calc(3px * var(--fs));
+  height: calc(3px * var(--fs));
   background: #ffffff;
   box-shadow: 0 0 0 calc(1px * var(--fs)) #0f1a30;
   transform: translate(-50%, -50%);
@@ -353,7 +391,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 }
 
 /* Game bar under the field: batting, tour controls, free mode. Only shown by src/diamond.js. */
-.game-bar { margin-top: .5rem; max-width: calc(320px * var(--fs) + 4px); }
+.game-bar { margin: .5rem auto 0; max-width: calc(480px * var(--fs) + 4px); }
 .bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
 .bar-hint { margin: 0; font-size: .9375rem; color: var(--muted); }
 .game-bar .button { padding: .4rem .8rem; font-size: 1rem; }

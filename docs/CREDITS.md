@@ -7,7 +7,8 @@ All original, drawn in code by `npm run art` (scripts/art/) for this portfolio: 
 - Coaches, teammates and pitcher (crew.png): original, same body as the player with a cap.
 - Lab cover (public/assets/lab/cover.webp): original chalkboard-in-the-dugout scene drawn in code (scripts/art/lab-cover.js).
 - Pixel title font (5×7, A–Z, 0–9 and a few signs): original, in scripts/art/title.js.
-- Palette: 16 colours in src/palette.js.
+- Palette: 24 colours in src/palette.js (16 + 8 added for the 480×270 art: grassLight, dirtLight, navyMid, redDark, greyDark, greyLight, wood, hair).
+- Fase 1 (480×270): field, 48 px player and crew, 24 px icons, scoreboard, ticket booth, mound, dugout and bullpen redrawn in code (scripts/art/*.js), all original.
 
 ## Sound effects (src/sound.js)
 All original, synthesised in the browser with Web Audio (bat crack, crowd, clap): no recordings or sample packs. Off by default.

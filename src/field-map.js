@@ -1,30 +1,33 @@
-// Shared map of the ballpark, in field pixels (the field image is 320×180).
-// Used by scripts/field.js (draws the image), scripts/pages.js (places the base links)
+// Shared map of the ballpark, in field pixels (the field image is 480×270).
+// Used by scripts/art/field.js (draws the image), scripts/pages.js (places the base links)
 // and src/diamond.js (moves the runner). Change a position here and everything follows.
-export const FIELD = { width: 320, height: 180 };
+// On a phone the 480 px wide field is cropped to the screen (about 64 px off each side): every point a visitor can
+// click must stay between x = 64 and x = 416 (tests/field.spec.js checks it).
+export const FIELD = { width: 480, height: 270 };
+export const SAFE = { left: 64, right: 416 };
 
 // Stops in keyboard order (← →). `id` = case page slug (/nipotyno/); home has no page of its own.
 // `tag` = where the label sits, so it never hides the runner standing on the base (or the pitcher): below / right / above.
 export const STOPS = [
-  { id: 'home', x: 160, y: 158, label: 'Home plate', name: 'Start here', tag: 'right' },
-  { id: 'nipotyno', x: 222, y: 112, label: '1st base', name: 'Nipotyno', tag: 'below' },
-  { id: 'levante', x: 160, y: 66, label: '2nd base', name: 'Levante', tag: 'right' },
-  { id: 'housing', x: 98, y: 112, label: '3rd base', name: 'Housing', tag: 'below' },
-  { id: 'lab', x: 36, y: 150, label: 'Dugout', name: 'Lab', tag: 'above' },
+  { id: 'home', x: 240, y: 237, label: 'Home plate', name: 'Start here', tag: 'right' },
+  { id: 'nipotyno', x: 333, y: 168, label: '1st base', name: 'Nipotyno', tag: 'below' },
+  { id: 'levante', x: 240, y: 99, label: '2nd base', name: 'Levante', tag: 'right' },
+  { id: 'housing', x: 147, y: 168, label: '3rd base', name: 'Housing', tag: 'below' },
+  { id: 'lab', x: 110, y: 225, label: 'Dugout', name: 'Lab', tag: 'right' }, // its label sits beyond the dugout's right edge (style.css)
 ];
 
 // The runner follows the base path (home → 1st → 2nd → 3rd → home); the dugout is reached from home.
 export const RING = ['home', 'nipotyno', 'levante', 'housing'];
 
 // People on the field (scripts/art/crew.js draws one row each, in this order). x/y = feet, in field pixels.
-// `flip` = faces left. Teammates stand in front of the dugout.
+// `flip` = faces left. Teammates stand in front of the dugout (which sits at x = 110 so it is inside the phone crop).
 export const CREW_ROWS = ['coach', 'mateA', 'mateB', 'pitcher'];
 export const CREW = [
-  { id: 'coach1', who: 'coach', x: 244, y: 114, flip: true },
-  { id: 'coach3', who: 'coach', x: 78, y: 114 }, // hand meets the runner's on 3rd
-  { id: 'pitcher', who: 'pitcher', x: 160, y: 114, flip: true },
-  { id: 'mateA', who: 'mateA', x: 12, y: 160 },
-  { id: 'mateB', who: 'mateB', x: 60, y: 160, flip: true },
+  { id: 'coach1', who: 'coach', x: 366, y: 171, flip: true },
+  { id: 'coach3', who: 'coach', x: 117, y: 171 }, // hand meets the runner's on 3rd
+  { id: 'pitcher', who: 'pitcher', x: 240, y: 171, flip: true },
+  { id: 'mateA', who: 'mateA', x: 80, y: 241 },
+  { id: 'mateB', who: 'mateB', x: 140, y: 241, flip: true },
 ];
 
 // The home-run tour: one stop per project, each with a small moment (src/diamond.js), then the last card.

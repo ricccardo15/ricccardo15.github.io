@@ -4,7 +4,7 @@
 > - Stack: Vite + HTML/CSS/SVG + plain JS (no Phaser). The site works without the game.
 > - Home = first viewport already shows name, "UX Research & Design intern · Madrid · Feb–Jul 2027", CV EN/ES, contacts, Nipotyno card. No gate before content.
 > - Every case = real static page with Open Graph (`/nipotyno/`, `/levante/`, `/housing/`, `/lab/`). `/nipotyno/` for consultancies/corporates; home for studios/startups.
-> - Diamond = pixel PNG 320×180 at integer scale, bases = HTML links on the same grid; < 700 px → the same field at 1× with simplified touch labels (the list of cases stays below). The field is shown in every version.
+> - Diamond = pixel PNG **480×270** (Fase 1, 21/10: ×1.5, 24-colour palette, 48 px sprites, 24 px icons) at a whole-number scale: 2× (960×540) from 1000 px wide, 1× below with simplified touch labels (the list of cases stays below). On a phone the 480 px picture is centred and cropped (about 64 px per side): everything clickable stays between x = 64 and x = 416. The field is shown in every version. Until the stadium becomes the navigation centre (Fase 2) the card sits below the field on desktop.
 > - **UPDATE (Riccardo): the COMPLETE portfolio is built in ~2 days** — uniforms, batting, home-run tour and all case studies included (see ROADMAP). No phased release.
 > - Interaction: home-run tour that stops at each base = main; batting = optional extra that never decides content.
 > - Baseball only in graphics and labels with plain translation ("1st base · Nipotyno"); never in case-study text.
@@ -19,7 +19,7 @@ Draft prepared in the "Internship" project. Open points are marked **[OPEN]**: i
 
 ## 2. Style
 - Retro **pixel art baseball**, 16-bit arcade feel, old Super Mario vibe (style only — all characters and art are original).
-- Low resolution scaled up (e.g. 320×180 → full screen, pixel-perfect), limited palette, chunky pixel font for titles only; body text in a readable web font.
+- Low resolution scaled up (480×270 → 960×540 on desktop, pixel-perfect), limited palette (24 colours), chunky pixel font for titles only; body text in a readable web font.
 - References: Retro Pixel Baseball (Ponywolf) — https://ponywolf.com/retro-pixel-baseball ; pixel baseball characters on Magnific/Freepik (moodboard only, check license before any use).
 - Light: should run smoothly on an old laptop and a phone.
 
