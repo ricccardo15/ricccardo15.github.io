@@ -93,7 +93,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 .kicker { margin: 0; font-size: .875rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
 
 /* --- Home: Start screen "At bat" --- */
-.hero { padding-block: 2rem 1rem; display: grid; gap: 1.5rem; }
+.hero { padding-block: 2rem 1rem; display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …): a wide child can never stretch the page */
 @media (min-width: 900px) {
   .hero { grid-template-columns: auto 1fr; grid-template-areas: "bat intro"; align-items: center; gap: 2.5rem; }
   .hero .intro { grid-area: intro; }
@@ -118,7 +118,7 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 :root:has(#u-designer:checked) { --uniform-row: 1; }
 :root:has(#u-maker:checked) { --uniform-row: 2; }
 
-.at-bat { display: flex; align-items: flex-end; gap: 1rem; }
+.at-bat { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; } /* the uniform buttons drop under the batter on the narrowest screens or with wider fonts */
 @media (min-width: 900px) {
   .at-bat { flex-direction: column; align-items: center; }
 }
@@ -163,8 +163,8 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 :root:has(#u-maker:checked) .uniform-card[data-uniform="maker"] { display: block; }
 .skills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
 .skills li { margin: 0 !important; padding: .1rem .5rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: .9375rem; }
-.swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .35rem .75rem; }
-.swatches li { margin: 0 !important; display: flex; align-items: center; gap: .4rem; font-size: .9375rem; }
+.swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: .35rem .75rem; }
+.swatches li { margin: 0 !important; display: flex; align-items: center; flex-wrap: wrap; gap: .1rem .4rem; font-size: .9375rem; }
 .swatches code { color: var(--muted); font-size: .8125rem; }
 .swatch { width: 1.25rem; height: 1.25rem; flex: none; border: 1px solid var(--navy); border-radius: 2px; }
 
@@ -284,6 +284,11 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 /* The Lab label goes to the right of the dugout (46 field pixels from its centre, so it starts just past the dugout's edge):
    above it, it would cover the coach on 3rd base. It stays inside the crop even on a 320 px phone (x = 156 …). */
 .base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% + 6px)); } /* a little lower: clear of the 3rd-base label */
+/* On the narrowest phones the crop is bigger (up to 98 px per side): the 1st-base label leans to the left so it stays whole
+   even with wider fonts (the CI machine has different fonts from a Mac). */
+@media (max-width: 519px) {
+  .base[data-stop="nipotyno"] { transform: translate(-62%, calc(4px * var(--fs) + 3px)); }
+}
 
 /* World = everything drawn on the field (image + people + ball). The tour zooms it 2× (integer = sharp);
    the base links stay outside, so they never scale. --tx / --ty come from src/diamond.js. */
