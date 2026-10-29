@@ -29,3 +29,4 @@ PORTFOLIO_progetto_claude/
 
 # Local skills installed for Claude
 .claude/skills/
+skills-lock.json
