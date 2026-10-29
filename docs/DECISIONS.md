@@ -69,3 +69,15 @@
 - 2026-10-29 — F3: fallback "Arial" con size-adjust misurato in Chromium (Jersey 92.5%, Atkinson 92%, Courier New 74% per il Mono). (auto)
 - 2026-10-29 — F3: header e footer sono sempre night (una striscia di tabellone su ogni pagina); in F3 la home resta paper con lo stadio (#field) night, perché la home cambia struttura in F4. (auto)
 - 2026-10-29 — F3: bottone principale = riempimento rosso #b3261e con testo bianco (6.5:1) in entrambi i temi; secondari = contorno inchiostro. (auto)
+- 2026-10-29 — F4: `/` = schermata titolo (nome, ruolo, date, menu Story mode / Gameplay / Multiplayer, 3 card "Quick picks", CV, contatti). Sostituisce la lobby "Select your player" come primo schermo e lo stadio dentro la home (Fase 2). Ogni modalità è una pagina intera: /story/, /play/, /multiplayer/ (+ /es/, /it/).
+- 2026-10-29 — F4: barra delle modalità uguale su tutte le pagine tranne il titolo; il titolo ha la sua barra (nome · EN ES IT · CV ↓ · Contact).
+- 2026-10-29 — F4: il reader a schermo intero è tolto (src/reader.js e i suoi test): nella Story mode i casi sono pagine vere e nel gioco "Read the case study" apre la pagina. (auto)
+- 2026-10-29 — F4: la fine della storia ("That's the story" + Multiplayer + Play the game) è in fondo al capitolo 3, non una pagina a parte (una pagina quasi vuota in più non serve). (auto)
+- 2026-10-29 — F4: capitolo 0 = paragrafo "Hi, I'm Riccardo" e principi di content/about.md (testi già rivisti in F2), motto grande; nessun testo nuovo inventato. Titolo h1 "Hi, I'm Riccardo"; etichetta "Warm-up · before chapter 1". (auto)
+- 2026-10-29 — F4: niente etichetta "PORTFOLIO · 2026" sopra il logo né "let's work together" sotto Multiplayer (sono nel mockup ma non nel piano: meno testo). Niente "I usually answer within a day" nel biglietto: non è un dato di facts.md. (auto)
+- 2026-10-29 — F4: in ES/IT "Story mode" è tradotto (Modo historia / Modalità storia), "Gameplay" e "Multiplayer" restano in inglese come nei videogiochi [CHECK]. (auto)
+- 2026-10-29 — F4: tasti ↑ ↓ solo dentro il menu del titolo; il cursore ▶ è CSS (content "▶" / "" per non entrare nel nome del link). Nessuna animazione sul titolo (niente PRESS START lampeggiante). (auto)
+- 2026-10-29 — F4: sfondo del titolo = field.png scurito con filtro CSS finché F6 non disegna night.png (il generatore usa night.png appena esiste); stelle = quadrati da 3 px; su telefono lo stadio non si vede. (auto)
+- 2026-10-29 — F4: un solo commit invece di due (pagine e redirect stanno nello stesso generatore). (auto)
+- 2026-10-29 — F4: lo scouting report usa la riga Headline di facts.md (Position, Available) e Status/Languages/Education; il ritratto è lo sprite del battitore. (auto)
+- 2026-10-29 — F4: la scelta della divisa sparisce dalla home; torna in F5 come primo passo del gioco. (auto)

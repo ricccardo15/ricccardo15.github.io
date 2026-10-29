@@ -5,18 +5,18 @@ const STATUS = "EU citizen · Spanish NIE · Italian (native) · English B2 · S
 const cases = { nipotyno: '1st base', levante: '2nd base', 'sensor-lab': '3rd base' };
 
 test.describe('0.3 accessibility', () => {
-  for (const path of ['/', '/nipotyno/']) {
+  for (const path of ['/', '/nipotyno/', '/multiplayer/']) {
     test(`${path}: every link to the Spanish CV says lang="es"`, async ({ page }) => {
       await page.goto(path);
       const links = page.locator('a[href$="CV_Riccardo_Cirillo_ES.pdf"]');
-      // Fase 3: the header shows only the CV of the page's language, so a case page has the Spanish CV in the footer only.
-      expect(await links.count()).toBeGreaterThanOrEqual(path === '/' ? 2 : 1);
+      // Fase 3: the bar on top shows only the CV of the page's language; the Spanish one is in the footer (and the ticket).
+      expect(await links.count()).toBeGreaterThanOrEqual(path === '/multiplayer/' ? 2 : 1);
       for (const link of await links.all()) await expect(link).toHaveAttribute('lang', 'es');
     });
   }
 
   test('one single live region (the status in the game bar): the card panel announces nothing twice', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/play/');
     await expect(page.locator('[aria-live]')).toHaveCount(0);
     await expect(page.locator('[role="status"]')).toHaveCount(1);
     await expect(page.locator('#field-panel')).not.toHaveAttribute('aria-live', /.*/);
@@ -24,57 +24,46 @@ test.describe('0.3 accessibility', () => {
 
   test('free mode announces the base once the runner arrives', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/play/');
     await page.locator('.base[data-stop="levante"]').click();
     await expect(page.locator('.game-bar [role="status"]')).toHaveText('Levante, 2nd base.');
   });
 });
 
-test.describe('0.6 status line and About in the menu', () => {
+test.describe('0.6 status line (F4: in the scouting report of Multiplayer)', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test('the line is in the hero (first screen) and in the About; the menu has About', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('.hero .status-line')).toHaveText(STATUS);
-    await expect(page.locator('.hero .status-line')).toBeInViewport();
-    await expect(page.locator('#about .status-line')).toHaveText(STATUS);
-    const about = page.locator('.site-header').getByRole('link', { name: 'About' });
-    await expect(about).toHaveAttribute('href', '/#about');
-    await about.click();
-    await expect(page.locator('#about')).toBeInViewport();
-  });
-
-  test('About is in the menu of the case pages too, and no LinkedIn link yet', async ({ page }) => {
-    await page.goto('/sensor-lab/');
-    await expect(page.locator('.site-header').getByRole('link', { name: 'About' })).toHaveAttribute('href', '/#about');
+  test('the pieces of the line are in the scouting report, from content/facts.md; no LinkedIn link yet', async ({ page }) => {
+    await page.goto('/multiplayer/');
+    const report = page.locator('.scouting');
+    for (const piece of STATUS.split(' · ')) await expect(report).toContainText(piece);
     await expect(page.locator('a[href*="linkedin"]')).toHaveCount(0);
   });
 
-  test('the line fits on a phone without sideways scroll', async ({ page }) => {
+  test('the report fits on a phone without sideways scroll', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/');
-    await expect(page.locator('.hero .status-line')).toBeVisible();
+    await page.goto('/multiplayer/');
+    await expect(page.locator('.scouting')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   });
 });
 
 test.describe('0.5 covers', () => {
   test('Sensor lab uses its placeholder cover, and the image loads', async ({ page, request }) => {
-    await page.goto('/');
-    await expect(page.locator('#sensor-lab img')).toHaveAttribute('src', '/assets/sensor-lab/cover.webp');
+    await page.goto('/play/');
+    await expect(page.locator('[data-panel="sensor-lab"] img')).toHaveAttribute('src', '/assets/sensor-lab/cover.webp');
     expect((await request.get('/assets/sensor-lab/cover.webp')).status()).toBe(200);
   });
 });
 
 test.describe('0.7 case pages', () => {
-  for (const [slug, label] of Object.entries(cases)) {
-    test(`/${slug}/: the link goes back to the ballpark (${label}), another one to the list`, async ({ page }) => {
+  for (const slug of Object.keys(cases)) {
+    test(`/${slug}/: F4, the mode bar leads back to the title screen and to the game; the bottom leads back too`, async ({ page }) => {
       await page.goto(`/${slug}/`);
-      const crumb = page.locator('.crumb');
-      // Fase 2: the way back is in the pixel band on top of the page
-      await expect(page.locator('.case-band').getByRole('link', { name: `Back to the ballpark · ${label}` })).toHaveAttribute('href', `/#${slug}`);
-      await expect(crumb.getByRole('link', { name: 'All case studies' })).toHaveAttribute('href', '/#work');
-      await expect(crumb).not.toContainText('← All case studies');
+      await expect(page.locator('.mode-bar .to-title')).toHaveAttribute('href', '/');
+      await expect(page.locator('.mode-bar').getByRole('link', { name: 'Gameplay' })).toHaveAttribute('href', '/play/');
+      await expect(page.locator('.mode-bar').getByRole('link', { name: 'Story mode' })).toHaveAttribute('aria-current', 'true');
+      await expect(page.locator('.to-title-link')).toHaveAttribute('href', '/');
     });
   }
 

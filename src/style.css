@@ -130,11 +130,6 @@ code { font-family: var(--font-mono); }
 .lang-switch li + li::before { content: "·"; padding-inline: .35rem; color: var(--muted); }
 .site-header .lang-switch a { color: var(--ink); }
 .lang-switch a[aria-current] { color: var(--yellow); }
-/* Phones: the switch shares the line of the name, the menu wraps under them (no extra line in the header). */
-@media (max-width: 700px) {
-  .lang-switch { order: -1; }
-  .brand { order: -2; }
-}
 abbr { text-decoration: none; }
 
 .site-footer { margin-top: 4rem; padding-block: 2rem; border-top: 2px solid var(--line); font-size: 1rem; }
@@ -144,127 +139,19 @@ abbr { text-decoration: none; }
 h1, h2, h3 { line-height: 1.2; color: var(--ink); }
 /* Jersey 10 at whole multiples of its pixel step: crisp, never blurry in between. */
 h1, h2 { font-family: var(--font-display); font-weight: 400; letter-spacing: .01em; }
-h1 { font-size: calc(var(--j) * 3); margin: 0; line-height: 1; }
+h1 { font-size: calc(var(--j) * 3); margin: 0; line-height: 1; overflow-wrap: anywhere; } /* anywhere: the wider fallback font never pushes the page sideways while Jersey loads */
 @media (min-width: 700px) { h1 { font-size: calc(var(--j) * 4); } }
 h2 { font-size: calc(var(--j) * 2); margin: 2.5rem 0 .75rem; line-height: 1.05; }
 h3 { font-size: 1.25rem; }
 /* Pixel title (public/game/title.svg, 128×8): sharp at any size, max 5× */
 .pixel-title { width: min(100%, 640px); height: auto; }
 .kicker { margin: 0; font-family: var(--font-mono); font-size: .875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
-/* --- Home: the lobby (first screen, never a gate) ---
-   Desktop: "Select your player" on the left (≈40%) with the one main button under it, the player card = a short About on the right.
-   Phone: the card comes first (name, role, CV, email and Nipotyno stay on the first screen), then the button, then the player. */
-.lobby { padding-block: 1.5rem 1rem; display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); grid-template-areas: "card" "cta" "select"; } /* minmax(0, …): a wide child can never stretch the page */
-@media (min-width: 900px) {
-  .lobby { grid-template-columns: minmax(420px, 2fr) minmax(0, 3fr); grid-template-rows: auto 1fr; grid-template-areas: "select card" "cta card"; align-items: start; gap: 1.25rem 2rem; } /* the button sits right under the player, on the first screen */
-}
-.player-select { grid-area: select; min-width: 0; }
-.player-card { grid-area: card; min-width: 0; }
-.lobby-cta { grid-area: cta; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
-.lobby-cta .enter { padding: .7rem 1.4rem; background: var(--red); border-color: var(--red); font-size: 1.125rem; }
-.lobby-cta .enter:hover { background: var(--navy); border-color: var(--ink); }
-.skip-list { font-weight: 700; }
-.headline { margin: 0 0 .75rem; font-weight: 700; color: var(--red); }
-.status-line { margin: -.25rem 0 1rem; font-size: .9375rem; color: var(--muted); }
-.about .status-line { margin: 0 0 1rem; }
-.motto { margin: 0 0 1rem; font-size: 1.125rem; font-style: italic; }
-
-/* Uniform = row of public/game/runner.png (src/uniforms.js). Picked with the radios, no JS needed. */
-:root:has(#u-designer:checked) { --uniform-row: 1; }
-:root:has(#u-maker:checked) { --uniform-row: 2; }
-
-/* Select your player: a navy panel with the clubhouse (public/game/lobby.png, 200×150 at --ls×) and three character tiles. */
-.uniforms { margin: 0; padding: .75rem; min-width: 0; border: 2px solid var(--ink); background: var(--navy); }
-.uniforms legend { float: left; width: 100%; padding: 0; margin-bottom: .75rem; } /* float: the legend sits inside the panel */
-.pixel-heading svg, .pixel-name svg { display: block; width: 100%; height: auto; }
-.pixel-heading svg { max-width: 400px; margin-inline: auto; }
-.player-stage {
-  --ls: 1; /* scale of the clubhouse picture */
-  --s: 3; /* scale of the batter (48 px cells) */
-  clear: both;
-  position: relative;
-  width: calc(200px * var(--ls));
-  height: calc(150px * var(--ls));
-  margin-inline: auto;
-  background: url("/game/lobby.png") 0 0 / 100% 100% no-repeat;
-  image-rendering: pixelated;
-}
-@media (min-width: 480px) {
-  .player-stage { --ls: 2; --s: 5; }
-}
-/* The batter stands on the plate drawn in the picture (x 100, y 140): his soles are 2 px above the bottom of his cell. */
-.player-stage .batter { position: absolute; left: 50%; bottom: calc(10px * var(--ls) - 2px * var(--s)); transform: translateX(-50%); }
 .batter {
   background-image: url("/game/runner.png");
   background-repeat: no-repeat;
   background-position: 0 calc(var(--uniform-row, 0) * var(--step));
   background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px);
 }
-/* ◀ ▶ (src/uniform.js) change the uniform on a phone, next to the batter; on desktop the tiles are enough. */
-.uniform-step { position: absolute; top: 50%; z-index: 1; min-width: 44px; min-height: 44px; padding: 0; border: 2px solid var(--navyDark, #0f1a30); background: var(--card); color: var(--ink); font: inherit; font-size: 1.25rem; font-weight: 700; transform: translateY(-50%); cursor: pointer; }
-.uniform-step[data-step="-1"] { left: .25rem; }
-.uniform-step[data-step="1"] { right: .25rem; }
-.uniform-step:hover { color: var(--red); }
-@media (min-width: 900px) {
-  .uniform-step { display: none; }
-}
-.uniform-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: .75rem; }
-.uniform-tile { position: relative; display: grid; justify-items: center; align-content: start; gap: .3rem; padding: .5rem .4rem .6rem; border: 2px solid #2c4170; background: var(--card); color: var(--ink); text-align: center; cursor: pointer; }
-.uniform-tile input { position: absolute; top: 4px; left: 4px; width: 1px; height: 1px; margin: 0; opacity: 0; }
-.uniform-tile:has(input:checked) { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }
-.uniform-tile:has(input:checked)::before { content: "▶"; position: absolute; top: .35rem; left: .4rem; color: var(--red); font-size: .875rem; line-height: 1; animation: blink 1s steps(2, jump-none) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-.uniform-tile:has(input:focus-visible) { outline: 3px solid #f2c14e; outline-offset: 2px; } /* palette yellow: visible on the navy panel */
-/* Portrait: the head of the 48 px frame at 2× (a 52×40 window on the sheet) on the day-game sky */
-.portrait {
-  width: 52px;
-  height: 40px;
-  border: 2px solid var(--ink);
-
-  background: url("/game/runner.png") -20px calc(var(--row) * -96px) / 1440px 288px no-repeat, linear-gradient(#8fd3ff 70%, #3f9b3a 70%);
-  image-rendering: pixelated;
-}
-.tile-name { font-weight: 700; font-size: 1rem; }
-.tile-desc { font-size: .8125rem; line-height: 1.3; color: var(--muted); }
-.tile-suggest { display: block; margin-top: .3rem; font-weight: 700; color: var(--red); }
-@media (max-width: 599px) {
-  .tile-desc { display: none; } /* compact on phones: portrait + name (the skills are in How I design) */
-}
-
-/* The player card (a short About). Its colour follows the uniform: navy, red or dark grey (white text stays ≥ 4.5:1). */
-.player-card { --team: var(--navy); overflow: hidden; border: 2px solid var(--team); background: var(--card); box-shadow: 4px 4px 0 var(--shadow); }
-:root:has(#u-designer:checked) .player-card { --team: var(--red); }
-:root:has(#u-maker:checked) .player-card { --team: #5b6577; }
-.card-band { padding: .9rem 1.25rem .8rem; background: var(--team); }
-.card-band h1 { margin: 0; }
-.pixel-name svg { max-width: 512px; }
-.card-body { padding: 1rem 1.25rem 1.25rem; }
-.card-stats { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
-.card-stats li { padding: .4rem .5rem; border: 2px solid var(--line); text-align: center; font-size: .8125rem; line-height: 1.25; color: var(--muted); }
-.card-stats strong { display: block; font-size: 1.375rem; color: var(--ink); }
-.card-bio { margin: 0 0 1rem; font-size: 1rem; }
-@media (max-width: 599px) {
-  .card-bio { display: none; } /* compact card on phones: the bio is in the About */
-}
-.player-card .actions { margin-bottom: 1rem; }
-.start-here { display: block; margin-top: 1rem; padding: .75rem 1rem; max-width: 34rem; border: 2px solid var(--ink); border-left-width: 6px; background: var(--card); text-decoration: none; }
-.start-here strong { display: block; }
-.start-here:hover strong { color: var(--red); text-decoration: underline; }
-
-/* --- How I design --- */
-.how h2 { margin-top: 1.5rem; }
-.how-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
-.how-block { padding: 1rem 1.25rem; background: var(--card); border: 2px solid var(--ink); font-size: 1rem; }
-.how-block h3 { margin: 0 0 .5rem; font-size: 1.125rem; }
-.how-block ol { margin: 0; padding-left: 1.25rem; }
-.how-block li + li { margin-top: .5rem; }
-.how-block p { margin: .5rem 0 0; }
-/* Only the card of the picked uniform shows (Researcher by default). */
-.uniform-card:not([data-uniform="researcher"]) { display: none; }
-:root:has(#u-designer:checked) .uniform-card[data-uniform="researcher"],
-:root:has(#u-maker:checked) .uniform-card[data-uniform="researcher"] { display: none; }
-:root:has(#u-designer:checked) .uniform-card[data-uniform="designer"],
-:root:has(#u-maker:checked) .uniform-card[data-uniform="maker"] { display: block; }
 .skills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
 .skills li { margin: 0 !important; padding: .1rem .5rem; border: 1px solid var(--line); background: var(--bg); font-size: .9375rem; }
 .swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: .35rem .75rem; }
@@ -289,19 +176,6 @@ h3 { font-size: 1.25rem; }
 .button.ghost { background: transparent; border-color: var(--ink); color: var(--ink); box-shadow: none; }
 .button.ghost:hover { background: var(--ink); color: var(--bg); }
 
-.work { max-width: 64rem; }
-.work:focus { outline: none; }
-.case-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); }
-.case-card { background: var(--card); border: 1px solid var(--line); overflow: hidden; }
-.case-card:target { outline: 3px solid var(--red); outline-offset: 2px; }
-.case-card a { display: block; text-decoration: none; }
-.case-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: top; border-bottom: 1px solid var(--line); }
-.case-card .kicker { display: block; padding: 1rem 1rem 0; }
-.case-card h3 { margin: .25rem 0 0; padding: 0 1rem; font-size: 1.125rem; }
-.case-card a:hover h3 { color: var(--red); text-decoration: underline; }
-.case-card p { margin: .5rem 0 0; padding: 0 1rem 1rem; font-size: 1rem; color: var(--muted); }
-
-.about h3 { font-size: 1.25rem; margin: 2rem 0 .5rem; }
 
 /* --- Ballpark (home). The field is a 480×270 pixel picture shown at a whole-number scale --fs (sharp pixels):
    2× (960×540) from 1000 px wide, 1× (480×270) below. Positions come from src/field-map.js as --x / --y percentages.
@@ -582,6 +456,7 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 @media (max-width: 999px) {
   .is-live .panel { margin-top: .75rem; max-height: 60dvh; overflow: auto; overscroll-behavior: contain; }
   .stage-col { position: sticky; top: 0; z-index: 6; padding-bottom: .25rem; background: var(--bg); } /* the stage stays visible above the sheet */
+  .is-live .panel { scroll-margin-top: calc(270px + 1.5rem); } /* scrolled to: right under the sticky stage, never behind it */
 }
 .key-numbers { list-style: none; margin: .5rem 0; padding: 0; display: flex; flex-wrap: wrap; gap: .35rem; }
 .key-numbers li { padding: .15rem .5rem; border: 2px solid var(--ink); font-size: .875rem; font-weight: 700; }
@@ -597,31 +472,8 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .panel p { margin: .5rem 0; font-size: 1rem; }
 .panel .button { margin-top: .25rem; }
 
-/* --- Case reader (src/reader.js): the case in a full-screen dialog over the stadium, like a pause menu --- */
-dialog.reader { width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 0; border: 0; background: var(--bg); color: var(--ink); overflow: auto; overscroll-behavior: contain; }
-dialog.reader::backdrop { background: rgb(15 26 48 / .6); }
-.reader-band { position: sticky; top: 0; z-index: 2; }
-.reader-name { display: flex; align-items: center; gap: .75rem; min-width: 0; }
-.reader-close { margin-left: auto; padding: .4rem .8rem; border: 2px solid #fff; background: transparent; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
-.reader-close:hover { background: #fff; color: var(--ink); }
-.reader-body { padding-bottom: 3rem; }
-html.reader-open { overflow: hidden; } /* the page under the reader does not scroll */
 
-/* --- Case study --- */
-.case { padding-top: 1.5rem; }
-/* Pixel band on top of every case page (and of the case reader in the stadium): icon of the base, the name in the pixel font,
-   the way back to the ballpark. The name is an SVG (scripts/art/title.js), sharp at any size. */
-.case-band { background: var(--ink); color: var(--bg); }
-.band-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding-block: .75rem; }
-.case-band .base-icon { --fs: 2; flex: none; }
-.band-name { flex: 1 1 12rem; min-width: 0; } /* a long name shrinks to fit next to the icon (the SVG keeps its shape) */
-.band-name svg { display: block; width: auto; max-width: 100%; height: 32px; }
-.band-back { margin-left: auto; color: #fff; font-weight: 700; }
-.band-back:hover { color: #f2c14e; }
-.case-band a:focus-visible, .case-band button:focus-visible { outline-color: #fff; }
-.crumb { margin: 0 0 1.5rem; font-size: 1rem; }
-.case h1 { margin-top: .25rem; }
-.case h1 .sub { display: block; margin-top: .5rem; font-size: clamp(1.25rem, 3.5vw, 1.6rem); font-weight: 700; color: var(--ink); }
+.case h1 .sub { display: block; margin-top: .75rem; font-size: clamp(1.125rem, 3vw, 1.5rem); color: var(--ink); }
 
 .facts { margin: 1.5rem 0; padding: 1rem; display: grid; gap: .5rem; background: var(--card); border: 1px solid var(--line); font-size: 1rem; }
 .facts div { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; }
@@ -649,15 +501,6 @@ table { border-collapse: collapse; width: 100%; font-size: 1rem; background: var
 th, td { padding: .5rem .75rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
 th { background: var(--ink); color: var(--bg); }
 
-.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
-.pager a { display: block; font-weight: 700; }
-.pager a[rel="next"], .pager a:last-child { text-align: right; }
-.pager span { display: block; font-size: .875rem; font-weight: 700; color: var(--muted); }
-@media (max-width: 480px) {
-  .pager { grid-template-columns: 1fr; }
-  .pager a[rel="next"], .pager a:last-child { text-align: left; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -671,12 +514,15 @@ th { background: var(--ink); color: var(--bg); }
 .print-head { display: none; }
 @media print {
   @page { size: A4; margin: 14mm 14mm 16mm; }
-  body { background: #fff; font-size: 10.5pt; line-height: 1.45; }
-  .site-header, .skip, .pager, .crumb, .case-band { display: none; }
+  body, body[data-theme] { background: #fff; font-size: 10.5pt; line-height: 1.45; }
+  .site-header, .skip, .chapter-progress, .chapter-nav, .story-end, .chapter-no { display: none; }
   .print-head { display: block; margin: 0 0 6mm; padding-bottom: 2mm; border-bottom: 1px solid var(--line); font-size: 9pt; color: var(--muted); }
   .wrap, .case { max-width: none; padding: 0; }
-  .site-footer { margin-top: 8mm; padding: 3mm 0 0; background: none; color: var(--ink); border-top: 1px solid var(--line); font-size: 9pt; }
-  .site-footer a { color: var(--ink); }
+  .site-footer { margin-top: 8mm; padding: 3mm 0 0; background: none; color: #1b2a4a; border-top: 1px solid #d9ccb3; font-size: 9pt; }
+  .site-footer a { color: #1b2a4a; }
+  .chapter-grid { display: block; }
+  .scorecard { position: static; margin-bottom: 5mm; box-shadow: none; }
+  .chapter h1 { text-shadow: none; }
   h1 { font-size: 22pt; }
   h2 { font-size: 14pt; margin: 6mm 0 2mm; break-after: avoid; }
   h3 { break-after: avoid; }
@@ -693,3 +539,190 @@ th { background: var(--ink); color: var(--bg); }
 .tldr h2 { font-family: var(--font-mono); font-size: .875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 /* Long reading text never wider than 68 characters. */
 .case p, .case li { max-width: 68ch; }
+
+/* ===================================================================================================
+   F4 · Title screen, modes and the mode bar
+   =================================================================================================== */
+
+/* --- The bars on top (night): the title screen has name · EN ES IT · CV · Contact; every other page has the modes. --- */
+.site-header .bar { max-width: 72rem; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; padding-block: .6rem; }
+.site-header .lang-switch { margin-left: auto; }
+.site-header .lang-switch a, .cv-top, .contact-top, .modes a, .to-title {
+  display: inline-flex; align-items: center; gap: .4em; min-height: 44px;
+  font-family: var(--font-mono); font-size: .9375rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; color: var(--ink);
+}
+.site-header .lang-switch a { min-width: 2rem; justify-content: center; }
+.site-header a:hover { color: var(--yellow); }
+.site-header .lang-switch a[aria-current] { color: var(--yellow); }
+.contact-top { padding: 0 1rem; border: 2px solid var(--ink); }
+.contact-top:hover { border-color: var(--yellow); }
+.title-bar .brand { margin-right: 0; min-height: 44px; display: inline-flex; align-items: center; }
+.mode-bar { border-bottom: 4px solid var(--yellow); }
+.modes ul { display: flex; flex-wrap: wrap; gap: .5rem; }
+.modes a { padding: 0 .9rem; border: 2px solid var(--line); }
+.to-title { margin-right: .5rem; }
+.modes a[aria-current] { background: var(--yellow); border-color: var(--yellow); color: var(--night); }
+.modes a[aria-current]:hover { color: var(--night); }
+.modes a:not([aria-current]):hover { border-color: var(--yellow); }
+.site-header a:focus-visible { outline-color: var(--yellow); }
+/* Phones: ◀ Title screen · EN ES IT · CV on the first line, the three modes under it. */
+@media (max-width: 699px) {
+  .site-header .bar { gap: .25rem .75rem; }
+  .modes { order: 2; width: 100%; padding-bottom: .25rem; }
+  .modes ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .375rem; }
+  .modes a { justify-content: center; width: 100%; padding: 0 .25rem; font-size: .75rem; letter-spacing: .02em; text-align: center; line-height: 1.2; }
+  .mode-bar .to-title, .mode-bar .lang-switch a, .mode-bar .cv-top { font-size: .8125rem; letter-spacing: .04em; }
+  .mode-bar .lang-switch a { min-width: 1.5rem; }
+  .mode-bar .lang-switch li + li::before { padding-inline: .15rem; }
+  .mode-bar .to-title { margin-right: auto; }
+  .title-bar .brand { display: none; } /* the name is the logo right under it */
+  .title-bar .lang-switch { margin-right: auto; }
+}
+
+/* --- Title screen --- */
+.title-screen { position: relative; overflow: hidden; padding-block: 2.5rem 4rem; min-height: calc(100dvh - 4.25rem); }
+/* A few stars: 3 px squares (box-shadows of one pseudo-element). */
+.title-screen::before {
+  content: ""; position: absolute; left: 0; top: 0; width: 3px; height: 3px; opacity: .75; /* the box itself stays transparent: only its shadows are stars */
+  box-shadow: 34vw 3rem #f4f1e6, 62vw 9rem #f4f1e6, 12vw 14rem #f4f1e6, 88vw 4rem #f4f1e6, 48vw 20rem #f4f1e6, 76vw 26rem #5fd3ff, 21vw 30rem #f4f1e6, 95vw 15rem #f4f1e6;
+}
+/* The ballpark at the bottom, dark (F6: the night picture; before it, the day field dimmed). Whole-number scale, decoration. */
+/* 480×270 at 3×, only its lower two thirds (the infield): the sky above stays the night of the page. */
+.title-stadium { position: absolute; left: 50%; bottom: 0; z-index: 0; width: 1440px; max-width: none; height: 540px; object-fit: cover; object-position: bottom; transform: translateX(-50%); image-rendering: pixelated; pointer-events: none; }
+.title-stadium[src$="field.png"] { filter: brightness(.25) saturate(.7); }
+@media (max-width: 699px) { .title-stadium { display: none; } } /* phones: the menu and the projects need the room */
+.title-grid { position: relative; z-index: 1; display: grid; gap: 3rem; max-width: 72rem; }
+@media (min-width: 1000px) {
+  .title-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: start; }
+}
+.logo { margin: 0; font-size: calc(var(--j) * 4); line-height: .92; text-transform: uppercase; color: var(--ink); text-shadow: .107em .107em 0 var(--red-fill); }
+.logo span { display: block; }
+@media (min-width: 700px) { .logo { font-size: calc(var(--j) * 6); } }
+.role { margin: 1.75rem 0 .25rem; font-size: 1.375rem; line-height: 1.35; }
+.role-sub { margin: 0 0 2rem; color: var(--muted); }
+@media (max-width: 699px) {
+  .role .sep { display: none; }
+  .role .when { display: block; }
+}
+/* The menu: three real links. The ▶ cursor sits on the first one until the visitor hovers or focuses another. */
+.title-menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; max-width: 36rem; }
+.menu-item { position: relative; display: block; padding: .85rem 1.25rem .9rem 3.25rem; border: 2px solid var(--line); background: var(--night); color: var(--ink); text-decoration: none; }
+.menu-name { display: block; font-family: var(--font-display); font-size: calc(var(--j) * 2); line-height: 1; letter-spacing: .02em; text-transform: uppercase; }
+.menu-desc { display: block; margin-top: .4rem; font-size: 1rem; line-height: 1.4; }
+.title-menu:not(:hover):not(:focus-within) [data-first], .menu-item:hover, .menu-item:focus-visible {
+  border-color: var(--yellow); background: var(--card); box-shadow: 4px 4px 0 #000; color: var(--ink);
+}
+.title-menu:not(:hover):not(:focus-within) [data-first] .menu-name, .menu-item:hover .menu-name, .menu-item:focus-visible .menu-name { color: var(--yellow); }
+.title-menu:not(:hover):not(:focus-within) [data-first]::before, .menu-item:hover::before, .menu-item:focus-visible::before {
+  content: "▶" / ""; position: absolute; left: 1.15rem; top: 1.05rem; /* / "": the cursor is not read as part of the link's name */ color: var(--yellow); font-size: 1.25rem; line-height: 1;
+}
+.menu-item:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.menu-hint { margin: 1.25rem 0 0; font-family: var(--font-mono); font-size: .875rem; letter-spacing: .04em; color: var(--muted); }
+.menu-hint kbd { border-color: var(--line); background: var(--card); color: var(--ink); }
+@media (hover: none) and (pointer: coarse) {
+  .menu-hint { display: none !important; } /* no arrow keys on a touch screen */
+}
+/* Quick picks: the three projects, numbered in the order of the Story mode. */
+.quick-picks h2 { margin: .5rem 0 1rem; color: var(--yellow); text-transform: uppercase; }
+.picks { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.pick { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.25rem; padding: 1.25rem; background: var(--card); border: 2px solid var(--line); box-shadow: 4px 4px 0 #000; color: var(--ink); text-decoration: none; }
+.pick:hover { border-color: var(--yellow); color: var(--ink); }
+.pick:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.pick-no { display: grid; place-items: center; width: 4rem; height: 4rem; background: var(--red-fill); color: #fff; font-family: var(--font-display); font-size: calc(var(--j) * 2); line-height: 1; }
+.pick-name { display: block; font-family: var(--font-display); font-size: calc(var(--j) * 2); line-height: 1; text-transform: uppercase; color: var(--yellow); }
+.pick-line { display: block; margin-top: .4rem; font-size: 1rem; line-height: 1.4; }
+.pick-stats { display: block; margin-top: .5rem; font-family: var(--font-mono); font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+:target > .pick { border-color: var(--yellow); } /* an old /#nipotyno link without JS lands here */
+@media (max-width: 599px) {
+  .pick { gap: .9rem; padding: 1rem; }
+  .pick-no { width: 2.75rem; height: 2.75rem; font-size: calc(var(--j) * 1.5); }
+}
+
+/* --- Story mode: chapters (paper) --- */
+.chapter { padding-block: 2rem 1rem; max-width: 72rem; }
+.chapter-progress { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin: 0 0 1.5rem; font-family: var(--font-mono); font-size: .875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.bars { display: inline-flex; gap: .4rem; }
+.bars i { width: 2.5rem; height: .6rem; background: var(--card-dark); }
+.bars i.is-done { background: var(--red-fill); }
+.chapter-head { display: flex; align-items: flex-start; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--ink); }
+.chapter-no { flex: none; font-family: var(--font-display); font-size: calc(var(--j) * 4); line-height: .8; color: transparent; -webkit-text-stroke: 3px var(--red-fill); }
+.chapter h1 { min-width: 0; text-transform: uppercase; overflow-wrap: break-word; text-shadow: .107em .107em 0 var(--yellow); }
+.chapter h1 .sub { text-transform: none; text-shadow: none; }
+@media (min-width: 700px) { .chapter-no { font-size: calc(var(--j) * 6); } }
+@media (max-width: 599px) {
+  .chapter-head { gap: 1rem; }
+  .chapter-no { font-size: calc(var(--j) * 3); -webkit-text-stroke-width: 2px; }
+  .chapter h1 { font-size: calc(var(--j) * 3); }
+}
+.chapter-grid { display: grid; gap: 2rem; }
+@media (min-width: 1000px) {
+  .chapter-grid { grid-template-columns: 20rem minmax(0, 1fr); align-items: start; gap: 3rem; }
+  .scorecard { position: sticky; top: 1rem; }
+}
+.scorecard { padding: 1.25rem 1.5rem; background: var(--card); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.scorecard h2.kicker { margin: 0 0 1rem; font-family: var(--font-mono); font-size: .875rem; line-height: 1.3; letter-spacing: .08em; }
+.scorecard .facts { margin: 0; padding: 0; border: 0; background: none; gap: .9rem; }
+.scorecard .facts div { display: block; }
+.scorecard .facts dt { font-family: var(--font-mono); font-size: .8125rem; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.scorecard .facts dd { font-size: 1rem; line-height: 1.45; }
+.scorecard .pdf { margin: 1.25rem 0 0; }
+.scorecard .pdf a { font-family: var(--font-mono); font-size: .9375rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+/* Key numbers on a strip of scoreboard (always dark: yellow 11.4:1 and chalk 16.9:1 on night). */
+.score-strip { list-style: none; margin: 0 0 2rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); background: var(--night); border: 4px solid var(--navy); }
+.score-strip li { padding: 1rem 1.25rem; border: 1px solid var(--navy); }
+.score-strip strong { display: block; font-family: var(--font-display); font-size: calc(var(--j) * 2); font-weight: 400; line-height: 1; color: var(--yellow); }
+.score-strip span { display: block; margin-top: .5rem; font-family: var(--font-mono); font-size: .8125rem; letter-spacing: .06em; text-transform: uppercase; color: #f4f1e6; }
+.chapter-body > section:first-of-type h2, .chapter-body > .tldr h2 { margin-top: 0; }
+/* The way on: ◀ Title screen and one big Next chapter ▶ */
+.chapter-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem 2rem; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--ink); }
+.to-title-link { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; font-family: var(--font-mono); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+.next-chapter { display: inline-grid; gap: .35rem; padding: 1rem 1.5rem; background: var(--red-fill); color: #fff; text-decoration: none; box-shadow: 6px 6px 0 var(--ink); }
+.next-chapter:hover { background: var(--ink); color: var(--bg); }
+.next-label { font-family: var(--font-mono); font-size: .8125rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.next-name { font-family: var(--font-display); font-size: calc(var(--j) * 2); line-height: 1; text-transform: uppercase; }
+.story-end { margin-top: 3rem; padding: 1.75rem; background: var(--card); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.story-end h2 { margin-top: 0; }
+.story-end p { max-width: 60ch; }
+/* Chapter 0 (/story/) */
+.story-grid { display: grid; gap: 2.5rem; }
+@media (min-width: 900px) { .story-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: start; gap: 3rem; } }
+.story-bio p { margin: 0 0 1rem; font-size: 1.25rem; max-width: 60ch; }
+.story-zero .motto { margin: 2rem 0 0; padding-left: 1rem; border-left: 6px solid var(--yellow); font-family: var(--font-display); font-size: calc(var(--j) * 2); line-height: 1.1; color: var(--red); }
+.story-how { padding: 1.5rem 1.75rem; background: var(--card); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.story-how h2 { margin-top: 0; }
+.story-how ol { margin: 0; padding-left: 1.5rem; }
+.story-how li + li { margin-top: .75rem; }
+
+/* --- Multiplayer (paper, with a night scouting report) --- */
+.multiplayer { padding-block: 2.5rem 1rem; max-width: 72rem; }
+.mp-head h1 { text-transform: uppercase; text-shadow: .107em .107em 0 var(--yellow); }
+@media (min-width: 700px) { .mp-head h1 { font-size: calc(var(--j) * 6); } }
+.mp-sub { margin: 1rem 0 2.5rem; font-size: 1.375rem; line-height: 1.4; }
+.mp-grid { display: grid; gap: 2.5rem; }
+@media (min-width: 1000px) { .mp-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: start; gap: 3rem; } }
+.ticket { display: grid; grid-template-columns: minmax(0, 1fr) 4rem; background: var(--card); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.ticket-main { padding: 1.75rem; }
+.ticket h2.kicker { margin: 0 0 .75rem; font-family: var(--font-mono); font-size: .875rem; color: var(--red); }
+.ticket-email { margin: 0 0 1.5rem; font-size: clamp(1rem, 4.2vw, 1.375rem); font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.ticket-email a { color: var(--red); }
+.ticket-stub { display: grid; place-items: center; overflow: hidden; border-left: 3px dashed var(--ink); background: var(--card-dark); }
+.ticket-stub span { writing-mode: vertical-rl; font-family: var(--font-display); font-size: calc(var(--j) * 2); color: var(--red); }
+.scouting { padding: 1.75rem; border: 4px solid var(--navy); box-shadow: 6px 6px 0 var(--navy); }
+.scout-head { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; }
+.scout-head h2 { margin: .25rem 0 0; font-size: calc(var(--j) * 2); text-transform: uppercase; color: var(--yellow); }
+.scout-portrait { position: relative; flex: none; width: 104px; height: 104px; overflow: hidden; border: 3px solid var(--yellow); background: var(--card); }
+.scout-portrait .batter { --s: 2; position: absolute; left: 1px; top: 4px; display: block; animation: none; }
+.scout-rows { margin: 0; }
+.scout-rows div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: .25rem 1rem; padding: .7rem 0; border-top: 1px solid var(--line); }
+.scout-rows dt { font-family: var(--font-mono); font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: .2rem; }
+.scout-rows dd { margin: 0; font-size: 1rem; line-height: 1.45; }
+.scout-rows ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+@media (max-width: 599px) {
+  .scout-rows div { grid-template-columns: 1fr; }
+  .ticket { grid-template-columns: minmax(0, 1fr) 3rem; }
+  .ticket-stub span { font-size: calc(var(--j) * 1.5); }
+  .ticket-main { padding: 1.25rem; }
+}
+
+/* --- Gameplay (/play/): the stadium is the page (F5 makes it full screen) --- */
+.field h1 { margin: 0; font-size: calc(var(--j) * 2); }

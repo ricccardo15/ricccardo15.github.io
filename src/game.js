@@ -13,8 +13,7 @@ import { atBat } from './batting.js';
 import { sound } from './sound.js';
 import { createTour } from './tour.js';
 import { createSpots } from './spots.js';
-import './reader.js';
-import { T } from './strings.js'; // the sentences in the page's language // the case reader (its popstate runs first and marks the events it handles)
+import { T } from './strings.js'; // the sentences in the page's language
 
 const stage = document.querySelector('.stage');
 const field = document.querySelector('#field');
@@ -93,6 +92,8 @@ function start() {
     panel.hidden = false;
     for (const card of panel.querySelectorAll('[data-panel]')) card.hidden = card.dataset.panel !== id;
     camera(spotById[id] ?? byId[id] ?? byId[current]);
+    // Phones: the card is under the stage (which stays on top): bring it up right under the stage.
+    if (!wide.matches) requestAnimationFrame(() => panel.scrollIntoView({ block: 'nearest' }));
   }
 
   function closePanel({ focus = true } = {}) {
@@ -178,7 +179,13 @@ function start() {
   }
 
   async function swing() {
-    if (mode !== 'bat' || !batting.active) return;
+    if (mode !== 'bat') return;
+    if (!batting.active) {
+      // A swing while the runner is still walking out of the dugout: he is at the plate at once, the pitch comes.
+      await runTo('home', { animate: false, panelId: null });
+      runner.classList.remove('is-flipped');
+      batting.start();
+    }
     await batting.swing();
     if (mode !== 'bat') return;
     setMode('tour');
@@ -252,25 +259,13 @@ function start() {
     swing();
   });
 
-  // "Enter the ballpark" in the lobby: scroll to the stadium; the runner comes out of the dugout and walks to home plate,
-  // then the pitches start and Swing! has the focus. Done here, not by the browser, because a link to #field would add a
-  // step to the history (and then one Back press would not be enough to leave). Without JS it is a normal link.
+  // On /play/ (F4) the game is the page: the runner comes out of the dugout and walks to home plate, then the pitches start.
   function entrance() {
     batting.stop();
     current = 'dugout'; // not a stop (no link, no card): only where the runner comes from
     pos = { ...DUGOUT };
     place(pos);
     batUp();
-  }
-  for (const enter of document.querySelectorAll('a[href="#field"]')) {
-    enter.addEventListener('click', (event) => {
-      event.preventDefault();
-      field.scrollIntoView({ block: 'start' });
-      if (mode === 'bat') {
-        entrance();
-        swingButton.focus({ preventScroll: true });
-      }
-    });
   }
 
   field.addEventListener('keydown', (event) => {
@@ -290,29 +285,19 @@ function start() {
 
   // --- Address bar: deep links and Back/Forward -----------------------------------
 
-  const fromHash = ({ scroll }) => {
+  const fromHash = () => {
     const id = location.hash.slice(1);
     if (!byId[id]) return false;
     runTo(id, { animate: false });
-    if (scroll) {
-      // Chrome keeps the page pinned to the #id target while images load, undoing our scroll:
-      // the field is the deep-link view, so take the id off the list card.
-      const card = document.getElementById(id);
-      if (card && !field.contains(card)) { card.dataset.id = id; card.removeAttribute('id'); }
-      const toField = () => requestAnimationFrame(() => field.scrollIntoView({ block: 'start' }));
-      if (document.readyState === 'complete') toField();
-      else window.addEventListener('load', toField, { once: true });
-    }
     return true;
   };
 
-  // Only other anchors (#work, #about…) or an address that was typed can add history entries now,
+  // Only other anchors or an address that was typed can add history entries now,
   // so Back/Forward here simply means "free mode" at whatever the address says.
-  window.addEventListener('popstate', (event) => {
-    if (event.readerHandled) return; // the case reader was opened or closed: the stadium stays as it is
+  window.addEventListener('popstate', () => {
     const id = location.hash.slice(1);
     if (!id) { if (mode !== 'bat') { setMode('free'); runTo('home', { animate: false }); } return; }
-    if (!byId[id]) { if (mode === 'tour') setMode('free'); return; } // #work, #about… are not bases
+    if (!byId[id]) { if (mode === 'tour') setMode('free'); return; } // other anchors are not bases
     setMode('free');
     runTo(id, { animate: false });
   });
@@ -326,11 +311,11 @@ function start() {
   bar.hidden = false;
   closeButton.hidden = false;
   panel.hidden = true; // the card opens when a point is clicked (or by the tour): at first the whole field is free to bat
-  if (fromHash({ scroll: true })) {
+  if (fromHash()) {
     setMode('free');
     panel.focus({ preventScroll: true });
   } else {
-    batUp();
+    entrance();
   }
   stage.classList.add('is-ready');
   field.classList.add('is-live'); // CSS: the card goes over the stadium (desktop) only with the game running

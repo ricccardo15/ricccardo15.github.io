@@ -1,5 +1,14 @@
 # SPEC — Riccardo's portfolio (v0.2, 2026-10-20)
 
+> **v3 Title screen (F3–F4, 29/10/2026) — OVERRIDES the home, lobby and stadium parts below.** Plan: docs/PROMPT_V3.md.
+> - `/` = **title screen** (night theme): bar "name · EN ES IT · CV ↓ · Contact"; logo RICCARDO CIRILLO (Jersey 10, red shadow); "UX Research & Design · internship in Madrid, Feb–Jul 2027"; menu of 3 real links **Story mode** (/story/) · **Gameplay** (/play/) · **Multiplayer** (/multiplayer/) with a ▶ cursor (↑ ↓ inside the menu, src/title.js); **Quick picks** = the 3 projects (01 Nipotyno, 02 Levante, 03 Sensor lab). Works without JS. No gate.
+> - **Mode bar** on every other page: "◀ Title screen" · Story mode · Gameplay · Multiplayer (current one lit, aria-current) · EN ES IT · CV ↓.
+> - **Story mode** (paper): /story/ = chapter 0 (bio, motto, How I design) → /nipotyno/ (1 of 3) → /levante/ (2 of 3) → /sensor-lab/ (3 of 3, ends with "That's the story" + Multiplayer + Play the game). Each chapter: progress bars, big outlined number, title, player card (role, team, when, methods, PDF), key numbers on a dark strip, the text, "◀ Title screen" + "Next chapter ▶".
+> - **Gameplay** (/play/, night): the stadium as its own page (F5 makes it full screen with the pause menu). "Read the case study" opens the real page (the full-screen reader is gone).
+> - **Multiplayer** (/multiplayer/, paper): ticket with the email and the 2 CVs; night "scouting report" (Position, Available, Status, Languages, Education) from content/facts.md.
+> - Old links: /#nipotyno, /#levante, /#sensor-lab → the case page; /#about, /#how → /story/; /#contact → /multiplayer/; /#field → /play/ (inline script; without JS the same ids sit on the title screen).
+> - Type: Jersey 10 (titles, menus, numbers) + Atkinson Hyperlegible Next (text) + Atkinson Hyperlegible Mono (labels). Themes: night and paper (src/style.css). Square frames, 2 px border + solid shadow.
+
 > **v0.2 — Team meeting decisions (see MEETING_2026-10-20.md) OVERRIDE anything below that conflicts:**
 > - Stack: Vite + HTML/CSS/SVG + plain JS (no Phaser). The site works without the game.
 > - Home = first viewport already shows name, "UX Research & Design intern · Madrid · Feb–Jul 2027", CV EN/ES, contacts, Nipotyno card. No gate before content.

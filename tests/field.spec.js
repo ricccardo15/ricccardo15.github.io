@@ -20,7 +20,7 @@ for (const { width, height, scale } of sizes) {
     test.use({ viewport: { width, height } });
 
     test(`is shown at ${scale}× (the picture is ${FIELD.width * scale} px wide) and the sprites follow`, async ({ page }) => {
-      await page.goto('/');
+      await page.goto('/play/');
       const img = await page.locator('.field-img').boundingBox();
       expect(img.width).toBe(FIELD.width * scale);
       expect(img.height).toBe(FIELD.height * scale);
@@ -30,7 +30,7 @@ for (const { width, height, scale } of sizes) {
     });
 
     test('the stage fits the screen, is centred, and the picture is centred in it (cropped on phones)', async ({ page }) => {
-      await page.goto('/');
+      await page.goto('/play/');
       const stage = await page.locator('.stage').boundingBox();
       const img = await page.locator('.field-img').boundingBox();
       expect(stage.x).toBeGreaterThanOrEqual(0);
@@ -57,8 +57,8 @@ for (const { width, height } of [{ width: 390, height: 844 }, { width: 320, heig
     test.use({ viewport: { width, height } });
 
     // In every language (Fase 3): the Spanish and Italian labels are longer.
-    for (const home of ['/', '/es/', '/it/']) test(`${home}: every base label is completely inside the visible field, and no two labels overlap`, async ({ page }) => {
-      await page.goto(home);
+    for (const home of ['/', '/es/', '/it/']) test(`${home}play/: every base label is completely inside the visible field, and no two labels overlap`, async ({ page }) => {
+      await page.goto(`${home}play/`);
       const stage = await page.locator('.stage').boundingBox();
       const boxes = [];
       for (const base of await page.locator('.base').all()) {
@@ -82,21 +82,12 @@ for (const { width, height } of [{ width: 390, height: 844 }, { width: 320, heig
 test.describe('Fase 1 art in the page', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test('the sprite sheets load at their real size and the big batter shows a 48 px frame', async ({ page, request }) => {
-    await page.goto('/');
+  test('the sprite sheets load at their real size', async ({ page, request }) => {
+    await page.goto('/play/');
     for (const [file, w, h] of [['field.png', 480, 270], ['runner.png', 720, 144], ['crew.png', 384, 192], ['icons.png', 168, 24]]) {
       const size = await page.evaluate((src) => new Promise((resolve) => { const i = new Image(); i.onload = () => resolve([i.naturalWidth, i.naturalHeight]); i.src = src; }), `/game/${file}`);
       expect(size, file).toEqual([w, h]);
     }
-    const batter = await page.locator('.batter').boundingBox();
-    expect([batter.width, batter.height]).toEqual([48 * 5, 48 * 5]); // 5× in the lobby at this width
     expect((await request.get('/og/home.jpg')).status()).toBe(200);
-  });
-
-  test('the Uniform picked on the start screen shows on the field (a row of the 48 px sheet)', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.uniform-tiles').getByText('Maker', { exact: true }).click();
-    const position = await page.locator('.runner').evaluate((el) => getComputedStyle(el).backgroundPositionY);
-    expect(position).toBe(`${-48 * 2 * 2}px`); // row 2 at 2×
   });
 });

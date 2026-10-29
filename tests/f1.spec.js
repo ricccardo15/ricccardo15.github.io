@@ -27,7 +27,7 @@ test('dist/ has no housing, lab or _archive (pages, images, previews, PDFs)', as
 
 test('no generated page links to /housing/ or /lab/, in any language', async () => {
   const pages = (await files('dist')).filter((f) => f.endsWith('.html'));
-  expect(pages.length).toBeGreaterThanOrEqual(12); // 3 homes + 3 × 3 cases
+  expect(pages.length).toBeGreaterThanOrEqual(21); // 3 languages × (title, story, play, multiplayer + 3 cases)
   for (const page of pages) {
     const html = await readFile(page, 'utf8');
     expect(html, page).not.toMatch(/(href|src|content)="[^"]*\/(housing|lab)\//);
@@ -38,12 +38,12 @@ test('no generated page links to /housing/ or /lab/, in any language', async () 
 test('the three projects are on the site, in the right order, in every language', async ({ page }) => {
   for (const home of ['/', '/es/', '/it/']) {
     await page.goto(home);
-    await expect(page.locator('#work .case-card')).toHaveCount(3);
-    expect(await page.locator('#work .case-card').evaluateAll((cards) => cards.map((c) => c.id))).toEqual(['nipotyno', 'levante', 'sensor-lab']);
+    await expect(page.locator('.picks > li')).toHaveCount(3); // F4: the Quick picks of the title screen
+    expect(await page.locator('.picks > li').evaluateAll((cards) => cards.map((c) => c.id))).toEqual(['nipotyno', 'levante', 'sensor-lab']);
   }
   const res = await page.goto('/sensor-lab/');
   expect(res.status()).toBe(200);
   await expect(page.locator('h1')).toContainText('Sensor lab');
   await expect(page.locator('main')).toContainText('Case study in preparation');
-  await expect(page.locator('.pager a[rel="prev"]')).toHaveAttribute('href', '/levante/');
+  await expect(page.locator('.chapter-progress')).toContainText('Chapter 3 of 3'); // F4: the last chapter of the Story mode
 });

@@ -44,7 +44,7 @@ test('Jersey 10 only for titles: reading text is Atkinson Hyperlegible Next', as
 test('themes: cases are paper, the stadium is night; colour contrast passes in both', async ({ page }) => {
   for (const [path, selector, theme, bg] of [
     ['/nipotyno/', 'body', 'paper', 'rgb(246, 242, 234)'],
-    ['/', '#field', 'night', 'rgb(11, 15, 30)'],
+    ['/play/', '#field', 'night', 'rgb(11, 15, 30)'],
   ]) {
     await page.goto(path);
     await expect(page.locator(selector)).toHaveAttribute('data-theme', theme);
@@ -55,9 +55,9 @@ test('themes: cases are paper, the stadium is night; colour contrast passes in b
 });
 
 test('frames are square: no rounded corners on cards and buttons', async ({ page }) => {
-  await page.goto('/');
-  for (const sel of ['.button', '.player-card', '.panel', '.stage']) {
-    expect(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius), sel).toBe('0px');
+  for (const [path, sels] of [['/', ['.pick', '.menu-item']], ['/play/', ['.button', '.panel', '.stage']], ['/multiplayer/', ['.ticket', '.button']]]) {
+    await page.goto(path);
+    for (const sel of sels) expect(await page.locator(sel).first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius), sel).toBe('0px');
   }
 });
 

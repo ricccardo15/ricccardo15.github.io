@@ -4,24 +4,18 @@ import { SPOTS, STOPS } from '../src/field-map.js';
 // Fase 2: the stadium is the navigation centre. Every point opens its card over the stadium (a drawer on desktop,
 // under the stage on phones); ✕ Close and Esc close it and the focus goes back to the point. Without JS: plain links.
 const card = (page) => page.locator('#field-panel [data-panel]:visible');
-const enter = async (page) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Enter the ballpark' }).click();
-};
+const enter = async (page) => { await page.goto('/play/'); }; // F4: the stadium is its own page
 const overlap = (a, b) => !(a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y);
 
 test.describe('stadium @ 1280×800', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
 
-  test('"Enter the ballpark" brings the stadium to the screen; it fills the screen, the card is closed, Swing! has the focus', async ({ page }) => {
+  test('/play/ shows the whole stage on the first screen, the card is closed, Swing! is there', async ({ page }) => {
     await enter(page);
-    const field = await page.locator('#field').boundingBox();
-    expect(Math.abs(field.y)).toBeLessThanOrEqual(20); // the page keeps 1rem of scroll padding
-    expect(field.height).toBeGreaterThanOrEqual(800 - 60);
     await expect(page.locator('.stage')).toBeInViewport({ ratio: 1 });
     await expect(page.locator('#field-panel')).toBeHidden();
-    await expect(page.getByRole('button', { name: 'Swing!' })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Swing!' })).toBeVisible();
     // Swing! sits inside the stage, under home plate, and covers no label
     const stage = await page.locator('.stage').boundingBox();
     const swing = await page.locator('.swing-box').boundingBox();
@@ -117,15 +111,14 @@ test.describe('stadium without JavaScript', () => {
   test.use({ viewport: { width: 1280, height: 800 }, javaScriptEnabled: false });
 
   test('every point is a plain link to a real place, and the home card is shown', async ({ page }) => {
-    await page.goto('/');
-    for (const spot of SPOTS) {
-      await expect(page.locator(`.stage [data-spot="${spot.id}"]`)).toHaveAttribute('href', spot.href);
-      await expect(page.locator(spot.href)).toHaveCount(1);
-    }
+    await page.goto('/play/');
+    // F4: the scoreboard and the mound lead to the Story mode, the ticket booth to Multiplayer
+    const hrefs = { about: '/story/', how: '/story/#how-i-design', contact: '/multiplayer/' };
+    for (const spot of SPOTS) await expect(page.locator(`.stage [data-spot="${spot.id}"]`)).toHaveAttribute('href', hrefs[spot.id]);
     await expect(page.locator('.stage [data-stop="levante"]')).toHaveAttribute('href', '/levante/');
     await expect(card(page)).toHaveAttribute('data-panel', 'home');
     await expect(page.locator('.game-bar')).toBeHidden();
     await page.locator('.stage [data-spot="contact"]').click();
-    await expect(page.locator('#contact')).toBeInViewport();
+    await expect(page).toHaveURL(/\/multiplayer\/$/);
   });
 });

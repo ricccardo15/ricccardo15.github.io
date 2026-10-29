@@ -33,7 +33,7 @@ test.describe('languages @ 1280 px', () => {
         }
 
         // the CV in the header follows the language: EN for EN and IT, ES for ES
-        const cv = page.locator('.site-header nav a[href^="/cv/"]');
+        const cv = page.locator('.site-header a[href^="/cv/"]');
         await expect(cv).toHaveCount(1);
         await expect(cv).toHaveAttribute('href', lang === 'es' ? '/cv/CV_Riccardo_Cirillo_ES.pdf' : '/cv/CV_Riccardo_Cirillo_EN.pdf');
         // every CV link in another language than the page says so (WCAG 3.1.2)
@@ -53,14 +53,14 @@ test.describe('languages @ 1280 px', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'it');
     await expect(page.locator('.facts dt').first()).toHaveText('Il mio ruolo');
 
-    // on the home the base in the address goes along
-    await page.goto('/#sensor-lab');
+    // on the game page the base in the address goes along
+    await page.goto('/play/#sensor-lab');
     await page.locator('.lang-switch a[hreflang="es"]').focus();
     await expect(page.locator('.lang-switch a[hreflang="es"]')).toBeFocused();
     const outline = await page.locator('.lang-switch a[hreflang="es"]').evaluate((el) => getComputedStyle(el).outlineStyle);
     expect(outline).not.toBe('none');
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/es\/#sensor-lab$/);
+    await expect(page).toHaveURL(/\/es\/play\/#sensor-lab$/);
     await expect(page.locator('#field-panel [data-panel="sensor-lab"]')).toBeVisible();
   });
 
@@ -71,12 +71,12 @@ test.describe('languages @ 1280 px', () => {
     await page.locator('.lang-switch a[hreflang="es"]').click();
     await expect(page).toHaveURL(/\/es\/$/);
 
-    await page.goto('/#levante');
-    await expect(page).toHaveURL(/\/es\/#levante$/);
+    await page.goto('/#levante'); // an old link: first the chosen language, then the case page (F4)
+    await expect(page).toHaveURL(/\/es\/levante\/$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
 
     await page.locator('.lang-switch a[hreflang="en"]').click();
-    await expect(page).toHaveURL(/\/#levante$/);
+    await expect(page).toHaveURL(/\/levante\/$/);
     await page.goto('/');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     // case pages never redirect
@@ -86,42 +86,36 @@ test.describe('languages @ 1280 px', () => {
   });
 
   for (const [lang, words] of Object.entries({
-    es: { next: 'Siguiente base: Levante →', count: '1 de 3 · Nipotyno', swing: '¡Batea!', back: 'Volver al estadio', read: 'Lee el caso de estudio' },
-    it: { next: 'Prossima base: Levante →', count: '1 di 3 · Nipotyno', swing: 'Batti!', back: 'Torna allo stadio', read: 'Leggi il caso studio' },
+    es: { next: 'Siguiente base: Levante →', count: '1 de 3 · Nipotyno', swing: '¡Batea!', read: 'Lee el caso de estudio' },
+    it: { next: 'Prossima base: Levante →', count: '1 di 3 · Nipotyno', swing: 'Batti!', read: 'Leggi il caso studio' },
   })) {
-    test(`/${lang}/: the game and the reader speak ${lang}, no English left in the interface`, async ({ page }) => {
+    test(`/${lang}/play/: the game and the chapters speak ${lang}, no English left in the interface`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(`/${lang}/`);
+      await page.goto(`/${lang}/play/`);
       // English interface strings must not appear anywhere (also in hidden cards).
       // The CV links are written in the CV's own language on purpose ("CV (English, PDF)").
       const text = await page.locator('body').textContent();
       for (const english of ['Read the case study', 'Enter the ballpark', 'Take another swing', 'Explore the ballpark', 'Stadium map',
-        'Select your player', 'Suggested first base', 'Back to the ballpark', 'Player stats', 'Why baseball?', 'Exit tour', 'Skip to content']) {
+        'Select your player', 'Suggested first base', 'Back to the ballpark', 'Player stats', 'Why baseball?', 'Exit tour', 'Skip to content', 'Title screen', 'Story mode']) {
         expect(text, english).not.toContain(english);
       }
 
       await page.getByRole('button', { name: words.swing }).click();
       await expect(page.locator('.tour-count')).toHaveText(words.count);
-      await expect(page).toHaveURL(new RegExp(`/${lang}/#nipotyno$`));
+      await expect(page).toHaveURL(new RegExp(`/${lang}/play/#nipotyno$`));
       const next = page.locator('#field-panel .tour-nav .button');
       await expect(next).toHaveText(words.next);
       await next.click();
       await expect(page.locator('#field-panel [data-panel="levante"]')).toBeVisible();
 
-      // the reader opens the case in this language and closes back to this home
+      // the case opens in this language (F4: the real page), and the next chapter stays in it
       const card = page.locator('#field-panel [data-panel="levante"]');
       await card.getByRole('link', { name: new RegExp(`^${words.read}`) }).click();
-      const reader = page.locator('dialog.reader');
-      await expect(reader).toBeVisible();
       await expect(page).toHaveURL(new RegExp(`/${lang}/levante/$`));
-      await expect(reader.locator('.reader-close')).toHaveText(`✕ ${words.back}`);
-      // next case inside the reader stays in the language
-      await reader.locator('.pager a[rel="next"]').click();
+      await page.locator('.next-chapter').click();
       await expect(page).toHaveURL(new RegExp(`/${lang}/sensor-lab/$`));
-      await expect(reader).toBeVisible();
-      await page.keyboard.press('Escape');
-      await expect(reader).toBeHidden();
-      await expect(page).toHaveURL(new RegExp(`/${lang}/#levante$`));
+      await expect(page.locator('.next-chapter')).toHaveCount(0); // the last chapter ends the story
+      await expect(page.locator(`.story-end a[href="/${lang}/multiplayer/"]`)).toBeVisible();
     });
   }
 
@@ -132,21 +126,21 @@ test.describe('languages @ 1280 px', () => {
     const ids = await page.locator('[id]').evaluateAll((els) => els.map((el) => el.id));
     for (const id of ids) expect(id).toMatch(/^[A-Za-z0-9_-]+$/);
 
-    const pdf = page.locator('.crumb a[href^="/pdf/"]');
+    const pdf = page.locator('.scorecard .pdf a');
     await expect(pdf).toHaveAttribute('href', '/pdf/Riccardo_Cirillo_Nipotyno_ES.pdf');
     for (const file of ['Riccardo_Cirillo_Nipotyno_ES.pdf', 'Riccardo_Cirillo_Sensor_lab_IT.pdf', 'Riccardo_Cirillo_Sensor_lab.pdf']) {
       const res = await request.get(`/pdf/${file}`);
       expect(res.status(), file).toBe(200);
     }
 
-    // the lobby, the About and How I design come from the translated About (fixed ids), in Italian
-    await page.goto('/it/');
-    await expect(page.locator('.card-bio')).toContainText('master EIT Digital');
-    await expect(page.locator('#about')).toContainText('Perché il baseball?');
-    await expect(page.locator('#how ol li')).toHaveCount(3);
-    await expect(page.locator('.player-card .status-line')).toHaveText(
-      'Cittadino UE · NIE spagnolo · Italiano (madrelingua) · Inglese B2 · Spagnolo B2 · Tirocinio curricolare + tesi magistrale',
-    );
+    // chapter 0 comes from the translated About (fixed ids), the scouting report from facts.md, in Italian (F4)
+    await page.goto('/it/story/');
+    await expect(page.locator('.story-bio')).toContainText('master EIT Digital');
+    await expect(page.locator('.story-how ol li')).toHaveCount(3);
+    await page.goto('/it/multiplayer/');
+    for (const piece of ['Cittadino UE', 'NIE spagnolo', 'Italiano (madrelingua)', 'Inglese B2', 'Spagnolo B2', 'Tirocinio curricolare + tesi magistrale']) {
+      await expect(page.locator('.scouting')).toContainText(piece);
+    }
   });
 });
 
@@ -157,7 +151,7 @@ for (const { width, height } of [{ width: 1280, height: 800 }, { width: 390, hei
     test.use({ viewport: { width, height } });
     for (const home of ['/es/', '/it/']) {
       test(`${home}: Swing! covers no point`, async ({ page }) => {
-        await page.goto(home);
+        await page.goto(`${home}play/`);
         const swing = await page.locator('.swing-box').boundingBox();
         for (const base of await page.locator('.stage .base').all()) expect(overlap(swing, await base.boundingBox()), await base.getAttribute('href')).toBe(false);
       });

@@ -6,9 +6,10 @@ const viewports = [
   { name: 'desktop', width: 1280, height: 800 },
   { name: 'mobile', width: 390, height: 844 },
 ];
-// Every page in every language (Fase 3): /, /es/, /it/ and their cases.
+// Every page in every language (Fase 3): /, /es/, /it/, the modes (F4) and the cases.
 const homes = ['/', '/es/', '/it/'];
-const pages = homes.flatMap((home) => [home, ...['nipotyno', 'levante', 'sensor-lab'].map((slug) => `${home}${slug}/`)]);
+const CASES = ['nipotyno', 'levante', 'sensor-lab'];
+const pages = homes.flatMap((home) => [home, ...['story', 'play', 'multiplayer', ...CASES].map((slug) => `${home}${slug}/`)]);
 
 for (const vp of viewports) {
   for (const path of pages) {
@@ -65,7 +66,7 @@ test('CV files are served', async ({ request }) => {
   }
 });
 
-for (const path of pages.filter((p) => !homes.includes(p))) {
+for (const path of pages.filter((p) => CASES.some((c) => p.endsWith(`/${c}/`)))) {
   test(`${path} has Open Graph tags and every image loads`, async ({ page, request }) => {
     await page.goto(path);
     for (const prop of ['og:title', 'og:description', 'og:url', 'og:image']) {
@@ -84,27 +85,12 @@ for (const path of pages.filter((p) => !homes.includes(p))) {
   });
 }
 
-test.describe('phone (390 px): simplified touch field', () => {
+test.describe('phone (390 px): simplified touch field on /play/', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const panel = (page) => page.locator('#field-panel [data-panel]:visible');
 
-  test('name, CV, contact and Nipotyno are on the first screen; the field is there too', async ({ page }) => {
-    await page.goto('/');
-    for (const locator of [
-      page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
-      page.locator('.player-card').getByRole('link', { name: 'Download CV (English, PDF)' }),
-      page.locator('.player-card').getByRole('link', { name: 'CV en español (PDF)' }),
-      page.locator('.hero a[href^="mailto:"]'),
-      page.locator('.player-card').getByRole('link', { name: /^Start here/ }),
-    ]) {
-      await expect(locator).toBeInViewport();
-    }
-    await expect(page.locator('#field')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Enter the ballpark' })).toBeVisible();
-  });
-
   test('field at 1× (480×270, sharp pixels, cropped by the stage), touch bases at least 24 px high', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/play/');
     const box = await page.locator('.field-img').boundingBox();
     expect([box.width, box.height]).toEqual([480, 270]);
     for (const base of await page.locator('.base').all()) {
@@ -113,21 +99,21 @@ test.describe('phone (390 px): simplified touch field', () => {
   });
 
   test('tapping a base opens its panel', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/play/');
     await page.locator('.base[data-stop="sensor-lab"]').tap();
     await expect(page).toHaveURL(/#sensor-lab$/);
     await expect(panel(page)).toHaveAttribute('data-panel', 'sensor-lab');
   });
 
-  test('deep links (#nipotyno etc.) open the field on that base', async ({ page }) => {
-    for (const slug of ['nipotyno', 'levante', 'sensor-lab']) {
+  test('deep links (/play/#nipotyno etc.) open the field on that base; Read the case study opens the real page', async ({ page }) => {
+    for (const slug of CASES) {
       await page.goto('/sensor-lab/');
-      await page.goto(`/#${slug}`);
+      await page.goto(`/play/#${slug}`);
       await expect(panel(page)).toHaveAttribute('data-panel', slug);
-      await expect(page.locator('#field')).toBeInViewport();
+      await expect(page.locator('.stage')).toBeInViewport();
       await panel(page).getByRole('link', { name: /Read the case study/ }).click();
       await expect(page).toHaveURL(new RegExp(`/${slug}/$`));
-      await expect(page.locator('dialog.reader article.case h1')).toBeVisible(); // Fase 2: the case opens in the reader
+      await expect(page.locator('article.case h1')).toBeVisible(); // F4: no reader any more, the page itself
     }
   });
 });
@@ -138,7 +124,7 @@ for (const width of [632, 320]) {
     test.use({ viewport: { width, height: 800 } });
 
     test('the field is shown inside the screen and nothing scrolls sideways', async ({ page }) => {
-      await page.goto('/');
+      await page.goto('/play/');
       await expect(page.locator('#field')).toBeVisible();
       const stage = await page.locator('.stage').boundingBox();
       expect(stage.x + stage.width).toBeLessThanOrEqual(width);
@@ -148,29 +134,12 @@ for (const width of [632, 320]) {
   });
 }
 
-test.describe('desktop (1280 px): the ballpark', () => {
+test.describe('desktop (1280 px): the ballpark on /play/', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
   const panel = (page) => page.locator('#field-panel [data-panel]:visible');
 
-  test('first screen shows name, role, CV, contact and a way into Nipotyno', async ({ page }) => {
-    await page.goto('/');
-    for (const locator of [
-      page.getByRole('heading', { level: 1, name: 'Riccardo Cirillo' }),
-      page.getByText('UX Research & Design intern · Madrid · Feb–Jul 2027').first(),
-      page.locator('.player-card').getByRole('link', { name: 'Download CV (English, PDF)' }),
-      page.locator('.player-card').getByRole('link', { name: 'CV en español (PDF)' }),
-      page.locator('.hero a[href^="mailto:"]'),
-      page.locator('.player-card').getByRole('link', { name: /^Start here/ }),
-      page.getByRole('link', { name: 'Enter the ballpark' }),
-      page.getByRole('link', { name: 'Skip → Case studies' }),
-      page.getByRole('radio', { name: 'Researcher' }),
-    ]) {
-      await expect(locator).toBeInViewport();
-    }
-  });
-
   test('clicking a base runs there and opens its panel', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/play/');
     await page.locator('.base[data-stop="levante"]').click();
     await expect(page).toHaveURL(/#levante$/);
     await expect(panel(page)).toHaveAttribute('data-panel', 'levante');
@@ -182,7 +151,7 @@ test.describe('desktop (1280 px): the ballpark', () => {
 
   test('arrow keys move between bases, Esc closes the panel, one Back press leaves the page', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/play/');
     await page.locator('.base[data-stop="home"]').focus();
     await page.keyboard.press('ArrowRight');
     await expect(page.locator('.base[data-stop="nipotyno"]')).toBeFocused();
@@ -200,7 +169,7 @@ test.describe('desktop (1280 px): the ballpark', () => {
 
     // the address is replaced when a base is clicked (never added to): one Back press goes to the page before
     await page.goto('/levante/');
-    await page.goto('/#sensor-lab');
+    await page.goto('/play/#sensor-lab');
     await page.keyboard.press('Escape'); // the card opened by the deep link covers 1st base: close it
     await page.locator('.base[data-stop="nipotyno"]').click();
     await expect(page).toHaveURL(/#nipotyno$/);
@@ -208,63 +177,17 @@ test.describe('desktop (1280 px): the ballpark', () => {
     await expect(page).toHaveURL(/\/levante\/$/);
   });
 
-  test('F1: three bases with a project, the dugout is scenery (no link, an old /#lab opens no card)', async ({ page }) => {
-    await page.goto('/#lab');
+  test('F1: three bases with a project, the dugout is scenery (no link, an old #lab opens no card)', async ({ page }) => {
+    await page.goto('/play/#lab');
     await expect(page.locator('.stage .base[data-stop]')).toHaveCount(4); // home plate + 3 projects
     await expect(page.locator('[data-stop="lab"], [data-stop="housing"]')).toHaveCount(0);
     await expect(page.locator('#field-panel')).toBeHidden();
-    await expect(page.locator('#work .case-card')).toHaveCount(3);
   });
 
   test('field art is pixel-perfect: 480×270 shown at an integer scale', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/play/');
     const box = await page.locator('.field-img').boundingBox();
     expect(box.width / 480).toBe(Math.round(box.width / 480));
     expect(box.height / 270).toBe(box.width / 480);
-  });
-});
-
-test.describe('Start screen: uniforms', () => {
-  test.use({ viewport: { width: 1280, height: 800 } });
-  const card = (page) => page.locator('.uniform-card:visible');
-
-  test('Researcher by default; Maker shows its skills and suggests Sensor lab, and is remembered', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByRole('radio', { name: 'Researcher' })).toBeChecked();
-    await expect(card(page)).toHaveCount(1);
-    await expect(card(page)).toHaveAttribute('data-uniform', 'researcher');
-
-    await page.locator('.uniform-tiles').getByText('Maker', { exact: true }).click();
-    await expect(card(page)).toHaveAttribute('data-uniform', 'maker');
-    await expect(card(page)).toContainText('Arduino');
-    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/sensor-lab/');
-    // the batter and the runner on the field wear the Maker uniform (row 2 of the sprite)
-    const row = await page.locator('.runner').evaluate((el) => getComputedStyle(el).getPropertyValue('--uniform-row').trim());
-    expect(row).toBe('2');
-
-    await page.reload();
-    await expect(page.getByRole('radio', { name: 'Maker' })).toBeChecked();
-  });
-
-  test('uniforms work with the keyboard and show focus', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('radio', { name: 'Researcher' }).focus();
-    await page.keyboard.press('ArrowRight');
-    const designer = page.getByRole('radio', { name: 'Designer' });
-    await expect(designer).toBeFocused();
-    await expect(designer).toBeChecked();
-    await expect(card(page)).toHaveAttribute('data-uniform', 'designer');
-    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/levante/');
-    const outline = await page.locator('.uniforms label:has(input:focus-visible)').evaluate((el) => getComputedStyle(el).outlineStyle);
-    expect(outline).not.toBe('none');
-  });
-
-  test('Enter the ballpark goes to the field, Skip goes to the list', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('link', { name: 'Enter the ballpark' }).click();
-    await expect(page.locator('#field')).toBeInViewport();
-    await page.goto('/');
-    await page.getByRole('link', { name: 'Skip → Case studies' }).click();
-    await expect(page.locator('#work')).toBeInViewport();
   });
 });

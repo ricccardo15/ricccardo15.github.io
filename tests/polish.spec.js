@@ -8,7 +8,7 @@ test.describe('sound toggle', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
   test('off by default, turns on, is remembered', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/play/');
     const toggle = page.getByRole('button', { name: 'Sound' });
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await expect(toggle).toContainText('off');
@@ -55,13 +55,12 @@ test('home share preview is 1200×630 with alt text', async ({ page, request }) 
 });
 
 for (const width of [1280, 390]) {
-  test.describe(`home @ ${width} px`, () => {
+  test.describe(`/play/ @ ${width} px`, () => {
     test.use({ viewport: { width, height: 800 } });
 
     test('reduced motion: nothing keeps moving', async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto('/');
-      await page.locator('.uniform-tiles').getByText('Designer', { exact: true }).click(); // would make the batter swing
+      await page.goto('/play/');
       await page.getByRole('button', { name: 'Swing!' }).click();
       await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
       await page.waitForTimeout(100);
@@ -69,13 +68,13 @@ for (const width of [1280, 390]) {
       expect(moving).toBe(0);
     });
 
-    test('first load weighs less than 1.5 MB', async ({ page }) => {
+    for (const path of ['/', '/play/']) test(`${path}: first load weighs less than 1.5 MB`, async ({ page }) => {
       let bytes = 0;
       page.on('response', async (res) => {
         const body = await res.body().catch(() => null);
         if (body) bytes += body.length;
       });
-      await page.goto('/', { waitUntil: 'networkidle' });
+      await page.goto(path, { waitUntil: 'networkidle' });
       expect(bytes).toBeLessThan(1_500_000);
     });
   });
