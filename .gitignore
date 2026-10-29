@@ -19,6 +19,7 @@ tests/screenshots/
 /es/
 /it/
 /public/og/
+/public/fonts/
 
 # Local preview config for the Claude app
 .claude/launch.json

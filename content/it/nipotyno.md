@@ -3,10 +3,10 @@
 title: "Nipotyno — Un mentore digitale per gli anziani che usano i servizi pubblici"
 slug: nipotyno
 base: "Prima base"
-description: "Ricerca e design UX di un assistente a doppio schermo che guida le persone anziane a prenotare visite mediche e pagare bollettini pubblici online. SUS 78,75, 100% dei compiti completati."
+description: "Ricerca e design UX di un assistente a doppio schermo che guida le persone anziane a prenotare visite mediche e pagare bollettini pubblici online. SUS 78,75; 6/6 hanno completato entrambi i compiti, uno con l'aiuto del facilitatore."
 og_image: /assets/nipotyno/home_05.webp
 cover: /assets/nipotyno/home_05.webp
-tldr: "In Italia gli anziani devono usare i servizi pubblici online, e molti lo trovano stressante. In un team di 4 abbiamo studiato come se la cavano e testato due concept. Il migliore è diventato un 'mentore digitale' a doppio schermo. Tutti e 6 gli anziani del test finale hanno completato entrambi i compiti; SUS 78,75 (Buono)."
+tldr: "In Italia gli anziani devono usare i servizi pubblici online, e molti lo trovano stressante. In un team di 4 abbiamo studiato come se la cavano e testato due concept. Il migliore è diventato un 'mentore digitale' a doppio schermo. Tutti e 6 gli anziani del test finale hanno completato entrambi i compiti, uno con l'aiuto del facilitatore; SUS 78,75 (Buono)."
 stats: "13 interviste · 6 partecipanti · SUS 78,75"
 role: "UX researcher e designer (team di 4)"
 team: "Riccardo Cirillo, Fabio Vito Papapicco, Andrea Ramaglia Bianchino, Ilaria Salami"
@@ -16,7 +16,7 @@ tools: "Interviste, osservazione, personas, modello dei compiti, Figma, test thi
 ---
 
 ## In breve {#tl-dr}
-In Italia gli anziani sono spinti a prenotare visite mediche (CUP) e pagare bollettini pubblici (pagoPA) online, e molti dipendono dai figli per farlo. In un team di 4 abbiamo studiato come se la cavano e testato due concept alternativi. Il migliore è diventato un "mentore digitale" a doppio schermo. **6/6 partecipanti hanno completato entrambi i compiti · SUS 78,75 (Buono) · tutte e 6 le scale UEQ Buono o Eccellente.**
+In Italia gli anziani sono spinti a prenotare visite mediche (CUP) e pagare bollettini pubblici (pagoPA) online, e molti dipendono dai figli per farlo. In un team di 4 abbiamo studiato come se la cavano e testato due concept alternativi. Il migliore è diventato un "mentore digitale" a doppio schermo. **6/6 hanno completato entrambi i compiti, uno con l'aiuto del facilitatore · SUS 78,75 (Buono) · tutte e 6 le scale UEQ Buono o Eccellente.**
 
 ## Il mio ruolo
 - Nella ricerca ho condotto con il team le 13 interviste e le 5 osservazioni, e insieme le abbiamo trasformate in personas e in un modello dei compiti.
@@ -65,7 +65,7 @@ Abbiamo testato con 6 partecipanti in sessioni da remoto. Hanno usato facsimili 
 
 | Metrica | Risultato |
 |---|---|
-| Compiti completati | **100%** (6/6 in entrambi i compiti) |
+| Compiti completati | **6/6** · 1 con aiuto |
 | SUS | **78,75** (Buono; la media è 68) |
 | UEQ | Tutte e 6 le scale **Buono o Eccellente** |
 | Errori rispetto alla bassa fedeltà | **−10%** prenotazione CUP · **−16%** pagamento pagoPA |

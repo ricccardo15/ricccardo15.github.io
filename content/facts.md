@@ -9,7 +9,7 @@
   - Universidad Politécnica de Madrid – Máster Universitario en Innovación Digital, 09/2025 – 07/2026
   - BA in Social Innovation, Communication and New Technologies – University of Turin (thesis: UX design of the "Appetible" mobile app)
 - Languages: Italian (native) · English (B2 – IELTS Academic 6.0) · Spanish (B2)
-- Nipotyno: HCI Project UPM, team of 4, 13 interviews + 5 observations, 2 lo-fi concepts, dual-screen hi-fi prototype, 6 test participants, 100% task success, SUS 78.75, UEQ Good/Excellent
+- Nipotyno: HCI Project UPM, team of 4, 13 interviews + 5 observations, 2 lo-fi concepts, dual-screen hi-fi prototype, 6 test participants, 6/6 completed both tasks (one with help from the facilitator), SUS 78.75, UEQ Good/Excellent
 - Levante: EIT Digital Summer School 2026, ISEN Méditerranée (France), team of 6, Riccardo designed the monitoring dashboard; ~48 h → ~3 h confirmation time with on-site qPCR (concept)
 - Sensor lab: in preparation
 - CV files: CV_Riccardo_Cirillo_EN.pdf, CV_Riccardo_Cirillo_ES.pdf (in ~/Desktop/INFO INTERSHIP)

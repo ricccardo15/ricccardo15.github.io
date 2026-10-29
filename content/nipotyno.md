@@ -2,10 +2,10 @@
 title: "Nipotyno — A digital mentor for older adults using public services"
 slug: nipotyno
 base: "1st base"
-description: "UX research and design for a dual-screen assistant that guides older adults through booking medical visits and paying public bills online. SUS 78.75, 100% task success."
+description: "UX research and design for a dual-screen assistant that guides older adults through booking medical visits and paying public bills online. SUS 78.75; 6/6 completed both tasks, one with help from the facilitator."
 og_image: /assets/nipotyno/home_05.webp
 cover: /assets/nipotyno/home_05.webp
-tldr: "Older adults in Italy have to use public services online, and many find it stressful. In a team of 4 we studied how they cope and tested two concepts. The better one became a dual-screen 'digital mentor'. All 6 older adults in the final test completed both tasks; SUS 78.75 (Good)."
+tldr: "Older adults in Italy have to use public services online, and many find it stressful. In a team of 4 we studied how they cope and tested two concepts. The better one became a dual-screen 'digital mentor'. All 6 older adults in the final test completed both tasks, one with help from the facilitator; SUS 78.75 (Good)."
 stats: "13 interviews · 6 testers · SUS 78.75"
 role: "UX researcher & designer (team of 4)"
 team: "Riccardo Cirillo, Fabio Vito Papapicco, Andrea Ramaglia Bianchino, Ilaria Salami"
@@ -17,7 +17,7 @@ tools: "Interviews, observation, personas, task model, Figma, think-aloud testin
 <!-- Sources: HCI Project reports 4, 5, 6, 7 (credits tables). Interviews and business plan: team work (confirmed by Riccardo 20/10). -->
 
 ## TL;DR {#tl-dr}
-Older adults in Italy are pushed to book medical visits (CUP) and pay public bills (pagoPA) online, and many depend on their children to do it. In a team of 4 we studied how they cope and tested two competing concepts. The better one became a dual-screen "digital mentor". **6/6 participants completed both tasks · SUS 78.75 (Good) · all 6 UEQ scales Good or Excellent.**
+Older adults in Italy are pushed to book medical visits (CUP) and pay public bills (pagoPA) online, and many depend on their children to do it. In a team of 4 we studied how they cope and tested two competing concepts. The better one became a dual-screen "digital mentor". **6/6 completed both tasks, one with help from the facilitator · SUS 78.75 (Good) · all 6 UEQ scales Good or Excellent.**
 
 ## My role
 - In research, I ran the 13 interviews and 5 observations with the team, and we turned them into personas and a task model.
@@ -66,7 +66,7 @@ We tested with 6 participants in remote sessions. They used realistic paper facs
 
 | Metric | Result |
 |---|---|
-| Task success | **100%** (6/6 on both tasks) |
+| Task success | **6/6** · 1 with help |
 | SUS | **78.75** (Good; average is 68) |
 | UEQ | All 6 scales **Good or Excellent** |
 | Mistakes vs low-fi | **−10%** CUP booking · **−16%** pagoPA payment |

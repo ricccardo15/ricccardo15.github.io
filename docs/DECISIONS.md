@@ -63,3 +63,9 @@
 - 2026-10-29 — F1, uniforms: Researcher → Nipotyno, Designer → Levante (Riccardo designed its dashboard), Maker → Sensor lab.
 - 2026-10-29 — Testi EN riscritti con checklist anti-AI; ES/IT [CHECK].
 - 2026-10-29 — F2: "journey maps" resta come nome del metodo (Riccardo); Levante: sottotitolo "Knowing within hours if the sea is safe".
+- 2026-10-29 — Font Jersey 10 + Atkinson Hyperlegible Next/Mono (OFL, crediti); temi night e paper. Il font 5×7 originale resta per l'arte del gioco.
+- 2026-10-29 — F3: Nipotyno corretto in EN/ES/IT e facts.md: "6/6 completed both tasks, one with help from the facilitator" (tabella "6/6 · 1 with help"); nessun altro numero cambiato (Riccardo).
+- 2026-10-29 — F3: i font vengono copiati da node_modules/@fontsource in public/fonts/ a ogni dev/build (cartella ignorata da git), non importati nel CSS: così i nomi non hanno hash e il preload dei 2 file punta sempre al file giusto. (auto)
+- 2026-10-29 — F3: fallback "Arial" con size-adjust misurato in Chromium (Jersey 92.5%, Atkinson 92%, Courier New 74% per il Mono). (auto)
+- 2026-10-29 — F3: header e footer sono sempre night (una striscia di tabellone su ogni pagina); in F3 la home resta paper con lo stadio (#field) night, perché la home cambia struttura in F4. (auto)
+- 2026-10-29 — F3: bottone principale = riempimento rosso #b3261e con testo bianco (6.5:1) in entrambi i temi; secondari = contorno inchiostro. (auto)

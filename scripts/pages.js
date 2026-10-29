@@ -5,7 +5,7 @@
 // Interface strings: src/i18n.js.
 // Generated files are in .gitignore: edit content/*.md, never the generated HTML.
 // Runs automatically from vite.config.js (dev and build). Manual run: npm run pages
-import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
@@ -30,6 +30,28 @@ const dirOf = (lang) => (lang === 'en' ? '' : `${lang}/`);
 export const PAGES = LANGS.flatMap((lang) => [`${dirOf(lang)}index.html`, ...CASES.map((slug) => `${dirOf(lang)}${slug}/index.html`)]);
 
 const root = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
+
+// --- Fonts (F3) ---------------------------------------------------------------
+// Self-hosted from npm (@fontsource), latin subset only (it covers á é í ó ú à è ì ò ù ñ ü ¿ ¡). Copied to public/fonts/
+// at every dev/build (not hashed, so the two <link rel="preload"> always match). All SIL OFL 1.1: see docs/CREDITS.md.
+export const FONTS = [
+  ['jersey-10', 'jersey-10-latin-400-normal'],
+  ['atkinson-hyperlegible-next', 'atkinson-hyperlegible-next-latin-400-normal'],
+  ['atkinson-hyperlegible-next', 'atkinson-hyperlegible-next-latin-700-normal'],
+  ['atkinson-hyperlegible-next', 'atkinson-hyperlegible-next-latin-400-italic'],
+  ['atkinson-hyperlegible-mono', 'atkinson-hyperlegible-mono-latin-400-normal'],
+  ['atkinson-hyperlegible-mono', 'atkinson-hyperlegible-mono-latin-700-normal'],
+];
+const PRELOAD = ['jersey-10-latin-400-normal', 'atkinson-hyperlegible-next-latin-400-normal']
+  .map((f) => `<link rel="preload" as="font" type="font/woff2" href="/fonts/${f}.woff2" crossorigin>`).join('\n    ');
+
+async function copyFonts() {
+  await mkdir(root('public/fonts'), { recursive: true });
+  for (const [pkg, file] of FONTS) await copyFile(root(`node_modules/@fontsource/${pkg}/files/${file}.woff2`), root(`public/fonts/${file}.woff2`));
+  // One licence text per family (the OFL is the same, the copyright lines differ).
+  const licences = await Promise.all([...new Set(FONTS.map(([pkg]) => pkg))].map((pkg) => readFile(root(`node_modules/@fontsource/${pkg}/LICENSE`), 'utf8')));
+  await writeFile(root('public/fonts/OFL.txt'), licences.join('\n\n---\n\n'));
+}
 
 // --- Markdown -------------------------------------------------------------
 
@@ -217,7 +239,8 @@ const LANG_SCRIPT = `<script>for (const a of document.querySelectorAll('[data-la
 const REDIRECT_SCRIPT = `<script>try { const l = localStorage.getItem('lang'); if (l === 'es' || l === 'it') location.replace('/' + l + '/' + location.hash); } catch {}</script>`;
 
 // key = the page's address without the language prefix ('/' or '/nipotyno/').
-function layout(L, { title, description, key, image, imageAlt, main, bodyClass = '', scripts = '' }) {
+// theme = 'paper' (Story, cases, Multiplayer) or 'night' (title screen, game): the colours in src/style.css.
+function layout(L, { title, description, key, image, imageAlt, main, bodyClass = '', scripts = '', theme = 'paper' }) {
   const { t } = L;
   const url = `${SITE}${L.p}${key}`;
   const cvHeader = CV_LANG[L.lang];
@@ -247,12 +270,13 @@ function layout(L, { title, description, key, image, imageAlt, main, bodyClass =
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escape(imageAlt)}">
     <meta name="twitter:card" content="summary_large_image">
+    ${PRELOAD}
     <link rel="stylesheet" href="/src/style.css">
     ${scripts}
   </head>
-  <body${bodyClass ? ` class="${bodyClass}"` : ''}>
+  <body data-theme="${theme}"${bodyClass ? ` class="${bodyClass}"` : ''}>
     <a class="skip" href="#main">${escape(t.skip)}</a>
-    <header class="site-header">
+    <header class="site-header" data-theme="night">
       <div class="wrap">
         <a class="brand" href="${L.p}/">Riccardo Cirillo</a>
         <nav aria-label="${escape(t.navLabel)}">
@@ -269,7 +293,7 @@ function layout(L, { title, description, key, image, imageAlt, main, bodyClass =
     <main id="main" tabindex="-1">
 ${main}
     </main>
-    <footer class="site-footer">
+    <footer class="site-footer" data-theme="night">
       <div class="wrap">
         <p><strong>Riccardo Cirillo</strong> · ${escape(t.headline)}</p>
         <p><a href="mailto:${EMAIL}">${EMAIL}</a> · CV: ${cvLink(L, 'en', CV.en.short)} · ${cvLink(L, 'es', CV.es.short)}</p>
@@ -457,7 +481,7 @@ async function ballpark(L, cases, { aboutParts, how, status }) {
   ];
 
   // data-strings: the few sentences of the game's JavaScript, in the page's language (src/game.js reads them).
-  return `      <section id="field" class="field" aria-labelledby="field-title" data-strings="${escape(JSON.stringify(t.game))}">
+  return `      <section id="field" class="field" data-theme="night" aria-labelledby="field-title" data-strings="${escape(JSON.stringify(t.game))}">
         <div class="field-head wrap wide">
           <h2 id="field-title">${escape(t.fieldTitle)}</h2>
           <p class="hint">${escape(t.fieldHint)} <a href="#work">${escape(t.preferList)}</a></p>
@@ -688,6 +712,7 @@ ${aboutHtml}
 export async function generate() {
   // Start from an empty public/og: a preview of a case that left the site (Housing, Lab) must not be published.
   await rm(root('public/og'), { recursive: true, force: true });
+  await copyFonts();
   for (const lang of LANGS) {
     const L = context(lang);
     const dir = dirOf(lang);

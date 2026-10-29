@@ -3,10 +3,10 @@
 title: "Nipotyno — Un mentor digital para personas mayores que usan servicios públicos"
 slug: nipotyno
 base: "Primera base"
-description: "Investigación y diseño UX de un asistente de doble pantalla que guía a las personas mayores para pedir citas médicas y pagar recibos públicos en línea. SUS 78,75, 100 % de tareas completadas."
+description: "Investigación y diseño UX de un asistente de doble pantalla que guía a las personas mayores para pedir citas médicas y pagar recibos públicos en línea. SUS 78,75; 6/6 completaron las dos tareas, una persona con ayuda del facilitador."
 og_image: /assets/nipotyno/home_05.webp
 cover: /assets/nipotyno/home_05.webp
-tldr: "En Italia, las personas mayores tienen que usar servicios públicos en línea, y a muchas les genera estrés. En un equipo de 4 estudiamos cómo se las arreglan y probamos dos conceptos. El mejor se convirtió en un 'mentor digital' de doble pantalla. Las 6 personas mayores del test final completaron las dos tareas; SUS 78,75 (Bueno)."
+tldr: "En Italia, las personas mayores tienen que usar servicios públicos en línea, y a muchas les genera estrés. En un equipo de 4 estudiamos cómo se las arreglan y probamos dos conceptos. El mejor se convirtió en un 'mentor digital' de doble pantalla. Las 6 personas mayores del test final completaron las dos tareas, una de ellas con ayuda del facilitador; SUS 78,75 (Bueno)."
 stats: "13 entrevistas · 6 participantes · SUS 78,75"
 role: "Investigador y diseñador UX (equipo de 4)"
 team: "Riccardo Cirillo, Fabio Vito Papapicco, Andrea Ramaglia Bianchino, Ilaria Salami"
@@ -16,7 +16,7 @@ tools: "Entrevistas, observación, personas, modelo de tareas, Figma, tests con 
 ---
 
 ## En resumen {#tl-dr}
-En Italia se empuja a las personas mayores a pedir citas médicas (CUP) y pagar recibos públicos (pagoPA) en línea, y muchas dependen de sus hijos para hacerlo. En un equipo de 4 estudiamos cómo se las arreglan y probamos dos conceptos alternativos. El mejor se convirtió en un "mentor digital" de doble pantalla. **6/6 participantes completaron las dos tareas · SUS 78,75 (Bueno) · las 6 escalas UEQ en Bueno o Excelente.**
+En Italia se empuja a las personas mayores a pedir citas médicas (CUP) y pagar recibos públicos (pagoPA) en línea, y muchas dependen de sus hijos para hacerlo. En un equipo de 4 estudiamos cómo se las arreglan y probamos dos conceptos alternativos. El mejor se convirtió en un "mentor digital" de doble pantalla. **6/6 completaron las dos tareas, una persona con ayuda del facilitador · SUS 78,75 (Bueno) · las 6 escalas UEQ en Bueno o Excelente.**
 
 ## Mi rol
 - En la investigación, hice con el equipo las 13 entrevistas y las 5 observaciones, y las convertimos en personas y en un modelo de tareas.
@@ -65,7 +65,7 @@ Hicimos el test con 6 participantes en sesiones en remoto. Usaron facsímiles de
 
 | Métrica | Resultado |
 |---|---|
-| Tareas completadas | **100 %** (6/6 en las dos tareas) |
+| Tareas completadas | **6/6** · 1 con ayuda |
 | SUS | **78,75** (Bueno; la media es 68) |
 | UEQ | Las 6 escalas en **Bueno o Excelente** |
 | Errores frente a baja fidelidad | **−10 %** reserva CUP · **−16 %** pago pagoPA |
