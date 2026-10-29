@@ -23,3 +23,9 @@ tests/screenshots/
 
 # Local preview config for the Claude app
 .claude/launch.json
+
+# Private notes (never in the repo)
+PORTFOLIO_progetto_claude/
+
+# Local skills installed for Claude
+.claude/skills/

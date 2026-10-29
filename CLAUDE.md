@@ -25,6 +25,7 @@ Goal: get a UX internship in Madrid (Feb–Jul 2027). The site is sent to recrui
 - Never publish research participants' data (audio, transcripts, names). Group work always credits the team.
 - Keep it light: low-res pixel art scaled up, compressed images, respect `prefers-reduced-motion`.
 - A milestone is done only when the Definition of Done in docs/ROADMAP.md passes (build, Playwright + axe, screenshots 1280/390 px, keyboard, contrast, reduced motion, online, commit). Show the evidence.
+- taste-skill (design-taste-frontend): use only its no-slop checks and the screenshot look-and-fix loop. Do NOT run scripts/draw.mjs or scripts/assets.mjs, do not propose new directions, photos or fonts: the style is decided in docs/PROMPT_V3.md (night + paper themes, Jersey 10 + Atkinson, original pixel art).
 
 ## Working with Riccardo
 - He is new to Claude Code. Reply in Italian, short, simple words; explain technical terms in one line.
