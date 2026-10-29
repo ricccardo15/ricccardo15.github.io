@@ -58,7 +58,7 @@ test.describe('case reader @ 1280×800', () => {
   test('previous / next stay in the reader; one Back still returns to the stadium; "All case studies" goes to the list', async ({ page }) => {
     await page.goto('/sensor-lab/');
     await page.goto('/');
-    await page.locator('#work').getByRole('link', { name: /Knowing in hours/ }).click(); // the Levante card of the list
+    await page.locator('#work').getByRole('link', { name: /Knowing within hours/ }).click(); // the Levante card of the list
     await expect(reader(page).locator('article.case h1')).toContainText('Levante');
     await reader(page).locator('.pager a[rel="next"]').click();
     await expect(reader(page).locator('article.case h1')).toContainText('Sensor lab');
@@ -68,7 +68,7 @@ test.describe('case reader @ 1280×800', () => {
     await expect(reader(page)).toBeHidden();
     await expect(page).toHaveURL(/localhost:\d+\/(#.*)?$/);
 
-    await page.locator('#work').getByRole('link', { name: /Knowing in hours/ }).click();
+    await page.locator('#work').getByRole('link', { name: /Knowing within hours/ }).click();
     await reader(page).locator('.crumb').getByRole('link', { name: 'All case studies' }).click();
     await expect(reader(page)).toBeHidden();
     await expect(page.locator('#work')).toBeInViewport();
@@ -88,7 +88,7 @@ test.describe('case reader @ 1280×800', () => {
   test('if the case cannot be fetched, the link just navigates', async ({ page }) => {
     await page.route('**/levante/', (route) => (route.request().resourceType() === 'fetch' ? route.fulfill({ status: 500, body: 'no' }) : route.continue()));
     await page.goto('/');
-    await page.locator('#work').getByRole('link', { name: /Knowing in hours/ }).click();
+    await page.locator('#work').getByRole('link', { name: /Knowing within hours/ }).click();
     await expect(page).toHaveURL(/\/levante\/$/);
     await expect(page.locator('dialog.reader')).toHaveCount(0);
     await expect(page.locator('h1')).toContainText('Levante');

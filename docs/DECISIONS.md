@@ -61,3 +61,5 @@
 - 2026-10-29 — F1, archive: everything archived sits in one `_archive/` folder at the project root (`_archive/content/`, `_archive/assets/housing|lab`, `_archive/scripts/lab-cover.js`), outside `public/`, so Vite never copies it and no build plugin is needed (Riccardo).
 - 2026-10-29 — F1, stadium: 3rd base = Sensor lab (placeholder cover drawn in code, scripts/art/sensor-lab-cover.js, the Lab flask icon); the dugout is scenery only (the runner still comes out of it on "Enter the ballpark"); the tour is 1st → 2nd → 3rd → home plate, where the last card opens.
 - 2026-10-29 — F1, uniforms: Researcher → Nipotyno, Designer → Levante (Riccardo designed its dashboard), Maker → Sensor lab.
+- 2026-10-29 — Testi EN riscritti con checklist anti-AI; ES/IT [CHECK].
+- 2026-10-29 — F2: "journey maps" resta come nome del metodo (Riccardo); Levante: sottotitolo "Knowing within hours if the sea is safe".

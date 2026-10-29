@@ -52,7 +52,7 @@ test.describe('stadium @ 1280×800', () => {
     await page.locator('.stage [data-spot="about"]').click();
     for (const text of ['Player stats', 'University of Trento', 'Universidad Politécnica de Madrid', 'University of Turin', 'Why baseball?', 'Toolbox']) await expect(card(page)).toContainText(text);
     await page.locator('.stage [data-spot="how"]').click({ force: true });
-    for (const text of ['Find out first', 'Researcher', 'Designer', 'Maker', 'Moodboard']) await expect(card(page)).toContainText(text);
+    for (const text of ['I find out before I design', 'Researcher', 'Designer', 'Maker', 'Moodboard']) await expect(card(page)).toContainText(text);
     await page.keyboard.press('Escape');
     await page.locator('.stage [data-spot="contact"]').click();
     await expect(card(page).getByRole('link', { name: 'CV en español (PDF)' })).toHaveAttribute('lang', 'es');
