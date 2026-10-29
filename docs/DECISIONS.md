@@ -81,3 +81,13 @@
 - 2026-10-29 — F4: un solo commit invece di due (pagine e redirect stanno nello stesso generatore). (auto)
 - 2026-10-29 — F4: lo scouting report usa la riga Headline di facts.md (Position, Available) e Status/Languages/Education; il ritratto è lo sprite del battitore. (auto)
 - 2026-10-29 — F4: la scelta della divisa sparisce dalla home; torna in F5 come primo passo del gioco. (auto)
+- 2026-10-29 — F5: /play/ = il gioco a pagina intera; punti cliccabili solo 1st Nipotyno, 2nd Levante, 3rd Sensor lab, home plate = Multiplayer (Contact & CV). Tabellone, monte, biglietteria, bullpen e dugout = decorazione (le card About / How I design / Contact del gioco sono tolte).
+- 2026-10-29 — F5: menu di pausa = <dialog> modale (Esc o ⏸): Resume · Read this project · Switch to Story mode · Multiplayer · Title screen; sotto lingua, suono, movimento. Fine del tour: "Game over? Never." con Read the story · Multiplayer · Play again.
+- 2026-10-29 — F5: con JS l'HUD prende il posto della barra delle modalità (e del footer) su /play/; senza JS la barra resta. Il piano vuole la barra su tutte le pagine ma il gioco "a pagina intera" con la pausa: la pausa contiene le stesse destinazioni. (auto)
+- 2026-10-29 — F5: Esc apre/chiude la pausa (prima chiudeva la card): la card si chiude con ✕ Close. (auto)
+- 2026-10-29 — F5: la scelta della divisa è una riga sotto il campo, non una finestra sopra: così non copre nessuna base e si può anche cliccare subito una base. Nessun focus automatico al caricamento (la tastiera parte dall'alto). La divisa è ricordata. (auto)
+- 2026-10-29 — F5: "Read this project" punta alla base attuale o all'ultimo progetto visitato; prima di aver visitato un progetto la voce è nascosta. (auto)
+- 2026-10-29 — F5: interruttore "Reduce motion" nella pausa, ricordato; se il sistema chiede già meno movimento, l'interruttore è acceso e bloccato. (auto)
+- 2026-10-29 — F5: card dei casi senza PDF, TL;DR e ruolo (il piano dice "solo cover, titolo, 1 riga, numeri chiave, Read the case study e Next base"). (auto)
+- 2026-10-29 — F5: su telefono l'HUD mostra "⏸ Pause · GAMEPLAY · ◇◇◇ · ♪ off" e la base sulla riga sotto; la parola "Sound" resta nel nome accessibile. (auto)
+- 2026-10-29 — F5: tolti src/spots.js e src/uniform.js; SPOTS resta in field-map.js solo per l'ordine delle icone. (auto)

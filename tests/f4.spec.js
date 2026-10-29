@@ -79,7 +79,8 @@ test.describe('title screen menu', () => {
 });
 
 test.describe('the mode bar', () => {
-  for (const [path, current] of [['/story/', 'Story mode'], ['/nipotyno/', 'Story mode'], ['/play/', 'Gameplay'], ['/multiplayer/', 'Multiplayer']]) {
+  // /play/ has the bar without JS only: with JS the game's HUD and pause menu take its place (F5, tests/f5.spec.js)
+  for (const [path, current] of [['/story/', 'Story mode'], ['/nipotyno/', 'Story mode'], ['/multiplayer/', 'Multiplayer']]) {
     test(`${path}: ◀ Title screen, the three modes (${current} lit), languages and CV`, async ({ page }) => {
       await page.goto(path);
       const bar = page.locator('.mode-bar');

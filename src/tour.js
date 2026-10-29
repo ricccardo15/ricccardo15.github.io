@@ -1,6 +1,6 @@
 // The home-run tour (started by src/game.js after the home run): one project per stop, each with a small moment
 // (zoom, high five, cheer, wave) while the card shows a preview. NOTHING moves on by itself: the card has one main
-// button ("Next base: Levante →") and a small "◀ Back"; the diamond in the corner shows the bases visited.
+// button ("Next base: Levante →") and a small "◀ Back"; the HUD on top shows the base and the bases visited (game.js).
 // With reduced motion there is no zoom and no animation: the tour is the same, just still.
 import { FIELD, TOUR } from './field-map.js';
 import { T, fill } from './strings.js';
@@ -8,17 +8,13 @@ import { T, fill } from './strings.js';
 const MOMENT = 2000; // zoom + high five / cheer / wave (ms)
 const PROJECTS = TOUR.filter((s) => !s.panel).length; // stops that count in "2 of 3"
 
-// ctx (from game.js): stage, panel, bar, runner, crew, crewAt, byId, nameOf, reduceMotion, sound, sleep, say, setHash, runTo
+// ctx (from game.js): stage, panel, bar, runner, crew, crewAt, byId, nameOf, reduceMotion, sound, sleep, say, setHash, runTo, done
 export function createTour(ctx) {
   const { stage, panel, bar, runner, crew, crewAt, byId, reduceMotion, sound } = ctx;
-  const map = stage.querySelector('.tour-map');
-  const count = map.querySelector('.tour-count');
-  const corners = [...map.querySelectorAll('[data-corner]')];
   // `run` changes on every new step, so a step that was left behind stops by itself.
   // `shown` = the step whose card is on screen (Next and Back count from it).
   let shown = 0;
   let run = 0;
-  let visited = new Set();
 
   const stopName = (s) => ctx.nameOf(s.stop);
 
@@ -48,20 +44,6 @@ export function createTour(ctx) {
     for (const [id, anim] of Object.entries(s.with)) crew[id].classList.add(`is-${anim}`);
     await ctx.sleep(MOMENT);
     if (mine === run) endMoment();
-  }
-
-  // The diamond in the corner: bases already visited are filled, the current one is highlighted.
-  function showProgress(i) {
-    const s = TOUR[i];
-    if (s.panel) for (const t of TOUR) { if (t.corner) visited.add(t.corner); }
-    else visited.add(s.corner);
-    for (const el of corners) {
-      el.classList.toggle('is-visited', visited.has(el.dataset.corner));
-      el.classList.toggle('is-current', el.dataset.corner === s.corner);
-    }
-    const values = { i: i + 1, n: PROJECTS, name: s.panel ? '' : stopName(s) };
-    count.textContent = s.panel ? T.tourDone : fill(T.count, values);
-    ctx.say(s.panel ? `${T.tourDone}.` : fill(T.countSay, values));
   }
 
   function clearNav() {
@@ -104,7 +86,7 @@ export function createTour(ctx) {
   function focusNav() {
     const active = document.activeElement;
     if (active !== document.body && !panel.contains(active) && !bar.contains(active) && !stage.contains(active)) return;
-    const target = panel.querySelector('.tour-nav .button') ?? panel.querySelector('[data-panel]:not([hidden]) [data-action="again"]');
+    const target = panel.querySelector('.tour-nav .button') ?? panel.querySelector('[data-panel]:not([hidden]) .button');
     target?.focus({ preventScroll: true });
   }
 
@@ -115,20 +97,24 @@ export function createTour(ctx) {
     ctx.setHash(s.stop);
     await ctx.runTo(s.stop, { panelId: s.panel ?? s.stop });
     if (mine !== run) return;
-    // On arrival, all at once: card, counter, diamond, controls.
+    // On arrival, all at once: card, HUD, controls.
     shown = i;
-    showProgress(i);
+    if (s.panel) {
+      ctx.done();
+      ctx.say(`${T.tourDone}.`);
+    } else {
+      ctx.say(fill(T.countSay, { i: i + 1, n: PROJECTS, name: stopName(s) }));
+    }
     renderNav(i);
     focusNav();
     if (s.moment && !reduceMotion.matches) await moment(s, mine);
   }
 
   return {
-    start() { visited = new Set(); step(0); },
+    start() { step(0); },
     next() { if (shown < TOUR.length - 1) step(shown + 1); },
     back() { if (shown > 0) step(shown - 1); },
     // Leaving the tour: whatever was still going on stops, the controls go away.
     stop() { run++; endMoment(); clearNav(); },
-    show(visible) { map.hidden = !visible; },
   };
 }

@@ -6,10 +6,10 @@
 export const FIELD = { width: 480, height: 270 };
 export const SAFE = { left: 64, right: 416 };
 
-// Stops in keyboard order (← →). `id` = case page slug (/nipotyno/); home has no page of its own.
+// Stops in keyboard order (← →). `id` = case page slug (/nipotyno/); home plate = Multiplayer, Contact & CV (F5).
 // `tag` = where the label sits, so it never hides the runner standing on the base (or the pitcher): below / right / above.
 export const STOPS = [
-  { id: 'home', x: 240, y: 237, label: 'Home plate', name: 'Start here', tag: 'right' },
+  { id: 'home', x: 240, y: 237, label: 'Home plate', name: 'Contact & CV', tag: 'right' },
   { id: 'nipotyno', x: 333, y: 168, label: '1st base', name: 'Nipotyno', tag: 'below' },
   { id: 'levante', x: 240, y: 99, label: '2nd base', name: 'Levante', tag: 'right' },
   { id: 'sensor-lab', x: 147, y: 168, label: '3rd base', name: 'Sensor lab', tag: 'below' },
@@ -18,9 +18,8 @@ export const STOPS = [
 // The dugout is only scenery (F1): the runner comes out of it when the visitor enters the ballpark (src/game.js).
 export const DUGOUT = { x: 110, y: 225 };
 
-// Other points a visitor can click (Fase 2). Separate from STOPS and RING: the runner's path and ← → do not change.
-// They open a card over the stadium; without JS they are links to the sections of the page (`href`).
-// `tag` as for STOPS ('upleft' = above and to the left of the point). Their icons follow the 4 of STOPS in icons.png.
+// The scoreboard, the pitcher's mound and the ticket booth: clickable in Fase 2, scenery since F5 (less to read in the game).
+// Kept here because their icons follow the 4 of STOPS in public/game/icons.png (scripts/art/icons.js).
 export const SPOTS = [
   { id: 'about', x: 240, y: 30, label: 'Scoreboard', name: 'About', tag: 'below', href: '#about' },
   { id: 'how', x: 240, y: 168, label: "Pitcher's mound", name: 'How I design', tag: 'upleft', href: '#how' },

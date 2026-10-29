@@ -10,7 +10,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
 import sharp from 'sharp';
-import { FIELD, STOPS, SPOTS, CREW, CREW_ROWS } from '../src/field-map.js';
+import { FIELD, STOPS, SPOTS, CREW, CREW_ROWS, DUGOUT } from '../src/field-map.js';
 import { UNIFORMS } from '../src/uniforms.js';
 import { PALETTE } from '../src/palette.js';
 import { pixelText } from './art/title.js';
@@ -199,7 +199,6 @@ function context(lang) {
     t,
     p: PREFIX[lang],
     stops,
-    spots: SPOTS.map(point),
     stop: (id) => stops.find((s) => s.id === id),
     uniforms: UNIFORMS.map((u) => ({ ...u, ...(t.uniforms?.[u.id] ?? {}) })),
     // A piece of content/facts.md (English) in this language. A missing translation stops the build.
@@ -352,7 +351,6 @@ async function factPieces(L) {
     schools: schools.map((s) => L.tr(s)),
   };
 }
-const statusLine = (f) => [...f.status, ...f.languages, f.thesis].join(' · ');
 
 const shortName = (c) => c.data.title.split(' — ')[0];
 const subtitle = (c) => c.data.title.split(' — ').slice(1).join(' — ');
@@ -456,16 +454,14 @@ async function casePage(L, c, i, all) {
   });
 }
 
-// The ballpark: pixel field + every point as a real link + one card per point.
-// Without JavaScript the points are plain links (case pages, Story mode, Multiplayer) and the home card is shown under the
-// field; src/game.js adds the game: batting, the tour, free running, cards over the stadium. Since F4 it is the page /play/.
+// --- Gameplay (/play/, F5) ----------------------------------------------------------------
+// The game is the page: a HUD on top (⏸ Pause · Esc, the base, the bases visited, sound), the pixel field, one small card
+// per base, and a pause menu that leads to the other modes. Four points: 1st Nipotyno, 2nd Levante, 3rd Sensor lab,
+// home plate = Multiplayer (Contact & CV). The scoreboard, the mound, the ticket booth, the bullpen and the dugout are scenery.
+// Without JavaScript the bases are plain links and a sentence links the three case pages and the Story mode.
 // Under 1000 px the field is at 1× with icon-only labels and the "Stadium map" list under it (see style.css).
-const POINTS = [...STOPS.map((p) => ({ ...p, spot: false })), ...SPOTS.map((p) => ({ ...p, spot: true }))];
-const pointsOf = (L) => [...L.stops.map((p) => ({ ...p, spot: false })), ...L.spots.map((p) => ({ ...p, spot: true }))];
-// Spots without JS: the scoreboard and the mound lead to the Story mode, the ticket booth to Multiplayer (F4).
-const SPOT_HREF = { about: 'story/', how: 'story/#how-i-design', contact: 'multiplayer/' };
-const pointHref = (L, p) => (p.spot ? `${L.p}/${SPOT_HREF[p.id]}` : (p.id === 'home' ? '#field-panel' : `${L.p}/${p.id}/`));
-const pointData = (p) => (p.spot ? `data-spot="${p.id}"` : `data-stop="${p.id}"`);
+const POINTS = [...STOPS, ...SPOTS]; // the order of public/game/icons.png
+const pointHref = (L, p) => (p.id === 'home' ? modeHref(L, 'multiplayer') : `${L.p}/${p.id}/`);
 const iconOf = (p) => POINTS.findIndex((q) => q.id === p.id);
 
 // The content of one "## Heading" section of content/about.md, without its heading and without its id (no duplicate ids).
@@ -475,95 +471,65 @@ function aboutSection(aboutParts, id) {
   return part.replace(/^<section[^>]*>\s*<h2>[\s\S]*?<\/h2>\s*/, '').replace(/\s*<\/section>\s*$/, '');
 }
 
-const cvLinks = (L) => `<ul class="actions">
-              <li><a class="button" href="mailto:${EMAIL}">${EMAIL}</a></li>
-              ${cvOrder(L).map((lang) => `<li>${cvLink(L, lang, CV[lang].button, 'button ghost')}</li>`).join('\n              ')}
-            </ul>`;
-
-async function ballpark(L, cases, { aboutParts, how, status, schools }) {
+async function ballpark(L, cases) {
   const { t, p: prefix } = L;
-  const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
   const pct = (value, total) => `${+((value / total) * 100).toFixed(3)}%`;
+  const point = (id) => L.stops.find((q) => q.id === id);
 
-  const all = pointsOf(L);
-  const point = (id) => all.find((q) => q.id === id);
-  const points = all.map((p) => `                  <li><a class="base${p.spot ? ' spot' : ''}" href="${pointHref(L, p)}" ${pointData(p)} data-tag="${p.tag}" style="--x: ${pct(p.x, FIELD.width)}; --y: ${pct(p.y, FIELD.height)}; --icon: ${iconOf(p)}"><span class="base-icon"></span><span class="base-text"><span class="base-label">${escape(p.label)}</span> <span class="base-name">${escape(p.name)}</span></span></a></li>`);
-  const legend = all.map((p) => `          <li><a href="${pointHref(L, p)}" ${pointData(p)}><span class="base-icon" style="--icon: ${iconOf(p)}" aria-hidden="true"></span> <span class="map-name">${escape(p.name)}</span> <span class="map-label">${escape(p.label)}</span></a></li>`);
+  const points = L.stops.map((p) => `                  <li><a class="base" href="${pointHref(L, p)}" data-stop="${p.id}" data-tag="${p.tag}" style="--x: ${pct(p.x, FIELD.width)}; --y: ${pct(p.y, FIELD.height)}; --icon: ${iconOf(p)}"><span class="base-icon"></span><span class="base-text"><span class="base-label">${escape(p.label)}</span> <span class="base-name">${escape(p.name)}</span></span></a></li>`);
+  const legend = L.stops.map((p) => `          <li><a href="${pointHref(L, p)}" data-stop="${p.id}"><span class="base-icon" style="--icon: ${iconOf(p)}" aria-hidden="true"></span> <span class="map-name">${escape(p.name)}</span> <span class="map-label">${escape(p.label)}</span></a></li>`);
   // Crew sprites (coaches, teammates, pitcher): decoration only, so hidden from screen readers.
   const crew = CREW.map((m) => `                  <div class="sprite crew-sprite${m.flip ? ' is-flipped' : ''}" data-crew="${m.id}" style="--x: ${pct(m.x, FIELD.width)}; --y: ${pct(m.y, FIELD.height)}; --row: ${CREW_ROWS.indexOf(m.who)}"></div>`);
   const covers = Object.fromEntries(await Promise.all(cases.map(async ({ data }) => [data.slug, { src: data.cover, ...(await imageSize(data.cover)) }])));
-  const nipotyno = bySlug.nipotyno;
-
   const kicker = (id) => `${escape(point(id).label)} · ${escape(point(id).name)}`;
+
+  // The cards: little to read (F5). A case = cover, name, one line, key numbers, Read the case study (the real page).
   const panels = [
-    `          <article class="panel-card" data-panel="home">
+    `          <article class="panel-card" data-panel="home" hidden>
             <p class="kicker">${kicker('home')}</p>
-            <h3>${escape(t.homeCardTitle)}</h3>
-            <p>${t.homeCardText}</p>
-            <p><a class="button" href="${prefix}/nipotyno/">${escape(fill(t.readNamed, { name: shortName(nipotyno) }))}</a></p>
-            <p class="small">${escape(nipotyno.data.description)}</p>
+            <h2>${escape(t.modes.multiplayer.name)}</h2>
+            <p class="panel-email"><a href="mailto:${EMAIL}">${EMAIL}</a></p>
+            <ul class="actions">
+              ${cvOrder(L).map((lang, i) => `<li>${cvLink(L, lang, CV[lang].button, i ? 'button ghost' : 'button')}</li>`).join('\n              ')}
+            </ul>
+            <p><a href="${modeHref(L, 'multiplayer')}">${escape(t.openMultiplayer)}</a></p>
           </article>`,
     ...cases.map(({ data }) => {
       const cover = covers[data.slug];
-      const numbers = data.stats ? `<ul class="key-numbers" aria-label="${escape(t.keyNumbers)}">${data.stats.split(' · ').map((n) => `<li>${escape(n)}</li>`).join('')}</ul>` : '';
+      const numbers = hasNumbers(data) ? `<ul class="key-numbers" aria-label="${escape(t.keyNumbers)}">${data.stats.split(' · ').map((n) => `<li>${escape(n)}</li>`).join('')}</ul>` : '';
       return `          <article class="panel-card" data-panel="${data.slug}" hidden>
             <img class="panel-cover" src="${cover.src}" alt="" width="${cover.width}" height="${cover.height}" loading="lazy" decoding="async">
             <p class="kicker">${kicker(data.slug)}</p>
-            <h3>${escape(shortName({ data }))}<span class="sub">${escape(subtitle({ data }))}</span></h3>
+            <h2>${escape(shortName({ data }))}<span class="sub">${escape(subtitle({ data }))}</span></h2>
             ${numbers}
-            <p class="card-links"><a class="button" href="${prefix}/${data.slug}/">${escape(t.read)}<span class="visually-hidden">: ${escape(shortName({ data }))}</span> →</a> <a class="pdf-link" href="/pdf/${pdfName(data.slug, L.lang)}">PDF<span class="visually-hidden">${escape(t.of)}${escape(shortName({ data }))}</span></a></p>
-            <p>${escape(data.tldr)}</p>
-            ${data.role ? `<p class="small"><strong>${escape(t.roleLabel)}</strong> ${escape(data.role)}</p>` : ''}
+            <p class="card-links"><a class="button" href="${prefix}/${data.slug}/">${escape(t.read)}<span class="visually-hidden">: ${escape(shortName({ data }))}</span></a></p>
           </article>`;
     }),
-    `          <article class="panel-card" data-panel="done" hidden>
+    `          <article class="panel-card game-over" data-panel="done" hidden>
             <p class="kicker">${escape(t.tourDoneKicker)}</p>
-            <h3>${escape(t.tourDoneTitle)}</h3>
-            <p>${escape(t.tourDoneText)}</p>
+            <h2>${escape(t.gameOver)}</h2>
             <ul class="actions">
-              ${cvOrder(L).map((lang, i) => `<li>${cvLink(L, lang, CV[lang].button, i ? 'button ghost' : 'button')}</li>`).join('\n              ')}
-              <li><a class="button ghost" href="mailto:${EMAIL}">${escape(t.emailMe)}</a></li>
+              <li><a class="button" href="${modeHref(L, 'story')}">${escape(t.readStory)}</a></li>
+              <li><a class="button ghost" href="${modeHref(L, 'multiplayer')}">${escape(t.modes.multiplayer.name)}</a></li>
+              <li><button class="button ghost" type="button" data-action="again">${escape(t.playAgain)}</button></li>
             </ul>
-            <p><button class="button ghost" type="button" data-action="again">${escape(t.again)}</button></p>
-          </article>`,
-    `          <article class="panel-card" data-panel="about" hidden>
-            <p class="kicker">${kicker('about')}</p>
-            <h3>${escape(t.playerStats)}</h3>
-            ${aboutSection(aboutParts, 'hi-im-riccardo')}
-            <h4>${escape(t.studies)}</h4>
-            <ul class="card-list">${schools.map((s) => `<li>${escape(s)}</li>`).join('')}</ul>
-            <h4>${escape(t.languagesStatus)}</h4>
-            <p>${escape(status)}</p>
-            <h4>${escape(t.whyBaseball)}</h4>
-            ${aboutSection(aboutParts, 'why-baseball')}
-            <h4>${escape(t.toolbox)}</h4>
-            ${aboutSection(aboutParts, 'toolbox')}
-          </article>`,
-    `          <article class="panel-card" data-panel="how" hidden>
-            <p class="kicker">${kicker('how')}</p>
-            <h3>${escape(t.howTitle)}</h3>
-            <h4>${escape(t.principles)}</h4>
-            ${how.principles}
-            <h4>${escape(t.uniformsTitle)}</h4>
-            ${how.uniforms}
-            <h4>${escape(t.moodboard)}</h4>
-            ${how.moodboard}
-          </article>`,
-    `          <article class="panel-card" data-panel="contact" hidden>
-            <p class="kicker">${kicker('contact')}</p>
-            <h3>${escape(t.contact)}</h3>
-            <p>${escape(t.headline)}</p>
-            <p class="small">${escape(status)}</p>
-            ${cvLinks(L)}
           </article>`,
   ];
 
+  const tiles = L.uniforms.map((u) => `                  <li><button class="uniform-tile" type="button" data-uniform="${u.id}" aria-pressed="false"><span class="portrait" style="--row: ${u.row}" aria-hidden="true"></span> <span class="tile-name">${escape(u.label)}</span></button></li>`);
+  const langs = LANGS.map((lang) => `<a href="${PREFIX[lang]}/play/" hreflang="${lang}" lang="${lang}" data-lang="${lang}" data-home${lang === L.lang ? ' aria-current="page"' : ''}>${lang.toUpperCase()}<span class="visually-hidden"> ${LANG_NAMES[lang]}</span></a>`);
+  const pauseItem = (tag, attrs, name, sub = '') => `            <li><${tag} class="pause-item" ${attrs}><span class="pause-name">${escape(name)}</span>${sub ? ` <span class="pause-sub">${sub}</span>` : ''}</${tag}></li>`;
+
   // data-strings: the few sentences of the game's JavaScript, in the page's language (src/game.js reads them).
   return `      <section id="field" class="field" data-theme="night" aria-labelledby="field-title" data-strings="${escape(JSON.stringify(t.game))}">
-        <div class="field-head wrap wide">
-          <h1 id="field-title">${escape(t.fieldTitle)}</h1>
-          <p class="hint">${escape(t.fieldHint)} <a href="${modeHref(L, 'story')}">${escape(t.preferList)}</a></p>
+        <div class="hud">
+          <button class="hud-pause" type="button" data-action="pause" aria-haspopup="dialog" hidden><span aria-hidden="true">⏸</span> ${escape(t.pause)}<span class="no-touch" aria-hidden="true"> · Esc</span></button>
+          <h1 id="field-title" class="hud-title">${escape(t.modes.play.name)}</h1>
+          <p class="hud-base" aria-hidden="true"></p>
+          <span class="hud-diamonds" aria-hidden="true" hidden><i data-corner="first"></i><i data-corner="second"></i><i data-corner="third"></i></span>
+          <button class="hud-sound sound-toggle" type="button" data-action="sound" aria-pressed="false" hidden><span aria-hidden="true">♪</span> <span class="sound-word">${escape(t.sound)}<span aria-hidden="true">:</span></span> <span class="state" aria-hidden="true">${escape(t.game.off)}</span></button>
         </div>
+        <p class="no-game wrap wide">${escape(t.noGame)} ${cases.map(({ data }) => `<a href="${prefix}/${data.slug}/">${escape(shortName({ data }))}</a>`).join(' · ')} · <a href="${modeHref(L, 'story')}">${escape(t.modes.story.name)}</a></p>
         <div class="ballpark">
           <div class="stage-col">
             <div class="stage">
@@ -571,7 +537,7 @@ async function ballpark(L, cases, { aboutParts, how, status, schools }) {
                 <div class="world">
                   <img class="field-img" src="/game/field.png" alt="${escape(t.fieldAlt)}" width="${FIELD.width}" height="${FIELD.height}">
 ${crew.join('\n')}
-                  <div class="sprite runner" style="--x: ${pct(STOPS[0].x, FIELD.width)}; --y: ${pct(STOPS[0].y, FIELD.height)}"></div>
+                  <div class="sprite runner" style="--x: ${pct(DUGOUT.x, FIELD.width)}; --y: ${pct(DUGOUT.y, FIELD.height)}"></div>
                   <div class="ball" hidden></div>
                 </div>
                 <ul class="bases" aria-label="${escape(t.stadium)}">
@@ -580,12 +546,15 @@ ${points.join('\n')}
               </div>
               <div class="swing-box" hidden><button class="button swing" type="button" data-action="swing"><span aria-hidden="true">⚾</span> ${escape(t.swing)}</button></div>
               <p class="banner" aria-hidden="true" hidden>${escape(t.homeRun)}</p>
-              <div class="tour-map" aria-hidden="true" hidden>
-                <span class="tour-diamond"><i data-corner="second"></i><i data-corner="third"></i><i data-corner="first"></i><i data-corner="home"></i></span>
-                <span class="tour-count"></span>
-              </div>
             </div>
             <div class="game-bar" hidden>
+              <section class="uniform-pick bar-row" data-mode="pick" aria-labelledby="pick-title" hidden>
+                <h2 id="pick-title">${escape(t.chooseUniform)}</h2>
+                <ul class="uniform-tiles">
+${tiles.join('\n')}
+                </ul>
+                <button class="link pick-skip" type="button" data-action="skip-uniform">${escape(t.skipUniform)} <span aria-hidden="true">▶</span></button>
+              </section>
               <div class="bar-row" data-mode="bat">
                 <p class="bar-hint"><strong>${escape(t.orClick)}</strong><span class="no-touch"> ${t.pressSpace}</span></p>
               </div>
@@ -593,51 +562,38 @@ ${points.join('\n')}
                 <button class="link" type="button" data-action="free"><span aria-hidden="true">✕</span> ${escape(t.exitTour)}</button>
               </div>
               <div class="bar-row" data-mode="free" hidden>
-                <button class="button ghost" type="button" data-action="again">${escape(t.again)}</button>
                 <p class="bar-hint">${t.freeHint}</p>
               </div>
-              <p class="bar-tools"><button class="link sound-toggle" type="button" data-action="sound" aria-pressed="false"><span aria-hidden="true">♪</span> ${escape(t.sound)} <span class="state" aria-hidden="true">${escape(t.game.off)}</span></button></p>
               <p class="visually-hidden" role="status"></p>
             </div>
           </div>
-          <div class="panel" id="field-panel" tabindex="-1" role="region" aria-label="${escape(t.card)}">
-            <button class="panel-close" type="button" data-action="close" hidden><span aria-hidden="true">✕</span> ${escape(t.close)}</button>
+          <div class="panel" id="field-panel" tabindex="-1" role="region" aria-label="${escape(t.card)}" hidden>
+            <button class="panel-close" type="button" data-action="close"><span aria-hidden="true">✕</span> ${escape(t.close)}</button>
 ${panels.join('\n')}
           </div>
         </div>
         <nav class="stadium-map wrap wide" aria-labelledby="map-title">
-          <h3 id="map-title">${escape(t.stadiumMap)}</h3>
+          <h2 id="map-title">${escape(t.stadiumMap)}</h2>
           <ul>
 ${legend.join('\n')}
           </ul>
         </nav>
+        <dialog class="pause" aria-labelledby="pause-title">
+          <h2 id="pause-title">${escape(t.paused)}</h2>
+          <ul class="pause-menu">
+${pauseItem('button', 'type="button" data-action="resume"', t.resume)}
+${pauseItem('a', `href="${prefix}/nipotyno/" data-read-this`, t.readThis, `<span class="read-this-name">${escape(shortName(cases[0]))}</span>${escape(t.readThisSub)}`)}
+${pauseItem('a', `href="${modeHref(L, 'story')}"`, t.switchStory, escape(t.switchStorySub))}
+${pauseItem('a', `href="${modeHref(L, 'multiplayer')}"`, t.modes.multiplayer.name, escape(t.modes.multiplayer.desc))}
+${pauseItem('a', `href="${prefix}/"`, t.titleScreen)}
+          </ul>
+          <div class="pause-tools">
+            <nav class="pause-langs" aria-label="${escape(t.langLabel)}">${langs.join(' <span aria-hidden="true">·</span> ')}</nav>
+            <button class="link sound-toggle" type="button" data-action="sound" aria-pressed="false"><span>${escape(t.sound)}<span aria-hidden="true">:</span></span> <span class="state" aria-hidden="true">${escape(t.game.off)}</span></button>
+            <button class="link motion-toggle" type="button" data-action="motion" aria-pressed="false"><span>${escape(t.reduceMotion)}<span aria-hidden="true">:</span></span> <span class="state" aria-hidden="true">${escape(t.game.off)}</span></button>
+          </div>
+        </dialog>
       </section>`;
-}
-
-// "How I design": principles (content/about.md), the three uniforms and their skills, the moodboard.
-// The pieces are used twice: in the section of the page (#how) and in the mound's card in the stadium (without ids).
-function howPieces(L, cases, principles) {
-  const { t, p } = L;
-  const bySlug = Object.fromEntries(cases.map((c) => [c.data.slug, c]));
-  const uniformCards = L.uniforms.map((u) => {
-    const c = bySlug[u.suggested];
-    return `            <div class="uniform-card" data-uniform="${u.id}">
-              <h3>${escape(t.yourUniform)}: ${escape(u.label)}</h3>
-              <ul class="skills">${u.skills.map((s) => `<li>${escape(s)}</li>`).join('')}</ul>
-              <p>${escape(t.suggestedCase)}: <a href="${p}/${c.data.slug}/">${escape(shortName(c))} — ${escape(subtitle(c))}</a></p>
-            </div>`;
-  });
-  const uniforms = `<ul class="uniform-list">${L.uniforms.map((u) => {
-    const c = bySlug[u.suggested];
-    return `<li><strong>${escape(u.label)}</strong> <span class="skills-inline">${u.skills.map(escape).join(' · ')}</span> <span class="small">${escape(t.suggestedFirstBase)}: <a href="${p}/${c.data.slug}/">${escape(shortName(c))}</a></span></li>`;
-  }).join('')}</ul>`;
-  const swatches = ['navy', 'red', 'sky', 'grass', 'dirt', 'yellow'].map(
-    (name) => `<li><span class="swatch" style="background: ${PALETTE[name]}"></span>${escape(t.colours[name])} <code>${PALETTE[name]}</code></li>`,
-  );
-  const moodboard = `<ul class="swatches" aria-label="${escape(t.palette)}">${swatches.join('')}</ul>
-            <p>${t.type}</p>
-            <p>${fill(t.mood, { link: `<a href="https://ponywolf.com/retro-pixel-baseball"${langAttr(L, 'en')}>Retro Pixel Baseball by Ponywolf</a>` })}</p>`;
-  return { principles, uniformCards: uniformCards.join('\n'), uniforms, moodboard };
 }
 
 // --- The title screen (F4) ----------------------------------------------------------
@@ -770,7 +726,6 @@ export async function generate() {
     const cases = await Promise.all(CASES.map(load));
     const about = await load('about');
     const aboutParts = sections(await markdown(about.body, t)).split(/(?=<section)/);
-    const principles = aboutParts.find((part) => part.includes('id="how-i-design"')).match(/<ol>[\s\S]*<\/ol>/)[0];
     const f = await factPieces(L);
     const og = await ogHome(L);
     const page = async (key, html) => {
@@ -788,7 +743,7 @@ export async function generate() {
     }));
     await page('play/', layout(L, {
       ...shared, title: t.meta.play[0], description: t.meta.play[1], key: '/play/', theme: 'night', mode: 'play', bodyClass: 'play-page',
-      main: await ballpark(L, cases, { aboutParts, how: howPieces(L, cases, principles), status: statusLine(f), schools: f.schools }),
+      main: await ballpark(L, cases),
       // The sprites are CSS backgrounds (found late by the browser): preload them so the batter and the field show at once.
       scripts: [
         '<link rel="preload" as="image" href="/game/runner.png">',

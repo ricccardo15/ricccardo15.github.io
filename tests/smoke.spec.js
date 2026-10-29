@@ -163,14 +163,14 @@ test.describe('desktop (1280 px): the ballpark on /play/', () => {
     await page.keyboard.press('ArrowLeft'); // levante → nipotyno → home → (round the diamond) 3rd base
     await expect(panel(page)).toHaveAttribute('data-panel', 'sensor-lab');
 
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Close' }).click(); // F5: ✕ Close (Esc opens the pause menu)
     await expect(page.locator('#field-panel')).toBeHidden();
     await expect(page.locator('.base[data-stop="sensor-lab"]')).toBeFocused();
 
     // the address is replaced when a base is clicked (never added to): one Back press goes to the page before
     await page.goto('/levante/');
     await page.goto('/play/#sensor-lab');
-    await page.keyboard.press('Escape'); // the card opened by the deep link covers 1st base: close it
+    await page.getByRole('button', { name: 'Close' }).click(); // the card opened by the deep link covers 1st base: close it
     await page.locator('.base[data-stop="nipotyno"]').click();
     await expect(page).toHaveURL(/#nipotyno$/);
     await page.goBack();

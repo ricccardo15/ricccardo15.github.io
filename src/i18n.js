@@ -17,6 +17,22 @@ export const fill = (text, values) => text.replace(/\{(\w+)\}/g, (_, key) => val
 export const STRINGS = {
   en: {
     skip: 'Skip to content',
+    // F5: the game page (EN final)
+    pause: 'Pause',
+    paused: 'Paused',
+    resume: 'Resume',
+    readThis: 'Read this project',
+    readThisSub: ', full case study',
+    switchStory: 'Switch to Story mode',
+    switchStorySub: 'Read all 3 projects in order',
+    reduceMotion: 'Reduce motion',
+    chooseUniform: 'Choose your uniform',
+    skipUniform: 'Skip',
+    gameOver: 'Game over? Never.',
+    readStory: 'Read the story',
+    playAgain: 'Play again',
+    openMultiplayer: 'Open the Multiplayer page',
+    noGame: 'The game needs JavaScript. Every project is also a normal page:',
     // F4: title screen, modes, Story mode, Multiplayer (EN final)
     titleScreen: 'Title screen',
     modesLabel: 'Modes',
@@ -141,11 +157,29 @@ export const STRINGS = {
       on: 'on',
       off: 'off',
       backToBallpark: 'Back to the ballpark',
+      atBatBase: 'At bat',
+      visited: 'Bases visited: {n} of 3',
     },
   },
 
   es: {
     skip: 'Saltar al contenido',
+    // F5 [CHECK]: la página del juego
+    pause: 'Pausa',
+    paused: 'Pausa',
+    resume: 'Continuar',
+    readThis: 'Leer este proyecto',
+    readThisSub: ', caso de estudio completo',
+    switchStory: 'Pasar al modo historia',
+    switchStorySub: 'Lee los 3 proyectos en orden',
+    reduceMotion: 'Reducir movimiento',
+    chooseUniform: 'Elige tu uniforme',
+    skipUniform: 'Saltar',
+    gameOver: '¿Game over? Nunca.',
+    readStory: 'Leer la historia',
+    playAgain: 'Jugar otra vez',
+    openMultiplayer: 'Abrir la página Multiplayer',
+    noGame: 'El juego necesita JavaScript. Cada proyecto es también una página normal:',
     // F4 [CHECK]: pantalla de título, modos, modo historia, Multiplayer
     titleScreen: 'Pantalla de título',
     modesLabel: 'Modos',
@@ -263,10 +297,12 @@ export const STRINGS = {
       on: 'encendido',
       off: 'apagado',
       backToBallpark: 'Volver al estadio',
+      atBatBase: 'Al bate',
+      visited: 'Bases visitadas: {n} de 3',
     },
     // The bases and the points of the stadium (English in src/field-map.js)
     points: {
-      home: { label: 'Home', name: 'Empieza aquí' },
+      home: { label: 'Home', name: 'Contacto y CV' },
       nipotyno: { label: 'Primera base' },
       levante: { label: 'Segunda base' },
       'sensor-lab': { label: 'Tercera base' },
@@ -297,6 +333,22 @@ export const STRINGS = {
 
   it: {
     skip: 'Vai al contenuto',
+    // F5 [CHECK]: la pagina del gioco
+    pause: 'Pausa',
+    paused: 'In pausa',
+    resume: 'Riprendi',
+    readThis: 'Leggi questo progetto',
+    readThisSub: ', caso studio completo',
+    switchStory: 'Passa alla modalità storia',
+    switchStorySub: 'Leggi i 3 progetti in ordine',
+    reduceMotion: 'Riduci movimento',
+    chooseUniform: 'Scegli la divisa',
+    skipUniform: 'Salta',
+    gameOver: 'Game over? Mai.',
+    readStory: 'Leggi la storia',
+    playAgain: 'Gioca ancora',
+    openMultiplayer: 'Apri la pagina Multiplayer',
+    noGame: 'Il gioco ha bisogno di JavaScript. Ogni progetto è anche una pagina normale:',
     // F4 [CHECK]: schermata titolo, modalità, modalità storia, Multiplayer
     titleScreen: 'Schermata titolo',
     modesLabel: 'Modalità',
@@ -414,9 +466,11 @@ export const STRINGS = {
       on: 'acceso',
       off: 'spento',
       backToBallpark: 'Torna allo stadio',
+      atBatBase: 'In battuta',
+      visited: 'Basi visitate: {n} di 3',
     },
     points: {
-      home: { label: 'Casa base', name: 'Inizia qui' },
+      home: { label: 'Casa base', name: 'Contatti e CV' },
       nipotyno: { label: 'Prima base' },
       levante: { label: 'Seconda base' },
       'sensor-lab': { label: 'Terza base' },

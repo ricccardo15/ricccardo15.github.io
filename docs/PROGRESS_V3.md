@@ -34,3 +34,19 @@ Diario delle fasi eseguite da Claude Code in autonomia sul ramo `v3` (29/10/2026
 - Screenshot: tests/screenshots/v3/f4-*.png.
 - Decisioni (auto): vedi DECISIONS.md (reader tolto, fine storia nel capitolo 3, capitolo 0 dai testi di about.md, niente testi del mockup non presenti nel piano, nomi delle modalità in ES/IT, cursore CSS, sfondo provvisorio, un solo commit).
 - Punti aperti: sfondo night.png (F6); /play/ a tutto schermo, HUD, pausa e divise (F5); ES/IT delle stringhe nuove [CHECK].
+
+## F5 · Gameplay a pagina intera — piano
+- /play/ diventa il gioco a tutta pagina: HUD in alto (⏸ Pause · Esc, base attuale, 3 rombi, suono) al posto della barra.
+- Primo passo: scelta divisa (3 tessere, Skip). Poi Swing → home run → tour con Next base.
+- Punti: 3 basi + casa base = Multiplayer; tabellone, monte e biglietteria diventano decorazione.
+- Card corte (cover, titolo, 1 riga, numeri, Read the case study). Fine: "Game over? Never." con 3 bottoni.
+- Menu di pausa modale con 5 voci + lingua, suono, movimento. Senza JS: una frase con i link.
+- Test nuovi in tests/f5.spec.js; test vecchi aggiornati (Esc ora apre la pausa, prima la divisa, HUD al posto del contatore).
+
+## F5 — fatto
+- Codice: src/game.js riscritto (modi pick/bat/tour/free, HUD, pausa, divise, movimento ridotto a scelta), src/tour.js senza il riquadro nel campo, scripts/pages.js con la nuova pagina /play/, CSS di HUD, riga divise, pausa.
+- Prove: `npm test` = 333 test verdi. tests/f5.spec.js: HUD in una riga, Esc apre/chiude con il focus giusto, Tab resta nella pausa (avanti e indietro), ogni voce porta dove deve, lingua che tiene la base, suono e movimento ricordati, divisa ricordata, partita intera da tastiera (frecce tra le basi), axe con pausa aperta, reduced motion senza lancio né zoom, screenshot con e senza pausa a 1280 e 390.
+- Correzioni dopo gli screenshot: la scelta divisa copriva le basi (spostata sotto il campo), HUD su telefono su 3 righe (ora 2), spazi in "Sound: off".
+- Screenshot: tests/screenshots/v3/f5-play-1280.png, f5-play-390.png, f5-play-tour-*.png, f5-play-pause-1280.png, f5-play-pause-390.png.
+- Decisioni (auto): HUD al posto della barra con JS; Esc = pausa; divise sotto il campo e nessun focus automatico; "Read this project" nascosto prima del primo progetto; interruttore movimento; card corte; file tolti.
+- Punti aperti: ES/IT delle stringhe nuove [CHECK] ("¿Game over? Nunca.", "Game over? Mai.").

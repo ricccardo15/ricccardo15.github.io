@@ -21,8 +21,9 @@ test.describe('sound toggle', () => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(err.message));
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.getByRole('button', { name: /^Skip/ }).click(); // F5: the uniform comes first (skippable)
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
+    await expect(page.locator('.hud-base')).toHaveText('1st base · Nipotyno');
     expect(errors).toEqual([]);
   });
 });
@@ -61,8 +62,9 @@ for (const width of [1280, 390]) {
     test('reduced motion: nothing keeps moving', async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/play/');
+      await page.getByRole('button', { name: /^Skip/ }).click(); // F5: the uniform comes first (skippable)
       await page.getByRole('button', { name: 'Swing!' }).click();
-      await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
+      await expect(page.locator('.hud-base')).toHaveText('1st base · Nipotyno');
       await page.waitForTimeout(100);
       const moving = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
       expect(moving).toBe(0);

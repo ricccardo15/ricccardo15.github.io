@@ -53,11 +53,13 @@ test.describe('languages @ 1280 px', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'it');
     await expect(page.locator('.facts dt').first()).toHaveText('Il mio ruolo');
 
-    // on the game page the base in the address goes along
+    // on the game page the base in the address goes along (F5: the languages are in the pause menu there)
     await page.goto('/play/#sensor-lab');
-    await page.locator('.lang-switch a[hreflang="es"]').focus();
-    await expect(page.locator('.lang-switch a[hreflang="es"]')).toBeFocused();
-    const outline = await page.locator('.lang-switch a[hreflang="es"]').evaluate((el) => getComputedStyle(el).outlineStyle);
+    await page.keyboard.press('Escape');
+    const es = page.locator('dialog.pause a[hreflang="es"]');
+    await es.focus();
+    await expect(es).toBeFocused();
+    const outline = await es.evaluate((el) => getComputedStyle(el).outlineStyle);
     expect(outline).not.toBe('none');
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/es\/play\/#sensor-lab$/);
@@ -86,8 +88,8 @@ test.describe('languages @ 1280 px', () => {
   });
 
   for (const [lang, words] of Object.entries({
-    es: { next: 'Siguiente base: Levante →', count: '1 de 3 · Nipotyno', swing: '¡Batea!', read: 'Lee el caso de estudio' },
-    it: { next: 'Prossima base: Levante →', count: '1 di 3 · Nipotyno', swing: 'Batti!', read: 'Leggi il caso studio' },
+    es: { next: 'Siguiente base: Levante →', count: 'Primera base · Nipotyno', swing: '¡Batea!', read: 'Lee el caso de estudio' },
+    it: { next: 'Prossima base: Levante →', count: 'Prima base · Nipotyno', swing: 'Batti!', read: 'Leggi il caso studio' },
   })) {
     test(`/${lang}/play/: the game and the chapters speak ${lang}, no English left in the interface`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -100,8 +102,9 @@ test.describe('languages @ 1280 px', () => {
         expect(text, english).not.toContain(english);
       }
 
+      await page.locator('[data-action="skip-uniform"]').click(); // F5: the uniform comes first
       await page.getByRole('button', { name: words.swing }).click();
-      await expect(page.locator('.tour-count')).toHaveText(words.count);
+      await expect(page.locator('.hud-base')).toHaveText(words.count);
       await expect(page).toHaveURL(new RegExp(`/${lang}/play/#nipotyno$`));
       const next = page.locator('#field-panel .tour-nav .button');
       await expect(next).toHaveText(words.next);
@@ -152,6 +155,7 @@ for (const { width, height } of [{ width: 1280, height: 800 }, { width: 390, hei
     for (const home of ['/es/', '/it/']) {
       test(`${home}: Swing! covers no point`, async ({ page }) => {
         await page.goto(`${home}play/`);
+        await page.locator('[data-action="skip-uniform"]').click();
         const swing = await page.locator('.swing-box').boundingBox();
         for (const base of await page.locator('.stage .base').all()) expect(overlap(swing, await base.boundingBox()), await base.getAttribute('href')).toBe(false);
       });

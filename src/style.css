@@ -152,12 +152,6 @@ h3 { font-size: 1.25rem; }
   background-position: 0 calc(var(--uniform-row, 0) * var(--step));
   background-size: calc(var(--frames) * var(--cell) * var(--s) * 1px) calc(var(--rows) * var(--cell) * var(--s) * 1px);
 }
-.skills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
-.skills li { margin: 0 !important; padding: .1rem .5rem; border: 1px solid var(--line); background: var(--bg); font-size: .9375rem; }
-.swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: .35rem .75rem; }
-.swatches li { margin: 0 !important; display: flex; align-items: center; flex-wrap: wrap; gap: .1rem .4rem; font-size: .9375rem; }
-.swatches code { color: var(--muted); font-size: .8125rem; }
-.swatch { width: 1.25rem; height: 1.25rem; flex: none; border: 1px solid var(--ink); }
 
 .actions { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .75rem; }
 /* Buttons: the main one is a red fill (white text 6.5:1 in both themes), the others an ink outline. Square, with a solid shadow. */
@@ -181,12 +175,10 @@ h3 { font-size: 1.25rem; }
    2× (960×540) from 1000 px wide, 1× (480×270) below. Positions come from src/field-map.js as --x / --y percentages.
    On a phone the stage is as wide as the screen and the 480 px picture is centred and cropped (about 64 px off each side):
    everything a visitor can click lives between x = 64 and x = 416 (tests/field.spec.js checks it). --- */
-.field { --fs: 1; padding-block: 1rem 1.5rem; min-height: calc(100dvh - 3.5rem); } /* the stadium fills the screen under the header */
+.field { --fs: 1; padding-block: 0 1.5rem; }
 @media (min-width: 1000px) {
   .field { --fs: 2; }
 }
-.field h2 { margin: 0; }
-.hint { margin: .25rem 0 .75rem; font-size: 1rem; color: var(--muted); }
 /* The stage and the card that opens over it. */
 .ballpark { position: relative; width: calc(480px * var(--fs) + 4px); max-width: calc(100% - 2rem); margin-inline: auto; }
 .stage {
@@ -269,7 +261,7 @@ h3 { font-size: 1.25rem; }
 }
 /* Stadium map: the list of every point, under the field on phones and tablets (keyboard friendly). On desktop the labels say it all. */
 .stadium-map { margin-top: 1rem; }
-.stadium-map h3 { margin: 0 0 .5rem; font-size: 1.125rem; }
+.stadium-map h2 { margin: 0 0 .5rem; font-family: var(--font-mono); font-size: .875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .stadium-map ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: .4rem; }
 .stadium-map a { display: flex; align-items: center; gap: .5rem; min-height: 44px; padding: .25rem .5rem; border: 2px solid var(--ink); background: var(--card); font-weight: 700; text-decoration: none; }
 .stadium-map a:hover, .stadium-map a[aria-current] { background: var(--ink); color: var(--bg); }
@@ -409,16 +401,6 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .button:disabled { opacity: .45; cursor: default; pointer-events: none; }
 /* Tour: the diamond in the corner of the field (bases visited filled, current one in red) and the controls inside the card.
    Nothing here moves on by itself. */
-.tour-map { position: absolute; top: 6px; right: 6px; z-index: 6; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 2px solid #fff; background: var(--navy); color: #fff; font-size: .8125rem; font-weight: 700; line-height: 1.2; }
-.tour-diamond { position: relative; flex: none; width: 22px; height: 22px; }
-.tour-diamond::before { content: ""; position: absolute; inset: 5px; border: 1px solid #8a94a6; transform: rotate(45deg); }
-.tour-diamond i { position: absolute; width: 6px; height: 6px; border: 1px solid #fff; background: var(--navy); }
-.tour-diamond i[data-corner="second"] { left: 8px; top: 0; }
-.tour-diamond i[data-corner="third"] { left: 0; top: 8px; }
-.tour-diamond i[data-corner="first"] { right: 0; top: 8px; }
-.tour-diamond i[data-corner="home"] { left: 8px; bottom: 0; }
-.tour-diamond i.is-visited { background: #f2c14e; }
-.tour-diamond i.is-current { background: #e0533f; box-shadow: 0 0 0 1px #fff; }
 .tour-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: .75rem; }
 .tour-nav { font-size: 1rem; }
 .tour-nav .button { margin-top: 0; font-size: inherit; }
@@ -426,9 +408,7 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .panel[data-mode="tour"] .panel-card[data-panel]:not([data-panel="done"]) > p > a.button { background: transparent; color: var(--ink); }
 .panel[data-mode="tour"] .panel-card[data-panel]:not([data-panel="done"]) > p > a.button:hover { background: var(--card); color: var(--red); border-color: var(--red); }
 @media (max-width: 699px) {
-  .tour-map { top: 4px; right: 4px; gap: 5px; padding: 2px 5px; font-size: .6875rem; }
 }
-.bar-tools { margin: .5rem 0 0; font-size: .9375rem; }
 .sound-toggle .state { display: inline-block; min-width: 1.6em; padding: 0 .3em; border: 1px solid var(--ink); font-size: .8125rem; text-decoration: none; }
 .sound-toggle[aria-pressed="true"] .state { background: var(--ink); color: var(--bg); }
 /* Touch screens have no Space or arrow keys: hide those hints there. */
@@ -449,7 +429,6 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 /* Only with the game running (src/game.js adds .is-live): without JS the card stays under the field and covers nothing. */
 @media (min-width: 1000px) {
   .is-live .panel { position: absolute; top: 12px; right: 12px; z-index: 8; width: min(400px, 44%); max-height: calc(270px * var(--fs) - 24px); overflow: auto; overscroll-behavior: contain; }
-  .is-live .ballpark:has(.panel:not([hidden])) .tour-map { right: auto; left: 6px; } /* the card covers the right side */
 }
 .panel { margin-top: .75rem; }
 .is-live .panel { margin-top: 0; }
@@ -462,13 +441,8 @@ button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .key-numbers li { padding: .15rem .5rem; border: 2px solid var(--ink); font-size: .875rem; font-weight: 700; }
 .card-links { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
 .pdf-link { font-weight: 700; }
-.card-list { margin: .25rem 0 .75rem; padding-left: 1.25rem; font-size: .9375rem; }
-.panel h4 { margin: 1rem 0 .25rem; font-size: 1rem; color: var(--ink); }
-.uniform-list { list-style: none; margin: .25rem 0 .75rem; padding: 0; display: grid; gap: .5rem; font-size: .9375rem; }
-.uniform-list strong { display: block; }
-.skills-inline { display: block; color: var(--ink); }
-.panel h3 { margin: .25rem 0 .5rem; font-size: 1.375rem; }
-.panel h3 .sub { display: block; margin-top: .25rem; font-size: 1rem; font-weight: 700; color: var(--ink); }
+.panel h2 { margin: .25rem 0 .5rem; font-size: calc(var(--j) * 2); text-transform: uppercase; color: var(--yellow); }
+.panel h2 .sub { display: block; margin-top: .4rem; font-family: var(--font-body); font-size: 1rem; line-height: 1.35; letter-spacing: 0; text-transform: none; color: var(--ink); }
 .panel p { margin: .5rem 0; font-size: 1rem; }
 .panel .button { margin-top: .25rem; }
 
@@ -535,7 +509,7 @@ th { background: var(--ink); color: var(--bg); }
 }
 
 /* F3: subtitles inside a pixel title are reading text, not Jersey; the TL;DR heading is a small label. */
-.case h1 .sub, .panel h3 .sub { font-family: var(--font-body); font-weight: 400; letter-spacing: 0; line-height: 1.3; }
+.case h1 .sub { font-family: var(--font-body); font-weight: 400; letter-spacing: 0; line-height: 1.3; }
 .tldr h2 { font-family: var(--font-mono); font-size: .875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 /* Long reading text never wider than 68 characters. */
 .case p, .case li { max-width: 68ch; }
@@ -725,4 +699,83 @@ th { background: var(--ink); color: var(--bg); }
 }
 
 /* --- Gameplay (/play/): the stadium is the page (F5 makes it full screen) --- */
-.field h1 { margin: 0; font-size: calc(var(--j) * 2); }
+/* The HUD: one row on top of the game (with JS it takes the place of the mode bar, which the pause menu replaces). */
+.is-game .mode-bar, .is-game .site-footer { display: none; }
+.hud { position: relative; z-index: 7; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; margin-bottom: 1.25rem; padding: .5rem max(1rem, (100% - 72rem) / 2); border-bottom: 2px solid var(--line); background: var(--night); }
+.hud-pause { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; padding: 0 1rem; border: 0; background: var(--yellow); color: var(--night); font-family: var(--font-mono); font-size: .9375rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.hud-pause:hover { background: var(--ink); }
+.hud-pause:focus-visible, .hud-sound:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.hud-title { margin: 0; font-size: calc(var(--j) * 1.5); line-height: 1; text-transform: uppercase; color: var(--ink); }
+.hud-base { margin: 0; font-family: var(--font-mono); font-size: .9375rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.hud-diamonds { display: inline-flex; gap: 6px; margin-left: auto; }
+.hud-diamonds i { width: 14px; height: 14px; border: 2px solid var(--muted); transform: rotate(45deg); }
+.hud-diamonds i.is-visited { border-color: var(--yellow); background: var(--yellow); }
+.hud-diamonds i.is-current { border-color: var(--yellow); box-shadow: 0 0 0 2px var(--night), 0 0 0 4px var(--yellow); }
+.hud-sound { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; padding: 0; border: 0; background: none; color: var(--ink); font-family: var(--font-mono); font-size: .9375rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.hud-sound:hover { color: var(--yellow); }
+.hud .sound-toggle .state { border: 0; padding: 0; font-size: inherit; }
+.hud .sound-toggle[aria-pressed="true"] .state { background: none; color: var(--yellow); }
+/* Without JS: no HUD controls, the mode bar stays, and one sentence links the pages. */
+.hud-diamonds[hidden] ~ .hud-sound[hidden] { display: none; }
+.no-game { margin: 0 auto 1rem; }
+/* Phones: ⏸ Pause · GAMEPLAY · ◇◇◇ · ♪ off on one line, the base under it. "Sound" stays in the button's name, unseen. */
+@media (max-width: 699px) {
+  .hud { gap: .25rem .75rem; margin-bottom: .75rem; }
+  .hud-base { order: 5; width: 100%; font-size: .8125rem; }
+  .hud-title { font-size: var(--j); }
+  .hud-sound, .hud-pause { font-size: .8125rem; }
+  .hud-pause .no-touch { display: none; }
+  .hud-sound .sound-word { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* Choose your uniform: the first step of the game, one row under the field (it covers no base): three small tiles, Skip. */
+.uniform-pick { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .6rem .75rem; border: 2px solid var(--yellow); background: var(--card); box-shadow: 4px 4px 0 #000; }
+.uniform-pick h2 { margin: 0; font-size: calc(var(--j) * 1.5); line-height: 1; text-transform: uppercase; color: var(--yellow); }
+.uniform-tiles { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+.uniform-tile { position: relative; display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding: .25rem .75rem .25rem .3rem; border: 2px solid var(--line); background: var(--night); color: var(--ink); font: inherit; font-size: .9375rem; font-weight: 700; cursor: pointer; }
+.uniform-tile:hover, .uniform-tile[aria-pressed="true"] { border-color: var(--yellow); }
+.uniform-tile[aria-pressed="true"] .tile-name::before { content: "▶ " / ""; color: var(--yellow); }
+.uniform-tile:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+/* Portrait: the head of the 48 px frame (a 40×30 window at 1.5×) */
+.portrait { width: 40px; height: 30px; border: 1px solid var(--line); background: url("/game/runner.png") -14px calc(var(--row) * -72px) / 1080px 216px no-repeat, #1b2a4a; image-rendering: pixelated; }
+.pick-skip { display: inline-flex; align-items: center; gap: .35em; min-height: 44px; margin-left: auto; color: var(--ink); }
+@media (max-width: 699px) {
+  .uniform-pick { gap: .4rem .5rem; padding: .5rem; }
+  .uniform-pick h2 { width: 100%; font-size: var(--j); }
+  .uniform-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: .35rem; }
+  .uniform-tile { flex-direction: column; gap: .15rem; padding: .25rem; font-size: .8125rem; }
+  .pick-skip { margin-left: 0; }
+}
+
+/* The game card: little text (F5). */
+.panel-email { font-weight: 700; overflow-wrap: anywhere; }
+.game-over h2 { color: var(--yellow); }
+
+/* The pause menu (modal dialog, night). */
+dialog.pause { width: min(34rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); padding: 2rem 2rem 1.5rem; border: 4px solid var(--ink); background: var(--card); color: var(--ink); box-shadow: 8px 8px 0 #000; }
+dialog.pause::backdrop { background: rgb(11 15 30 / .72); }
+dialog.pause h2 { margin: 0 0 1.25rem; font-size: calc(var(--j) * 3); text-align: center; text-transform: uppercase; color: var(--yellow); text-shadow: .107em .107em 0 var(--red-fill); }
+.pause-menu { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.pause-item { position: relative; display: block; width: 100%; min-height: 44px; padding: .55rem 1rem .55rem 2.5rem; border: 2px solid transparent; background: none; color: var(--ink); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.pause-name { display: block; font-family: var(--font-display); font-size: calc(var(--j) * 2); line-height: 1; text-transform: uppercase; }
+.pause-sub { display: block; margin-top: .3rem; font-size: 1rem; }
+.pause-item:hover, .pause-item:focus-visible { border-color: var(--yellow); background: var(--night); color: var(--ink); }
+.pause-item:hover .pause-name, .pause-item:focus-visible .pause-name { color: var(--yellow); }
+.pause-item:hover::before, .pause-item:focus-visible::before { content: "▶" / ""; position: absolute; left: .9rem; top: .9rem; color: var(--yellow); font-size: 1rem; line-height: 1; }
+.pause-item:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.pause-tools { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .25rem 1.25rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid var(--line); font-family: var(--font-mono); font-size: .875rem; letter-spacing: .06em; text-transform: uppercase; }
+.pause-tools a, .pause-tools button.link { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; color: var(--ink); font: inherit; font-weight: 700; letter-spacing: inherit; text-transform: inherit; }
+.pause-tools a[aria-current] { color: var(--yellow); }
+.pause-langs { display: inline-flex; align-items: center; gap: .5rem; color: var(--muted); }
+.pause-tools .state { border: 0; padding: 0; font-size: inherit; }
+.pause-tools button:disabled { opacity: 1; color: var(--muted); cursor: default; }
+@media (max-width: 599px) {
+  dialog.pause { padding: 1.25rem 1rem 1rem; }
+  dialog.pause h2 { font-size: calc(var(--j) * 2); margin-bottom: .75rem; }
+  .pause-name { font-size: calc(var(--j) * 1.5); }
+  .pause-sub { font-size: .875rem; }
+}
+
+/* Reduced motion chosen in the pause menu: the same as the system setting (no animation, no zoom). */
+.reduce-motion .sprite, .reduce-motion .is-running .runner, .reduce-motion .banner, .reduce-motion .panel-card { animation: none !important; }
+.reduce-motion .world, .reduce-motion .field-box, .reduce-motion .base { transition: none !important; }
