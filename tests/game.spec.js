@@ -25,7 +25,7 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     await page.getByRole('button', { name: 'Swing!' }).click();
     await expect.poll(() => page.evaluate(() => window.__banner)).toBe(true);
 
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await expect(page).toHaveURL(/#nipotyno$/);
     await expect(panel(page)).toHaveAttribute('data-panel', 'nipotyno');
     await expect(panel(page).locator('.panel-cover')).toBeVisible();
@@ -38,15 +38,15 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     await expect(page.locator('.timer, [data-action="pause"], .tour-step')).toHaveCount(0);
 
     await nextButton(page).click();
-    await expect(count(page)).toHaveText('2 of 4 · Levante');
+    await expect(count(page)).toHaveText('2 of 3 · Levante');
     await expect(nextButton(page)).toBeFocused(); // keyboard users keep going with Enter
     await backButton(page).click();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
 
-    for (const name of ['Levante', 'Housing', 'Lab']) {
+    for (const [slug, name] of [['levante', 'Levante'], ['sensor-lab', 'Sensor lab']]) {
       await nextButton(page).click();
       await expect(count(page)).toContainText(name);
-      await expect(panel(page)).toHaveAttribute('data-panel', name.toLowerCase());
+      await expect(panel(page)).toHaveAttribute('data-panel', slug);
     }
     // last base: the main button finishes the tour
     await expect(nextButton(page)).toHaveText('Finish the tour →');
@@ -56,7 +56,8 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     await expect(panel(page).getByRole('link', { name: 'CV (English, PDF)' })).toBeVisible();
     await expect(nextButton(page)).toHaveCount(0);
     await expect(backButton(page)).toBeVisible();
-    await expect(page.locator('.tour-diamond i.is-visited')).toHaveCount(4);
+    await expect(page.locator('.tour-diamond i.is-visited')).toHaveCount(4); // the 3 bases + home plate, where the tour ends
+    await expect(page).toHaveURL(/#home$/);
 
     await panel(page).getByRole('button', { name: 'Take another swing' }).click();
     await expect(bar(page, 'bat')).toBeVisible();
@@ -71,11 +72,11 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     const visited = page.locator('.tour-diamond i.is-visited');
     await expect(visited).toHaveCount(1);
     await expect(page.locator('.tour-diamond i.is-current')).toHaveAttribute('data-corner', 'first');
-    await expect(status(page)).toHaveText('Tour 1 of 4: Nipotyno.');
+    await expect(status(page)).toHaveText('Tour 1 of 3: Nipotyno.');
     await nextButton(page).click();
     await expect(visited).toHaveCount(2);
     await expect(page.locator('.tour-diamond i.is-current')).toHaveAttribute('data-corner', 'second');
-    await expect(status(page)).toHaveText('Tour 2 of 4: Levante.');
+    await expect(status(page)).toHaveText('Tour 2 of 3: Levante.');
     await backButton(page).click();
     await expect(visited).toHaveCount(2); // visited stays filled, the current one moves back
     await expect(page.locator('.tour-diamond i.is-current')).toHaveAttribute('data-corner', 'first');
@@ -86,41 +87,41 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
     await page.locator('#field').scrollIntoViewIfNeeded();
     await page.locator('#field-title').click(); // focus on the page next to the field, not on a control
     await page.keyboard.press('Space');
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
 
     await page.goto('/');
     await page.locator('.stage').click({ position: { x: 300, y: 30 } }); // the stands: no base there
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
   });
 
   test('after the tour one browser Back press leaves the page (the address is replaced, not added to)', async ({ page }) => {
-    await page.goto('/lab/');
+    await page.goto('/levante/');
     await page.goto('/');
     await page.getByRole('link', { name: 'Enter the ballpark' }).click(); // "Enter the ballpark" links to #field: must not add a history entry
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await nextButton(page).click();
     await nextButton(page).click();
-    await expect(count(page)).toHaveText('3 of 4 · Housing');
-    await expect(page).toHaveURL(/#housing$/);
+    await expect(count(page)).toHaveText('3 of 3 · Sensor lab');
+    await expect(page).toHaveURL(/#sensor-lab$/);
     await page.goBack();
-    await expect(page).toHaveURL(/\/lab\/$/);
+    await expect(page).toHaveURL(/\/levante\/$/);
   });
 
   test('Back in free mode also leaves with one press', async ({ page }) => {
-    await page.goto('/lab/');
+    await page.goto('/levante/');
     await page.goto('/');
     await page.locator('.base[data-stop="levante"]').click();
-    await page.locator('.base[data-stop="housing"]').click();
-    await expect(page).toHaveURL(/#housing$/);
+    await page.locator('.base[data-stop="sensor-lab"]').click();
+    await expect(page).toHaveURL(/#sensor-lab$/);
     await page.goBack();
-    await expect(page).toHaveURL(/\/lab\/$/);
+    await expect(page).toHaveURL(/\/levante\/$/);
   });
 
   test('a link to another anchor in the middle of the tour ends it (hash that is not a base)', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await page.getByRole('link', { name: 'Skip → Case studies' }).click();
     await page.goBack(); // back from #work to the base address: free mode, not the tour
     await expect(bar(page, 'free')).toBeVisible();
@@ -130,17 +131,17 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
   test('clicking a base, Esc or "Exit tour" leaves the tour; deep links skip the at-bat', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
-    await page.locator('.base[data-stop="housing"]').click();
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
+    await page.locator('.base[data-stop="sensor-lab"]').click();
     await expect(bar(page, 'free')).toBeVisible();
     await expect(bar(page, 'tour')).toBeHidden();
-    await expect(panel(page)).toHaveAttribute('data-panel', 'housing');
-    await expect(status(page)).toHaveText('Tour ended. Free mode. Housing, 3rd base.');
+    await expect(panel(page)).toHaveAttribute('data-panel', 'sensor-lab');
+    await expect(status(page)).toHaveText('Tour ended. Free mode. Sensor lab, 3rd base.');
     await expect(page.locator('.tour-nav')).toHaveCount(0);
 
     await page.goto('/');
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await page.getByRole('button', { name: 'Exit tour' }).click();
     await expect(bar(page, 'free')).toBeVisible();
     await expect(status(page)).toHaveText('Tour ended. Free mode.');
@@ -148,7 +149,7 @@ test.describe('game @ 1280 px, reduced motion (no pitch, no zoom)', () => {
 
     await page.goto('/');
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await page.keyboard.press('Escape');
     await expect(bar(page, 'free')).toBeVisible();
     await expect(page.locator('#field-panel')).toBeHidden();
@@ -189,7 +190,7 @@ test.describe('game @ 1280 px with motion', () => {
 
     await page.getByRole('button', { name: 'Swing!' }).click();
     await expect(page.locator('.banner')).toBeVisible({ timeout: 10_000 });
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno', { timeout: 10_000 });
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno', { timeout: 10_000 });
     await expect(page.locator('.stage')).toHaveClass(/is-zoomed/, { timeout: 10_000 });
     await expect(page.locator('.runner')).toHaveClass(/is-highfive/);
     await expect(page.locator('[data-crew="coach1"]')).toHaveClass(/is-highfive/);
@@ -202,15 +203,15 @@ test.describe('game @ 1280 px with motion', () => {
 
     // no change of base without a click: wait 15 s on the card
     await page.waitForTimeout(15_000);
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await expect(panel(page)).toHaveAttribute('data-panel', 'nipotyno');
 
     // Next works while a moment is playing: go on and click again during the zoom of the next stop
     await nextButton(page).click();
-    await expect(count(page)).toHaveText('2 of 4 · Levante');
+    await expect(count(page)).toHaveText('2 of 3 · Levante');
     await expect(page.locator('.stage')).toHaveClass(/is-zoomed/, { timeout: 5_000 });
     await nextButton(page).click(); // the zoom is still on
-    await expect(count(page)).toHaveText('3 of 4 · Housing', { timeout: 10_000 });
+    await expect(count(page)).toHaveText('3 of 3 · Sensor lab', { timeout: 10_000 });
   });
 });
 
@@ -221,7 +222,7 @@ test.describe('game @ 390 px (touch)', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
     await page.getByRole('button', { name: 'Swing!' }).tap();
-    await expect(count(page)).toHaveText('1 of 4 · Nipotyno');
+    await expect(count(page)).toHaveText('1 of 3 · Nipotyno');
     await nextButton(page).tap();
     await expect(panel(page)).toHaveAttribute('data-panel', 'levante');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

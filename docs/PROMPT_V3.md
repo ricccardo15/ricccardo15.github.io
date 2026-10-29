@@ -27,7 +27,13 @@ Ispirazioni (solo struttura, niente copia): Helas Pxl (capitoli numerati 01/02, 
 6. **F6 Pixel art**
 7. **F7 Caso Sensor lab** (quando mi dai foto e appunti degli esercizi)
 
-Pubblica dopo F4 se ti serve subito il nuovo ingresso: F1–F4 insieme sono già una versione coerente.
+**Si pubblica solo la versione definitiva.** Tutto il lavoro sta sul ramo `v3` (una copia parallela del sito). Il sito online si aggiorna solo con un push su `main`, quindi il ramo `v3` può andare su GitHub come backup senza cambiare il sito. Alla fine (dopo F7) si unisce `v3` in `main` e il sito nuovo va online in un colpo solo.
+
+Prima sessione, prima di F1, scrivi a Claude Code: "Crea il ramo v3 da main e lavora solo lì. Non fare mai push su main finché non te lo dico io." In ogni prompt, "push" vuol dire push del ramo `v3`.
+
+Per vedere il sito in locale mentre lavori: `npm run dev` e apri l'indirizzo che ti mostra (di solito http://localhost:5173).
+
+Pubblicazione finale (ultima sessione): "Controlla che tutti i test passino su v3, poi unisci v3 in main e fai push. Mostrami il sito online."
 
 ---
 
@@ -206,7 +212,7 @@ ALLA FINE: DECISIONS.md, CREDITS.md se serve, commit. Italiano semplice. Plan mo
 ```
 
 ## F7 · Caso Sensor lab (quando c'è il materiale)
-Mi porti in chat: 3–6 foto o brevi video degli esercizi (senza volti), per ognuno 2 righe (cosa fa, sensori/attuatori, cosa hai imparato) e se è lavoro tuo o di gruppo. Io preparo `content/sensor-lab.md` (struttura del caso, 500–700 parole, niente dati inventati) e il prompt per Claude Code (immagini WebP senza EXIF, OG, PDF, traduzioni [CHECK]).
+Metti foto e video degli esercizi in `Desktop/PORTFOLIO/docs/assets-preview/mis/`, una sottocartella per esercizio (`01-nome/`, `02-nome/`…). Questa cartella non finisce mai nel repo. In ogni sottocartella aggiungi un file `note.txt` con: cosa fa, sensori e attuatori, cosa hai imparato, lavoro tuo o di gruppo (con chi). I video veri servono come materiale di partenza anche se sul sito useremo versioni ricreate. Io preparo `content/sensor-lab.md` (struttura del caso, 500–700 parole, niente dati inventati) e il prompt per Claude Code (immagini WebP senza EXIF, OG, PDF, traduzioni [CHECK]).
 
 ---
 

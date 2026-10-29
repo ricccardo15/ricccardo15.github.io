@@ -6,7 +6,7 @@ import { FIELD, TOUR } from './field-map.js';
 import { T, fill } from './strings.js';
 
 const MOMENT = 2000; // zoom + high five / cheer / wave (ms)
-const PROJECTS = TOUR.filter((s) => !s.panel).length; // stops that count in "2 of 4"
+const PROJECTS = TOUR.filter((s) => !s.panel).length; // stops that count in "2 of 3"
 
 // ctx (from game.js): stage, panel, bar, runner, crew, crewAt, byId, nameOf, reduceMotion, sound, sleep, say, setHash, runTo
 export function createTour(ctx) {

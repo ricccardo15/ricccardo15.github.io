@@ -56,13 +56,13 @@ test.describe('case reader @ 1280×800', () => {
   });
 
   test('previous / next stay in the reader; one Back still returns to the stadium; "All case studies" goes to the list', async ({ page }) => {
-    await page.goto('/lab/');
+    await page.goto('/sensor-lab/');
     await page.goto('/');
     await page.locator('#work').getByRole('link', { name: /Knowing in hours/ }).click(); // the Levante card of the list
     await expect(reader(page).locator('article.case h1')).toContainText('Levante');
     await reader(page).locator('.pager a[rel="next"]').click();
-    await expect(reader(page).locator('article.case h1')).toContainText('Finding a home');
-    await expect(page).toHaveURL(/\/housing\/$/);
+    await expect(reader(page).locator('article.case h1')).toContainText('Sensor lab');
+    await expect(page).toHaveURL(/\/sensor-lab\/$/);
     expect(await duplicateIds(page)).toEqual([]);
     await page.goBack();
     await expect(reader(page)).toBeHidden();
@@ -98,12 +98,12 @@ test.describe('case reader @ 1280×800', () => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Enter the ballpark' }).click();
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
+    await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
     await page.locator('#field-panel [data-panel="nipotyno"]').getByRole('link', { name: /Read the case study/ }).click();
     await expect(reader(page)).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(reader(page)).toBeHidden();
-    await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
+    await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
     await expect(page.getByRole('button', { name: /Next base: Levante/ })).toBeVisible();
   });
 

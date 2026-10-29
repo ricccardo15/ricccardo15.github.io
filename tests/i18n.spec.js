@@ -54,14 +54,14 @@ test.describe('languages @ 1280 px', () => {
     await expect(page.locator('.facts dt').first()).toHaveText('Il mio ruolo');
 
     // on the home the base in the address goes along
-    await page.goto('/#housing');
+    await page.goto('/#sensor-lab');
     await page.locator('.lang-switch a[hreflang="es"]').focus();
     await expect(page.locator('.lang-switch a[hreflang="es"]')).toBeFocused();
     const outline = await page.locator('.lang-switch a[hreflang="es"]').evaluate((el) => getComputedStyle(el).outlineStyle);
     expect(outline).not.toBe('none');
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/es\/#housing$/);
-    await expect(page.locator('#field-panel [data-panel="housing"]')).toBeVisible();
+    await expect(page).toHaveURL(/\/es\/#sensor-lab$/);
+    await expect(page.locator('#field-panel [data-panel="sensor-lab"]')).toBeVisible();
   });
 
   test('"/" follows a language only after the visitor chose it; choosing EN again stops it', async ({ page }) => {
@@ -86,8 +86,8 @@ test.describe('languages @ 1280 px', () => {
   });
 
   for (const [lang, words] of Object.entries({
-    es: { next: 'Siguiente base: Levante →', count: '1 de 4 · Nipotyno', swing: '¡Batea!', back: 'Volver al estadio', read: 'Lee el caso de estudio' },
-    it: { next: 'Prossima base: Levante →', count: '1 di 4 · Nipotyno', swing: 'Batti!', back: 'Torna allo stadio', read: 'Leggi il caso studio' },
+    es: { next: 'Siguiente base: Levante →', count: '1 de 3 · Nipotyno', swing: '¡Batea!', back: 'Volver al estadio', read: 'Lee el caso de estudio' },
+    it: { next: 'Prossima base: Levante →', count: '1 di 3 · Nipotyno', swing: 'Batti!', back: 'Torna allo stadio', read: 'Leggi il caso studio' },
   })) {
     test(`/${lang}/: the game and the reader speak ${lang}, no English left in the interface`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -117,7 +117,7 @@ test.describe('languages @ 1280 px', () => {
       await expect(reader.locator('.reader-close')).toHaveText(`✕ ${words.back}`);
       // next case inside the reader stays in the language
       await reader.locator('.pager a[rel="next"]').click();
-      await expect(page).toHaveURL(new RegExp(`/${lang}/housing/$`));
+      await expect(page).toHaveURL(new RegExp(`/${lang}/sensor-lab/$`));
       await expect(reader).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(reader).toBeHidden();
@@ -134,7 +134,7 @@ test.describe('languages @ 1280 px', () => {
 
     const pdf = page.locator('.crumb a[href^="/pdf/"]');
     await expect(pdf).toHaveAttribute('href', '/pdf/Riccardo_Cirillo_Nipotyno_ES.pdf');
-    for (const file of ['Riccardo_Cirillo_Nipotyno_ES.pdf', 'Riccardo_Cirillo_Lab_IT.pdf', 'Riccardo_Cirillo_Housing.pdf']) {
+    for (const file of ['Riccardo_Cirillo_Nipotyno_ES.pdf', 'Riccardo_Cirillo_Sensor_lab_IT.pdf', 'Riccardo_Cirillo_Sensor_lab.pdf']) {
       const res = await request.get(`/pdf/${file}`);
       expect(res.status(), file).toBe(200);
     }

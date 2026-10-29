@@ -1,5 +1,5 @@
-// 24×24 icons for the points of the stadium, in one strip of 192×24 (order = STOPS, then SPOTS in src/field-map.js):
-//   home plate · Nipotyno (phone with the assistant) · Levante (sensor buoy) · Housing (house) · Lab (flask)
+// 24×24 icons for the points of the stadium, in one strip of 168×24 (order = STOPS, then SPOTS in src/field-map.js):
+//   home plate · Nipotyno (phone with the assistant) · Levante (sensor buoy) · Sensor lab (flask)
 //   · About (scoreboard) · How I design (pitcher's mound with a ball) · Contact & CV (a ticket)
 // Drawn with shapes in the site palette; every icon gets a 1 px dark outline so it reads on any background.
 import { canvas } from './canvas.js';
@@ -61,27 +61,8 @@ export const ICONS = {
     c.rect(ox + 6, 14, 13, 1, 'red'); // waterline band
     c.line(ox + 12, 17, ox + 12, 21, 'grey'); // the cable down to the sensor
   },
-  // A small house with a red roof, a chimney and a door.
-  housing(c, ox) {
-    for (let y = 2; y <= 9; y++) {
-      const half = 1 + (y - 2) * 1.55;
-      c.rect(ox + Math.round(12 - half), y, Math.round(half * 2) + 1, 1, 'red');
-    }
-    for (let y = 2; y <= 9; y++) c.set(ox + Math.round(12 - (1 + (y - 2) * 1.55)), y, 'redLight');
-    c.rect(ox + 17, 3, 3, 5, 'greyDark'); // chimney
-    c.rect(ox + 17, 3, 3, 1, 'grey');
-    c.rect(ox + 5, 10, 14, 10, 'white');
-    c.rect(ox + 17, 10, 2, 10, 'greyLight');
-    c.rect(ox + 7, 12, 4, 4, 'sky'); // window with a cross
-    c.rect(ox + 8, 12, 1, 4, 'white'); c.rect(ox + 7, 13, 4, 1, 'white');
-    c.rect(ox + 13, 14, 4, 6, 'wood'); // door
-    c.set(ox + 15, 17, 'yellow');
-    c.rect(ox, 20, CELL, 3, 'grass');
-    for (const x of [2, 8, 15, 21]) c.set(ox + x, 20, 'grassLight');
-    c.rect(ox, 22, CELL, 1, 'grassDark');
-  },
   // A lab flask with a cork, bubbles and a blue liquid.
-  lab(c, ox) {
+  'sensor-lab'(c, ox) {
     c.rect(ox + 8, 0, 8, 2, 'wood'); // cork
     c.rect(ox + 9, 2, 6, 7, 'white');
     c.rect(ox + 10, 2, 4, 7, 'skyLight');

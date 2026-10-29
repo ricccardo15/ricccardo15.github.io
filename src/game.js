@@ -8,7 +8,7 @@
 // Sound (src/sound.js) is off until the visitor turns it on with the toggle in the game bar.
 // The address shows the base (/#nipotyno) and is only REPLACED, never added to: one Back press leaves the page.
 // Deep links skip the at-bat. With reduced motion: no pitch and no zoom — the tour is the same, just without animation.
-import { FIELD, STOPS, SPOTS, RING, CREW } from './field-map.js';
+import { FIELD, STOPS, SPOTS, RING, CREW, DUGOUT } from './field-map.js';
 import { atBat } from './batting.js';
 import { sound } from './sound.js';
 import { createTour } from './tour.js';
@@ -61,7 +61,7 @@ function start() {
     runner.style.setProperty('--y', `${(Math.round(y) / FIELD.height) * 100}%`);
   };
 
-  // Waypoints from one stop to another: along the base path (shortest way round), via home for the dugout.
+  // Waypoints from one stop to another: along the base path (shortest way round), out of the dugout via home.
   function route(from, to) {
     const ringPath = (a, b) => {
       const i = RING.indexOf(a), j = RING.indexOf(b), n = RING.length;
@@ -72,8 +72,7 @@ function start() {
       return path;
     };
     if (from === to) return [];
-    if (from === 'lab') return ['home', ...ringPath('home', to)];
-    if (to === 'lab') return [...ringPath(from, 'home'), 'lab'];
+    if (from === 'dugout') return ['home', ...ringPath('home', to)];
     return ringPath(from, to);
   }
 
@@ -258,8 +257,8 @@ function start() {
   // step to the history (and then one Back press would not be enough to leave). Without JS it is a normal link.
   function entrance() {
     batting.stop();
-    current = 'lab';
-    pos = { x: byId.lab.x, y: byId.lab.y };
+    current = 'dugout'; // not a stop (no link, no card): only where the runner comes from
+    pos = { ...DUGOUT };
     place(pos);
     batUp();
   }

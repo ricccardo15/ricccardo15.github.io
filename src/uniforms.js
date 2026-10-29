@@ -10,7 +10,7 @@ export const UNIFORMS = [
     colors: { helmet: 'navy', helmetLight: 'navyMid', helmetShade: 'navyDark', jersey: 'navy', jerseyLight: 'navyMid', jerseyShade: 'navyDark', number: 'red' },
     accessory: 'lens',
     skills: ['Interviews', 'Contextual inquiry', 'Qualitative coding', 'Usability testing (SUS, UEQ)'],
-    suggested: 'housing',
+    suggested: 'nipotyno',
   },
   {
     id: 'designer',
@@ -19,7 +19,7 @@ export const UNIFORMS = [
     colors: { helmet: 'red', helmetLight: 'redLight', helmetShade: 'redDark', jersey: 'red', jerseyLight: 'redLight', jerseyShade: 'redDark', number: 'navy' },
     accessory: 'pencil',
     skills: ['Personas & journey maps', 'Wireflows', 'Figma prototypes', 'WCAG 2.2'],
-    suggested: 'nipotyno',
+    suggested: 'levante',
   },
   {
     id: 'maker',
@@ -28,6 +28,6 @@ export const UNIFORMS = [
     colors: { helmet: 'navy', helmetLight: 'navyMid', helmetShade: 'navyDark', jersey: 'grey', jerseyLight: 'greyLight', jerseyShade: 'greyDark', number: 'navy' },
     accessory: 'wrench',
     skills: ['HTML/CSS/JS', 'React', 'Arduino & sensors', 'Business models'],
-    suggested: 'levante',
+    suggested: 'sensor-lab',
   },
 ];

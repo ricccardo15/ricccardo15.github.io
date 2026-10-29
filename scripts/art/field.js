@@ -2,9 +2,9 @@
 // infield, a big pitcher's mound, the dugout (roof in perspective) and a bullpen for later.
 // Base positions come from src/field-map.js, so the art always matches the base links.
 // Things a visitor will be able to click in Fase 2 are drawn here and kept inside the phone crop (x 64–416):
-//   the scoreboard (About), the ticket booth (Contact & CV), the pitcher's mound (How I design), the dugout (Lab).
+//   the scoreboard (About), the ticket booth (Contact & CV), the pitcher's mound (How I design), the dugout (scenery).
 import { canvas, seeded } from './canvas.js';
-import { FIELD, STOPS } from '../../src/field-map.js';
+import { FIELD, STOPS, DUGOUT } from '../../src/field-map.js';
 
 const inDiamond = (x, y, cx, cy, rx, ry) => Math.abs(x - cx) / rx + Math.abs(y - cy) / ry <= 1;
 const inEllipse = (x, y, cx, cy, rx, ry) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
@@ -144,7 +144,7 @@ export async function field(out) {
   }
 
   // Foul lines: from home through 1st and 3rd base to the warning track.
-  for (const base of [at.nipotyno, at.housing]) {
+  for (const base of [at.nipotyno, at['sensor-lab']]) {
     const dx = base.x - at.home.x, dy = base.y - at.home.y;
     const t = (TRACK_BOTTOM - at.home.y) / dy;
     c.line(at.home.x, at.home.y, at.home.x + dx * t, TRACK_BOTTOM, 'white');
@@ -171,7 +171,7 @@ export async function field(out) {
   ellipse(cx - 17, cy + 5, 2.5, 1.5, 'white'); // the rosin bag
 
   // --- Bases: white bags with a shadow; home plate is a pentagon -----------------------------------------------
-  for (const id of ['nipotyno', 'levante', 'housing']) {
+  for (const id of ['nipotyno', 'levante', 'sensor-lab']) {
     c.rect(at[id].x - 4, at[id].y - 4, 8, 8, 'white');
     c.rect(at[id].x - 4, at[id].y + 2, 8, 2, 'greyLight');
     c.rect(at[id].x - 4, at[id].y + 4, 8, 2, 'dirtDark');
@@ -187,7 +187,7 @@ export async function field(out) {
   for (let a = 0; a < 40; a++) c.set(hp.x - 66 + Math.round(8 * Math.cos(a / 6.37)), hp.y + 6 + Math.round(5 * Math.sin(a / 6.37)), 'dirtDark');
 
   // --- Dugout (will be "Lab"): roof in perspective, red fascia, dark inside with a bench, bats, helmets, a cooler ---
-  const d = at.lab;
+  const d = DUGOUT;
   const left = d.x - 42, right = d.x + 42;
   ellipse(d.x, d.y + 14, 48, 7, 'dirtDark'); // the dug-out ground in front
   for (let y = d.y - 22; y <= d.y - 13; y++) { // the roof: narrower at the back, wider at the front

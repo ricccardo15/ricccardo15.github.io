@@ -5,7 +5,7 @@ Goal: get a UX internship in Madrid (Feb–Jul 2027). The site is sent to recrui
 
 ## Read first
 - @docs/SPEC.md — concept, scenes, interaction, rules (source of truth)
-- @docs/ROADMAP.md — milestones + Definition of Done; work on ONE milestone per session
+- docs/ROADMAP.md — milestones + Definition of Done; work on ONE milestone per session (read at the start of each session)
 - docs/DECISIONS.md — log of decisions (append one line per decision)
 - docs/MEETING_2026-10-20.md — why the decisions were taken (read when in doubt)
 - docs/CONTENT_STATUS.md — all content is READY in content/ and public/ (do not rewrite it; render it). Lines with [CHECK] must be confirmed by Riccardo.

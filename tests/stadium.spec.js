@@ -74,7 +74,7 @@ test.describe('stadium @ 1280×800', () => {
   test('in the tour, clicking a spot ends the tour and opens its card', async ({ page }) => {
     await enter(page);
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
+    await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
     await page.locator('.stage [data-spot="about"]').click();
     await expect(card(page)).toHaveAttribute('data-panel', 'about');
     await expect(page.locator('.game-bar [role="status"]')).toHaveText('Tour ended. Free mode. About.');
@@ -86,7 +86,7 @@ test.describe('stadium @ 390×844 (phone)', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
   test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
 
-  test('icon-only points with their names for screen readers, and the Stadium map list with all 8 points', async ({ page }) => {
+  test('icon-only points with their names for screen readers, and the Stadium map list with all 7 points', async ({ page }) => {
     await enter(page);
     for (const base of await page.locator('.stage .base').all()) expect((await base.boundingBox()).width).toBeLessThanOrEqual(40); // only the icon is drawn
     await expect(page.locator('.stage [data-stop="levante"]')).toHaveAccessibleName(/Levante/);
@@ -109,7 +109,7 @@ test.describe('stadium @ 390×844 (phone)', () => {
     expect(swing.x >= stage.x && swing.x + swing.width <= stage.x + stage.width).toBe(true);
     for (const base of await page.locator('.stage .base').all()) expect(overlap(swing, await base.boundingBox()), await base.getAttribute('href')).toBe(false);
     await page.getByRole('button', { name: 'Swing!' }).tap();
-    await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
+    await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
   });
 });
 

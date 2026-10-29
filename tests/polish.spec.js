@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import sharp from 'sharp';
 
 // B7: sound toggle, case PDFs, share previews, reduced motion, page weight.
-const cases = { nipotyno: 'Nipotyno', levante: 'Levante', housing: 'Housing', lab: 'Lab' };
+const cases = { nipotyno: 'Nipotyno', levante: 'Levante', 'sensor-lab': 'Sensor_lab' };
 
 test.describe('sound toggle', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
@@ -22,7 +22,7 @@ test.describe('sound toggle', () => {
     page.on('pageerror', (err) => errors.push(err.message));
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.getByRole('button', { name: 'Swing!' }).click();
-    await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
+    await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
     expect(errors).toEqual([]);
   });
 });
@@ -63,7 +63,7 @@ for (const width of [1280, 390]) {
       await page.goto('/');
       await page.locator('.uniform-tiles').getByText('Designer', { exact: true }).click(); // would make the batter swing
       await page.getByRole('button', { name: 'Swing!' }).click();
-      await expect(page.locator('.tour-count')).toHaveText('1 of 4 · Nipotyno');
+      await expect(page.locator('.tour-count')).toHaveText('1 of 3 · Nipotyno');
       await page.waitForTimeout(100);
       const moving = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
       expect(moving).toBe(0);

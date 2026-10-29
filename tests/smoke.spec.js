@@ -8,7 +8,7 @@ const viewports = [
 ];
 // Every page in every language (Fase 3): /, /es/, /it/ and their cases.
 const homes = ['/', '/es/', '/it/'];
-const pages = homes.flatMap((home) => [home, ...['nipotyno', 'levante', 'housing', 'lab'].map((slug) => `${home}${slug}/`)]);
+const pages = homes.flatMap((home) => [home, ...['nipotyno', 'levante', 'sensor-lab'].map((slug) => `${home}${slug}/`)]);
 
 for (const vp of viewports) {
   for (const path of pages) {
@@ -114,14 +114,14 @@ test.describe('phone (390 px): simplified touch field', () => {
 
   test('tapping a base opens its panel', async ({ page }) => {
     await page.goto('/');
-    await page.locator('.base[data-stop="housing"]').tap();
-    await expect(page).toHaveURL(/#housing$/);
-    await expect(panel(page)).toHaveAttribute('data-panel', 'housing');
+    await page.locator('.base[data-stop="sensor-lab"]').tap();
+    await expect(page).toHaveURL(/#sensor-lab$/);
+    await expect(panel(page)).toHaveAttribute('data-panel', 'sensor-lab');
   });
 
   test('deep links (#nipotyno etc.) open the field on that base', async ({ page }) => {
-    for (const slug of ['nipotyno', 'levante', 'housing', 'lab']) {
-      await page.goto('/lab/');
+    for (const slug of ['nipotyno', 'levante', 'sensor-lab']) {
+      await page.goto('/sensor-lab/');
       await page.goto(`/#${slug}`);
       await expect(panel(page)).toHaveAttribute('data-panel', slug);
       await expect(page.locator('#field')).toBeInViewport();
@@ -191,29 +191,29 @@ test.describe('desktop (1280 px): the ballpark', () => {
     await expect(panel(page)).toHaveAttribute('data-panel', 'levante');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowLeft');
-    await expect(panel(page)).toHaveAttribute('data-panel', 'lab');
+    await page.keyboard.press('ArrowLeft'); // levante → nipotyno → home → (round the diamond) 3rd base
+    await expect(panel(page)).toHaveAttribute('data-panel', 'sensor-lab');
 
     await page.keyboard.press('Escape');
     await expect(page.locator('#field-panel')).toBeHidden();
-    await expect(page.locator('.base[data-stop="lab"]')).toBeFocused();
+    await expect(page.locator('.base[data-stop="sensor-lab"]')).toBeFocused();
 
     // the address is replaced when a base is clicked (never added to): one Back press goes to the page before
-    await page.goto('/lab/');
-    await page.goto('/#housing');
+    await page.goto('/levante/');
+    await page.goto('/#sensor-lab');
     await page.keyboard.press('Escape'); // the card opened by the deep link covers 1st base: close it
     await page.locator('.base[data-stop="nipotyno"]').click();
     await expect(page).toHaveURL(/#nipotyno$/);
     await page.goBack();
-    await expect(page).toHaveURL(/\/lab\/$/);
+    await expect(page).toHaveURL(/\/levante\/$/);
   });
 
-  test('deep link /#lab opens the dugout panel with the runner on it', async ({ page }) => {
+  test('F1: three bases with a project, the dugout is scenery (no link, an old /#lab opens no card)', async ({ page }) => {
     await page.goto('/#lab');
-    await expect(panel(page)).toHaveAttribute('data-panel', 'lab');
-    await expect(page.locator('#field')).toBeInViewport();
-    const runner = await page.locator('.runner').evaluate((el) => el.style.getPropertyValue('--x'));
-    expect(runner).toBe(`${(110 / 480) * 100}%`); // the dugout is at x = 110
+    await expect(page.locator('.stage .base[data-stop]')).toHaveCount(4); // home plate + 3 projects
+    await expect(page.locator('[data-stop="lab"], [data-stop="housing"]')).toHaveCount(0);
+    await expect(page.locator('#field-panel')).toBeHidden();
+    await expect(page.locator('#work .case-card')).toHaveCount(3);
   });
 
   test('field art is pixel-perfect: 480×270 shown at an integer scale', async ({ page }) => {
@@ -228,7 +228,7 @@ test.describe('Start screen: uniforms', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
   const card = (page) => page.locator('.uniform-card:visible');
 
-  test('Researcher by default; Maker shows its skills and suggests Levante, and is remembered', async ({ page }) => {
+  test('Researcher by default; Maker shows its skills and suggests Sensor lab, and is remembered', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('radio', { name: 'Researcher' })).toBeChecked();
     await expect(card(page)).toHaveCount(1);
@@ -237,7 +237,7 @@ test.describe('Start screen: uniforms', () => {
     await page.locator('.uniform-tiles').getByText('Maker', { exact: true }).click();
     await expect(card(page)).toHaveAttribute('data-uniform', 'maker');
     await expect(card(page)).toContainText('Arduino');
-    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/levante/');
+    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/sensor-lab/');
     // the batter and the runner on the field wear the Maker uniform (row 2 of the sprite)
     const row = await page.locator('.runner').evaluate((el) => getComputedStyle(el).getPropertyValue('--uniform-row').trim());
     expect(row).toBe('2');
@@ -254,7 +254,7 @@ test.describe('Start screen: uniforms', () => {
     await expect(designer).toBeFocused();
     await expect(designer).toBeChecked();
     await expect(card(page)).toHaveAttribute('data-uniform', 'designer');
-    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/nipotyno/');
+    await expect(card(page).getByRole('link')).toHaveAttribute('href', '/levante/');
     const outline = await page.locator('.uniforms label:has(input:focus-visible)').evaluate((el) => getComputedStyle(el).outlineStyle);
     expect(outline).not.toBe('none');
   });

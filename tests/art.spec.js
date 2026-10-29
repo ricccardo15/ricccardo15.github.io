@@ -18,7 +18,7 @@ test('palette has exactly 24 colours (16 + 8 added for the 480×270 art)', () =>
   expect(allowed.size).toBe(24);
 });
 
-for (const [file, size] of [['field.png', [480, 270]], ['runner.png', [720, 144]], ['crew.png', [384, 192]], ['icons.png', [192, 24]], ['lobby.png', [200, 150]]]) {
+for (const [file, size] of [['field.png', [480, 270]], ['runner.png', [720, 144]], ['crew.png', [384, 192]], ['icons.png', [168, 24]], ['lobby.png', [200, 150]]]) {
   test(`${file}: ${size.join('×')} and only palette colours`, async () => {
     const { found, info } = await colours(`public/game/${file}`);
     expect([info.width, info.height]).toEqual(size);
@@ -26,12 +26,12 @@ for (const [file, size] of [['field.png', [480, 270]], ['runner.png', [720, 144]
   });
 }
 
-test('Lab cover: 640×480 (160×120 at 4×), original, only palette colours', async () => {
-  const { found, info } = await colours('public/assets/lab/cover.webp');
+test('Sensor lab placeholder cover: 640×480 (160×120 at 4×), original, only palette colours', async () => {
+  const { found, info } = await colours('public/assets/sensor-lab/cover.webp');
   expect([info.width, info.height]).toEqual([640, 480]);
   expect([...found].filter((c) => !allowed.has(c))).toEqual([]);
   // pixel art at 4×: every 4×4 block is one colour, so the image has at most 160×120 distinct cells
-  const { data } = await sharp('public/assets/lab/cover.webp').ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data } = await sharp('public/assets/sensor-lab/cover.webp').ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (const [x, y] of [[3, 3], [100, 77], [401, 250], [637, 477]]) {
     const at = (px, py) => data.subarray((py * 640 + px) * 4, (py * 640 + px) * 4 + 4).join();
     const bx = x - (x % 4), by = y - (y % 4);

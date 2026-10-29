@@ -346,9 +346,6 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
 /* 'upleft' (the mound): the label sits above and to the left of the point, on the infield grass, clear of 2nd base and the batter. */
 .base[data-tag="upleft"] { transform: translate(calc(-100% - 8px * var(--fs)), calc(-100% - 18px * var(--fs))); }
 .base[data-tag="upleft"]::after { right: 8px; bottom: -14px; border-top-color: var(--navy); }
-/* The Lab label goes to the right of the dugout (46 field pixels from its centre, so it starts just past the dugout's edge):
-   above it, it would cover the coach on 3rd base. A little higher than centred: clear of "Swing!" under home plate. */
-.base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% - 2px * var(--fs))); }
 /* At 1× (under 1000 px) the points show their icon only, with their name for screen readers (WCAG: never hover-only):
    the names are in the "Stadium map" list under the field. Target ≥ 24 px (WCAG 2.5.8). */
 @media (max-width: 999px) {
@@ -356,7 +353,6 @@ h2 { font-size: 1.5rem; margin: 2.5rem 0 .75rem; }
   .base::after { display: none; }
   .base[data-tag="below"] { transform: translate(-50%, calc(4px * var(--fs) + 3px)); }
   .base[data-tag="right"] { transform: translate(calc(12px * var(--fs) + 4px), -50%); }
-  .base[data-stop="lab"] { transform: translate(calc(46px * var(--fs)), calc(-50% + 4px)); } /* clear of the 3rd-base icon */
   .base-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 /* Stadium map: the list of every point, under the field on phones and tablets (keyboard friendly). On desktop the labels say it all. */
@@ -588,7 +584,6 @@ html.reader-open { overflow: hidden; } /* the page under the reader does not scr
 .crumb { margin: 0 0 1.5rem; font-size: 1rem; }
 .case h1 { margin-top: .25rem; }
 .case h1 .sub { display: block; margin-top: .5rem; font-size: clamp(1.25rem, 3.5vw, 1.6rem); font-weight: 600; color: var(--ink); }
-.lede { font-size: 1.25rem; }
 
 .facts { margin: 1.5rem 0; padding: 1rem; display: grid; gap: .5rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; }
 .facts div { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; }
@@ -606,7 +601,7 @@ figure { margin: 1.5rem 0; }
 figure img { border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
 /* On screen a tall image (a phone screen is 2000+ px) is at most 70% of the window high, centred, never bigger than its real size.
    The width is worked out from the image's own proportions (--w / --h, set by scripts/pages.js) instead of `max-height` + `width: auto`:
-   that way the box has the right size before the image has loaded and the page does not jump. The Lab cards have their own size. */
+   that way the box has the right size before the image has loaded and the page does not jump. */
 @media screen {
   .case figure img { width: min(100%, calc(70vh * var(--w) / var(--h)), calc(var(--w) * 1px)); height: auto; margin-inline: auto; }
 }
@@ -615,15 +610,6 @@ figure img { border: 1px solid var(--line); border-radius: 6px; background: var(
 table { border-collapse: collapse; width: 100%; font-size: 1rem; background: var(--card); }
 th, td { padding: .5rem .75rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
 th { background: var(--navy); color: #fff; }
-
-/* Lab: grid of cards. */
-.cards { display: grid; gap: 1.25rem; margin-top: 2rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.card figure { margin: 0; }
-.card figure img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: top; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
-.card h2 { margin: 1rem 1rem .5rem; font-size: 1.125rem; }
-.card p { margin: 0 1rem 1rem; font-size: 1rem; }
-.card em { display: block; color: var(--muted); }
 
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
 .pager a { display: block; font-weight: 700; }
@@ -656,11 +642,10 @@ th { background: var(--navy); color: #fff; }
   h1 { font-size: 22pt; }
   h2 { font-size: 14pt; margin: 6mm 0 2mm; break-after: avoid; }
   h3 { break-after: avoid; }
-  figure, img, table, .facts, .tldr, .card { break-inside: avoid; }
+  figure, img, table, .facts, .tldr { break-inside: avoid; }
   figure { margin: 4mm 0; }
   figure img { max-height: 110mm; width: auto; margin: 0 auto; }
   .table-wrap { overflow: visible; }
-  .cards { grid-template-columns: 1fr 1fr; gap: 5mm; }
   a { color: inherit; }
   .case a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8.5pt; color: var(--muted); }
 }

@@ -10,7 +10,7 @@ import { T } from './strings.js';
 const PREFIX = 'reader-'; // ids inside the dialog get it, so no id is ever duplicated in the page
 // The home of this language (/, /es/, /it/) = where the name in the header leads; case pages are /es/nipotyno/ etc.
 const HOME = new URL(document.querySelector('.brand')?.href ?? '/', location.href).pathname;
-const CASE_PATH = new RegExp(`^${HOME}[a-z]+/$`);
+const CASE_PATH = new RegExp(`^${HOME}[a-z-]+/$`);
 
 let dialog = null;
 let origin = null; // the link that opened the reader

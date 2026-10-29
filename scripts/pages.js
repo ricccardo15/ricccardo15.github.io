@@ -5,7 +5,7 @@
 // Interface strings: src/i18n.js.
 // Generated files are in .gitignore: edit content/*.md, never the generated HTML.
 // Runs automatically from vite.config.js (dev and build). Manual run: npm run pages
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
@@ -18,12 +18,12 @@ import { LANGS, PREFIX, LOCALE, LANG_NAMES, CV_LANG, STRINGS, fill } from '../sr
 
 const SITE = 'https://ricccardo15.github.io';
 const EMAIL = 'riccardo.cirillo.work@gmail.com';
-// Order on the home and on the diamond: 1st, 2nd, 3rd base, dugout.
-export const CASES = ['nipotyno', 'levante', 'housing', 'lab'];
+// Order on the home and on the diamond: 1st, 2nd, 3rd base (F1: three projects; Housing and Lab are in _archive/).
+export const CASES = ['nipotyno', 'levante', 'sensor-lab'];
 // PDF of each case (made after the build by scripts/pdf.js from the page itself, with the print CSS).
-// English keeps the old names; the other languages get a suffix (Riccardo_Cirillo_Nipotyno_ES.pdf).
+// English keeps the old names; the other languages get a suffix (Riccardo_Cirillo_Nipotyno_ES.pdf). Spaces → _ (Sensor_lab).
 export const pdfName = (slug, lang = 'en') =>
-  `Riccardo_Cirillo_${STOPS.find((s) => s.id === slug).name}${lang === 'en' ? '' : `_${lang.toUpperCase()}`}.pdf`;
+  `Riccardo_Cirillo_${STOPS.find((s) => s.id === slug).name.replace(/ /g, '_')}${lang === 'en' ? '' : `_${lang.toUpperCase()}`}.pdf`;
 // Folder of each language in the site ('' = the root for English).
 const dirOf = (lang) => (lang === 'en' ? '' : `${lang}/`);
 // Pages Vite must build: home + one per case, for every language.
@@ -312,15 +312,9 @@ function facts(L, data) {
 async function casePage(L, c, i, all) {
   const { data } = c;
   const { t, p } = L;
-  const isLab = data.slug === 'lab';
   let html = figures(await markdown(c.body, t));
-  html = sections(html, isLab ? 'card' : '');
+  html = sections(html);
   html = html.replace('<section id="tl-dr">', '<section id="tl-dr" class="tldr">'); // styled by class: the reader prefixes the ids
-  // Lab cards: picture on top, then title and the two lines of text.
-  if (isLab) {
-    html = html.replace(/(class="card">\n)(<h2>[\s\S]*?)(<img [^>]+>)/g, '$1<figure>$3</figure>\n$2');
-    html = `<div class="cards">\n${html}\n</div>`;
-  }
 
   const prev = all[i - 1];
   const next = all[i + 1];
@@ -344,7 +338,7 @@ async function casePage(L, c, i, all) {
         <p class="crumb"><a href="${p}/#work">${escape(t.allCases)}</a> · <a href="/pdf/${pdfName(data.slug, L.lang)}">${escape(t.downloadPdf)}<span class="visually-hidden">${escape(t.ofThisCase)}</span></a></p>
         <p class="kicker">${escape(data.base)} · ${escape(shortName(c))}</p>
         <h1 id="case-title" tabindex="-1">${escape(shortName(c))}${subtitle(c) ? `<span class="sub">${escape(subtitle(c))}</span>` : ''}</h1>
-        ${isLab ? `<p class="lede">${escape(data.tldr)}</p>` : facts(L, data)}
+        ${facts(L, data)}
         ${html}
         ${pager}
       </article>`;
@@ -692,6 +686,8 @@ ${aboutHtml}
 }
 
 export async function generate() {
+  // Start from an empty public/og: a preview of a case that left the site (Housing, Lab) must not be published.
+  await rm(root('public/og'), { recursive: true, force: true });
   for (const lang of LANGS) {
     const L = context(lang);
     const dir = dirOf(lang);
