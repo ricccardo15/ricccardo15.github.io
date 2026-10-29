@@ -17,6 +17,9 @@ export const fill = (text, values) => text.replace(/\{(\w+)\}/g, (_, key) => val
 export const STRINGS = {
   en: {
     skip: 'Skip to content',
+    // 404 (EN only: GitHub Pages has one 404 page)
+    lostBall: 'Lost ball',
+    lostText: "This page isn't on the field. The link may be old, or the ball went over the wall.",
     // F5: the game page (EN final)
     pause: 'Pause',
     paused: 'Paused',

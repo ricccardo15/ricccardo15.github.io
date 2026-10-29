@@ -787,3 +787,9 @@ dialog.pause h2 { margin: 0 0 1.25rem; font-size: calc(var(--j) * 3); text-align
 /* Reduced motion chosen in the pause menu: the same as the system setting (no animation, no zoom). */
 .reduce-motion .sprite, .reduce-motion .is-running .runner, .reduce-motion .banner, .reduce-motion .panel-card { animation: none !important; }
 .reduce-motion .world, .reduce-motion .field-box, .reduce-motion .base { transition: none !important; }
+
+/* --- 404 "Lost ball" (night, the title screen's ballpark behind) --- */
+.lost-body { position: relative; z-index: 1; max-width: 40rem; margin-left: max(1rem, (100% - 72rem) / 2); }
+.lost .logo { font-size: calc(var(--j) * 4); }
+@media (min-width: 700px) { .lost .logo { font-size: calc(var(--j) * 6); } }
+.lost-links { list-style: none; max-width: 36rem; margin: 2rem 0 0; padding: 0; display: grid; gap: .75rem; }

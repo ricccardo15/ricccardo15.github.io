@@ -97,3 +97,5 @@
 - 2026-10-29 — F6: il colore "black" della palette (#2a1d18, marrone scurissimo) resta per scarpe e polsini; i contorni non lo usano mai. (auto)
 - 2026-10-29 — F6: sulla schermata titolo si vede solo la parte bassa di night.png (il diamante), scurita al 50%: le torri luci sono nel disegno ma restano sopra il taglio, perché dietro al nome il cielo deve restare liscio per il contrasto. Il suggerimento dei tasti ha uno sfondo scuro. (auto)
 - 2026-10-29 — F6: lobby.png e scripts/art/lobby.js tolti (la lobby non esiste più dopo F4). (auto)
+- 2026-10-29 — Pubblicazione: 404.html generata da scripts/pages.js ("Lost ball", tema night, lo stadio di notte dietro, link a Title screen, Story mode e Multiplayer), solo in inglese (GitHub Pages usa una sola 404), noindex. (auto)
+- 2026-10-29 — Pubblicazione: v3 unito in main (fast-forward) su richiesta di Riccardo, prima di F7; Sensor lab resta il segnaposto.

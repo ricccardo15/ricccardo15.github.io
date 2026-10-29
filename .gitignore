@@ -13,6 +13,7 @@ tests/screenshots/
 
 # Generated from content/*.md by scripts/pages.js (edit the .md files, not these)
 /index.html
+/404.html
 /nipotyno/
 /levante/
 /sensor-lab/

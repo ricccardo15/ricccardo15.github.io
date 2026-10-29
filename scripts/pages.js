@@ -27,7 +27,10 @@ export const pdfName = (slug, lang = 'en') =>
 // Folder of each language in the site ('' = the root for English).
 const dirOf = (lang) => (lang === 'en' ? '' : `${lang}/`);
 // Pages Vite must build, for every language: title screen, Story mode (chapter 0), Gameplay, Multiplayer, one page per case.
-export const PAGES = LANGS.flatMap((lang) => ['', 'story/', 'play/', 'multiplayer/', ...CASES.map((slug) => `${slug}/`)].map((key) => `${dirOf(lang)}${key}index.html`));
+export const PAGES = [
+  ...LANGS.flatMap((lang) => ['', 'story/', 'play/', 'multiplayer/', ...CASES.map((slug) => `${slug}/`)].map((key) => `${dirOf(lang)}${key}index.html`)),
+  '404.html', // GitHub Pages shows it for any address that does not exist (one page, in English)
+];
 
 const root = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 
@@ -282,7 +285,8 @@ function titleBar(L, key) {
 // key = the page's address without the language prefix ('/' or '/nipotyno/').
 // theme = 'paper' (Story, cases, Multiplayer) or 'night' (title screen, game): the colours in src/style.css.
 // mode = the mode the page belongs to (lit in the mode bar); none = the title screen and its own bar.
-function layout(L, { title, description, key, image, imageAlt, main, bodyClass = '', scripts = '', theme = 'paper', mode = null, head = '' }) {
+// index = false: a page search engines must not list (the 404): no canonical, no alternates, noindex.
+function layout(L, { title, description, key, image, imageAlt, main, bodyClass = '', scripts = '', theme = 'paper', mode = null, head = '', index = true }) {
   const { t } = L;
   const url = `${SITE}${L.p}${key}`;
   const alternates = [
@@ -297,8 +301,7 @@ function layout(L, { title, description, key, image, imageAlt, main, bodyClass =
     ${head}
     <title>${escape(title)}</title>
     <meta name="description" content="${escape(description)}">
-    <link rel="canonical" href="${url}">
-    ${alternates.join('\n    ')}
+    ${index ? `<link rel="canonical" href="${url}">\n    ${alternates.join('\n    ')}` : '<meta name="robots" content="noindex">'}
     <meta property="og:locale" content="${LOCALE[L.lang]}">
     ${LANGS.filter((lang) => lang !== L.lang).map((lang) => `<meta property="og:locale:alternate" content="${LOCALE[lang]}">`).join('\n    ')}
     <meta property="og:type" content="${key === '/' ? 'website' : 'article'}">
@@ -714,6 +717,29 @@ ${rows.map(([k, v]) => `              <div><dt>${escape(k)}</dt><dd>${v}</dd></d
 }
 
 
+// --- 404 (before publishing) ------------------------------------------------------------
+// "Lost ball": the night ballpark of the title screen and the three ways back. Absolute links, so it works at any address.
+function notFoundPage(L, og) {
+  const { t } = L;
+  const main = `      <div class="title-screen lost">
+        <img class="title-stadium" src="${NIGHT}" alt="" width="${FIELD.width}" height="${FIELD.height}" decoding="async">
+        <div class="wrap wide lost-body">
+          <p class="kicker">404</p>
+          <h1 class="logo">${escape(t.lostBall)}</h1>
+          <p class="role">${escape(t.lostText)}</p>
+          <ul class="lost-links">
+            <li><a class="menu-item" href="/"><span class="menu-name">${escape(t.titleScreen)}</span></a></li>
+            <li><a class="menu-item" href="/story/"><span class="menu-name">${escape(t.modes.story.name)}</span> <span class="menu-desc">${escape(t.modes.story.desc)}</span></a></li>
+            <li><a class="menu-item" href="/multiplayer/"><span class="menu-name">${escape(t.modes.multiplayer.name)}</span> <span class="menu-desc">${escape(t.modes.multiplayer.desc)}</span></a></li>
+          </ul>
+        </div>
+      </div>`;
+  return layout(L, {
+    title: `${t.lostBall} · Riccardo Cirillo`, description: t.lostText, key: '/', image: og, imageAlt: t.homeImageAlt,
+    main, theme: 'night', bodyClass: 'title-page', index: false,
+  });
+}
+
 export async function generate() {
   // Start from an empty public/og: a preview of a case that left the site (Housing, Lab) must not be published.
   await rm(root('public/og'), { recursive: true, force: true });
@@ -756,6 +782,7 @@ export async function generate() {
     }));
     for (const [i, c] of cases.entries()) await page(`${c.data.slug}/`, await casePage(L, c, i, cases));
   }
+  await writeFile(root('404.html'), notFoundPage(context('en'), await ogHome(context('en'))));
   console.log(`✓ pages generated: ${PAGES.join(', ')}`);
 }
 
