@@ -1,5 +1,5 @@
-// The one 24-colour palette of all the pixel art (field, runner, crew, icons, title, Lab cover).
-// 16 base colours + 8 added for the 480×270 art (Fase 1): light/dark tones for volume, wood and hair.
+// The one palette of all the pixel art (field, night field, runner, crew, icons, title, Sensor lab cover): 34 colours.
+// 16 base colours + 8 added for the 480×270 art (Fase 1) + 10 for the colour ramps and the night sky (F6).
 // The art scripts may only use these colours: tests/art.spec.js checks every PNG.
 // navy + red match the UI colours in src/style.css.
 export const PALETTE = {
@@ -28,4 +28,24 @@ export const PALETTE = {
   greyLight: '#b9c1cf',
   wood: '#7a4a28',
   hair: '#4a3426',
+  // added in F6: the ends of four 5-tone ramps (shadows lean blue/purple, lights lean yellow) + the night sky
+  redDeep: '#5a1238',
+  redPeach: '#f5925a',
+  navyLight: '#4a6aa0',
+  navyPale: '#8fb0d8',
+  grassDeep: '#1f5a4a',
+  grassPale: '#a8d65a',
+  skinDeep: '#5e3a3a',
+  skinLight: '#eebd92',
+  skinPale: '#f8dcb4',
+  night: '#0b0f1e',
+};
+
+// The ramps, darkest first (F6). The darkest tone of a ramp is the outline of the parts painted with that ramp
+// (scripts/art/canvas.js, outlineByRamp): never pure black, and one step lighter on the lit side (top left).
+export const RAMPS = {
+  red: ['redDeep', 'redDark', 'red', 'redLight', 'redPeach'],
+  navy: ['navyDark', 'navy', 'navyMid', 'navyLight', 'navyPale'],
+  grass: ['grassDeep', 'grassDark', 'grass', 'grassLight', 'grassPale'],
+  skin: ['skinDeep', 'skinDark', 'skin', 'skinLight', 'skinPale'],
 };

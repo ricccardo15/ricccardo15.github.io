@@ -50,3 +50,22 @@ Diario delle fasi eseguite da Claude Code in autonomia sul ramo `v3` (29/10/2026
 - Screenshot: tests/screenshots/v3/f5-play-1280.png, f5-play-390.png, f5-play-tour-*.png, f5-play-pause-1280.png, f5-play-pause-390.png.
 - Decisioni (auto): HUD al posto della barra con JS; Esc = pausa; divise sotto il campo e nessun focus automatico; "Read this project" nascosto prima del primo progetto; interruttore movimento; card corte; file tolti.
 - Punti aperti: ES/IT delle stringhe nuove [CHECK] ("¿Game over? Nunca.", "Game over? Mai.").
+
+## F6 · Pixel art — piano
+- Palette: rampe da 5 toni per rosso, navy, prato e pelle (+ il blu notte #0b0f1e per il cielo di night.png); test della palette aggiornato.
+- Contorno selettivo: ogni parte ha il contorno del tono più scuro della sua rampa (mai nero), più chiaro verso la luce (in alto a sinistra).
+- Battitore: testa più grande (chibi), posa asimmetrica, idle a 4 frame con respiro di 1 px e battito di ciglia ogni 8 frame, swing a 4 frame (carica, passo, contatto con scia, accompagnamento).
+- Nuovo public/game/night.png (480×270, stesse coordinate di field.png) per la schermata titolo: cielo con dithering, torri luci accese, tribune scure, prato con il riflesso delle luci.
+- Tutto disegnato in codice (scripts/art/), niente AI e niente sprite di altri giochi. La vecchia lobby.png (non più usata dopo F4) esce dalla pipeline.
+
+## F6 — fatto
+- Palette: 34 colori, 4 rampe (src/palette.js, RAMPS). Contorno selettivo in scripts/art/canvas.js (outlineByRamp) usato da battitore e crew.
+- Battitore: testa ×1.2, posa asimmetrica (mano sul fianco, ginocchio avanti), idle 4 frame con respiro di 1 px + frame di battito di ciglia (CSS: ciclo di 8 frame), swing in 4 frame (carica, passo, contatto con scia, accompagnamento).
+- night.png 480×270 (stesse coordinate di field.png): cielo #0b0f1e con dithering e stelle, due torri luci accese, tribune e prato più scuri, infield illuminato a scacchi. Usata dalla schermata titolo.
+- Prove: `npm test` = 337 test verdi. tests/art.spec.js: 34 colori, rampe in ordine e con i valori del piano, bordo dello sprite con ≥ 6 toni (niente contorno unico), runner.json a 18 frame, night.png, peso PNG. Reduced motion = frame fermo (test di smoke e F4/F5).
+- Peso PNG: runner 12,4 KB · crew 7,6 KB · field 19,8 KB · night 21,9 KB · icons 1,0 KB.
+- Confronto prima/dopo del foglio sprite: tests/screenshots/v3/f6-sprites-before-after.png (sopra prima, sotto dopo, 4×).
+- Punti aperti: i passi di tinta delle rampe del piano superano i 20° (vedi DECISIONS) [CHECK]; F7 (Sensor lab) quando c'è il materiale.
+
+## Screenshot finali (tests/screenshots/v3/, cartella non nel repo)
+final-home-1280/390, final-story-1280/390, final-nipotyno-1280/390, final-play-1280/390, final-play-pause-1280/390, final-multiplayer-1280/390.

@@ -14,9 +14,8 @@ const STANDS = { top: 16, bottom: 48 }; // 4 rows of 8 px
 const WALL = { top: 48, bottom: 58 };
 const TRACK_BOTTOM = 64; // the grass starts here
 
-export async function field(out) {
+function drawField(c) {
   const { width: W, height: H } = FIELD;
-  const c = canvas(W, H);
   const rand = seeded(7);
   const at = Object.fromEntries(STOPS.map((s) => [s.id, s]));
   const cx = at.levante.x, cy = at.nipotyno.y; // pitcher's mound = centre of the diamond
@@ -230,6 +229,48 @@ export async function field(out) {
   ellipse(bx + 10, by + 24, 14, 6, 'dirtDark');
   ellipse(bx + 10, by + 23, 13, 5, 'dirt');
   c.rect(bx + 5, by + 22, 7, 1, 'white');
+}
 
+export async function field(out) {
+  const c = canvas(FIELD.width, FIELD.height);
+  drawField(c);
   await c.png(out('field.png'));
+}
+
+// --- The same ballpark at night (F6), for the title screen: same size and coordinates as field.png --------------
+// Every colour goes one step down its ramp (blue/purple shadows); the sky is the page's night (#0b0f1e) with a light
+// dither near the horizon and a few stars; two light towers are lit; the infield keeps half of its daylight colours
+// in a checker (the floodlights on the grass). The scoreboard bulbs, the foul poles and the tower lamps stay yellow.
+const DARKER = {
+  red: 'redDark', redLight: 'red', redDark: 'redDeep', redPeach: 'redLight',
+  navy: 'navyDark', navyMid: 'navy', navyLight: 'navyMid', navyDark: 'night', navyPale: 'navyLight',
+  grass: 'grassDark', grassLight: 'grass', grassDark: 'grassDeep', grassPale: 'grassLight',
+  skin: 'skinDark', skinLight: 'skin', skinDark: 'skinDeep', skinPale: 'skinLight',
+  dirt: 'dirtDark', dirtLight: 'dirt', dirtDark: 'wood', wood: 'hair', hair: 'black',
+  white: 'greyLight', greyLight: 'grey', grey: 'greyDark', greyDark: 'navyDark',
+  sky: 'night', skyLight: 'navyDark',
+};
+export async function night(out) {
+  const { width: W, height: H } = FIELD;
+  const c = canvas(W, H);
+  drawField(c);
+  const lit = (x, y) => ((x - 240) / 190) ** 2 + ((y - 175) / 75) ** 2 <= 1 && (x + y) % 2 === 0;
+  c.remap((name, x, y) => {
+    if (y < STANDS.top) return y >= 10 && (x + y) % 2 === 0 ? 'navyDark' : 'night'; // the sky, dithered near the stands
+    if (y >= TRACK_BOTTOM && lit(x, y)) return null; // floodlit grass and dirt keep their day colour
+    return DARKER[name] ?? null;
+  });
+  const rand = seeded(11);
+  for (let i = 0; i < 26; i++) c.set(Math.floor(rand() * W), Math.floor(rand() * 9), rand() < 0.3 ? 'navyPale' : 'navyLight');
+  // two light towers above the stands: a pole and a bank of 3×2 lamps, lit
+  for (const tx of [44, 436]) {
+    c.rect(tx - 1, 4, 3, STANDS.bottom - 4, 'greyDark');
+    c.rect(tx - 1, 4, 1, STANDS.bottom - 4, 'grey');
+    c.rect(tx - 10, 0, 21, 9, 'navy');
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) {
+      c.rect(tx - 8 + i * 5, 1 + j * 4, 4, 3, 'yellow');
+      c.set(tx - 8 + i * 5, 1 + j * 4, 'white');
+    }
+  }
+  await c.png(out('night.png'));
 }

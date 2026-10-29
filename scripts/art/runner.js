@@ -1,5 +1,7 @@
-// Riccardo as a 48×48 pixel player, facing right, in 15 frames on one sprite sheet (720×144, 3 uniforms):
-//   idle 0–1 · run 2–5 · swing 6–9 · high five 10 · cheer 11–12 · wave 13–14   (same order as the tags in runner.json)
+// Riccardo as a 48×48 pixel player, facing right, in 18 frames on one sprite sheet (864×144, 3 uniforms):
+//   idle 0–3 · blink 4 · run 5–8 · swing 9–12 · high five 13 · cheer 14–15 · wave 16–17   (same order as the tags in runner.json)
+// F6: a bigger head (chibi, but still readable), an asymmetric idle pose that breathes (1 px) and blinks every 8 frames,
+// a 4-frame swing (load, stride, contact with a trail, follow-through) and the selective outline of canvas.outlineByRamp.
 // One row per uniform (src/uniforms.js): Researcher, Designer, Maker = palette swap + accessory.
 // Look taken from his reference photo (docs/reference/, private): navy helmet and jersey, dark curly hair,
 // stubble, black earring, white pants and batting gloves, black wristbands. The photo itself is never used.
@@ -23,10 +25,21 @@ function ellipse(cx, cy, rx, ry, paint, where = () => true) {
 }
 
 // look.gear = { main, light, shade } of the helmet (with ear flap) or the cap; look.helmet = true for the helmet.
+// look.headScale = how much bigger than the 22×16 box (F6: 1.2 for Riccardo); look.blink = eyes closed.
 function drawHead(c, hx, hy, look) {
-  const put = (x, y, color) => c.set(hx + x, hy + y, color);
-  const fill = (x, y, w, h, color) => c.rect(hx + x, hy + y, w, h, color);
-  const paint = (color) => (x, y) => put(x, y, color);
+  const S = look.headScale ?? 1;
+  const at = (v) => Math.round(v * S);
+  const put = (x, y, color) => c.set(hx + at(x), hy + at(y), color);
+  const fill = (x, y, w, h, color) => c.rect(hx + at(x), hy + at(y), Math.max(1, at(x + w) - at(x)), Math.max(1, at(y + h) - at(y)), color);
+  // An ellipse in head units, painted at the scaled size; `where` still speaks head units.
+  const ellipse = (cx, cy, rx, ry, paintAt, where = () => true) => {
+    for (let y = Math.floor((cy - ry) * S); y <= Math.ceil((cy + ry) * S); y++) {
+      for (let x = Math.floor((cx - rx) * S); x <= Math.ceil((cx + rx) * S); x++) {
+        if (((x / S - cx) / rx) ** 2 + ((y / S - cy) / ry) ** 2 <= 1 && where(x / S, y / S, x, y)) paintAt(x, y);
+      }
+    }
+  };
+  const paint = (color) => (x, y) => c.set(hx + x, hy + y, color);
   const { gear } = look;
   const skin = look.skin ?? 'skin';
   const shade = look.skinShade ?? 'skinDark';
@@ -46,14 +59,18 @@ function drawHead(c, hx, hy, look) {
   put(20, 12, shade);
   // stubble on the jaw and the chin, a little shadow under the brim
   if (look.stubble !== false) {
-    ellipse(12.5, 9, 7, 6.5, paint(shade), (x, y) => y >= 13 && (x + y) % 2 === 0 && x > 8);
+    ellipse(12.5, 9, 7, 6.5, paint(shade), (x, y, px, py) => y >= 13 && (px + py) % 2 === 0 && x > 8); // a checker of real pixels
     for (let x = 11; x <= 16; x++) put(x, 15, shade);
   }
   fill(14, 7, 6, 1, shade);
-  // eyebrow, eye, mouth
+  // eyebrow, eye (closed on the blink frame), mouth
   fill(13, 8, 4, 1, hair);
-  put(14, 9, 'white'); put(14, 10, 'white');
-  put(15, 9, 'black'); put(15, 10, 'black');
+  if (look.blink) {
+    fill(14, 10, 2, 1, hair);
+  } else {
+    put(14, 9, 'white'); put(14, 10, 'white');
+    put(15, 9, 'black'); put(15, 10, 'black');
+  }
   fill(15, 13, 3, 1, 'redDark');
   // the ear
   ellipse(8.5, 10, 1.6, 2.2, paint(shade));
@@ -103,20 +120,27 @@ export const legs = {
   wide: { back: [[19, 35], [15, 42]], front: [[31, 35], [36, 42]] },
   jump: { back: [[21, 33], [20, 39]], front: [[30, 33], [32, 39]] },
 };
+// idle (F6): weight on the back leg, front knee bent, back hand on the hip, the front hand holds the accessory.
+// Frames 0–1 up, 2–3 down one pixel (the breath); frame 4 = frame 3 with the eyes closed (CSS shows it once every 8 frames).
+const IDLE = { back: [[21, 35], [20, 42]], front: [[29, 35], [32, 42]], armBack: [[16, 24], [20, 28]] };
 const POSES = [
-  // idle: standing, a small breath on the second frame
-  { ...legs.stand, armBack: [[21, 23], [21, 27]], armFront: [[30, 23], [30, 27]], bob: 0 },
-  { ...legs.stand, armBack: [[21, 24], [21, 29]], armFront: [[30, 24], [30, 29]], bob: 1 },
+  { ...IDLE, armFront: [[31, 23], [32, 27]], bob: 0 },
+  { ...IDLE, armFront: [[31, 23], [32, 28]], bob: 0 },
+  { ...IDLE, armFront: [[31, 24], [32, 28]], bob: 1 },
+  { ...IDLE, armFront: [[31, 24], [32, 29]], bob: 1 },
+  { ...IDLE, armFront: [[31, 24], [32, 29]], bob: 1, blink: true },
   // run: stride, pass, stride (other leg), pass
   { back: [[20, 35], [15, 39]], front: [[32, 35], [35, 42]], armBack: [[29, 23], [33, 20]], armFront: [[24, 23], [21, 26]], bob: 0 },
   { back: [[26, 33], [21, 38]], front: [[29, 36], [27, 42]], armBack: [[23, 24], [21, 27]], armFront: [[27, 24], [30, 26]], bob: -2 },
   { back: [[32, 35], [35, 42]], front: [[20, 35], [15, 39]], armBack: [[21, 23], [18, 26]], armFront: [[32, 23], [36, 20]], bob: 0 },
   { back: [[29, 36], [27, 42]], front: [[26, 33], [21, 38]], armBack: [[27, 24], [30, 26]], armFront: [[23, 24], [21, 27]], bob: -2 },
-  // swing: stance, load, contact, follow-through
-  { ...legs.wide, armBack: [[20, 23], [21, 18]], armFront: [[26, 23], [21, 18]], bat: [[21, 18], [14, 3]], bob: 0 },
-  { ...legs.wide, armBack: [[18, 23], [18, 20]], armFront: [[24, 23], [18, 20]], bat: [[18, 20], [8, 8]], bob: 1 },
-  { back: legs.wide.back, front: [[33, 35], [37, 42]], armBack: [[27, 23], [33, 24]], armFront: [[32, 23], [33, 24]], bat: [[29, 24], [45, 23]], bob: 0 },
-  { ...legs.wide, armBack: [[26, 21], [20, 17]], armFront: [[29, 20], [20, 17]], bat: [[20, 17], [6, 23]], bob: 0 },
+  // swing (F6): load (weight back, hands high, bat up behind), stride (front foot forward, the bat starts to drop),
+  // contact (hips turned, arms long, a trail behind the bat), follow-through (bat round over the shoulder, back heel up)
+  { back: [[19, 35], [16, 42]], front: [[30, 35], [33, 42]], armBack: [[17, 21], [19, 15]], armFront: [[23, 21], [19, 15]], bat: [[19, 15], [10, 1]], bob: 1 },
+  { back: [[20, 35], [15, 42]], front: [[33, 35], [38, 42]], armBack: [[19, 22], [21, 18]], armFront: [[25, 22], [21, 18]], bat: [[21, 18], [7, 10]], bob: 1 },
+  { back: [[24, 35], [19, 42]], front: [[33, 35], [37, 42]], armBack: [[27, 23], [33, 24]], armFront: [[32, 23], [34, 24]], bat: [[30, 24], [46, 22]],
+    trail: [[9, 15], [11, 20], [15, 24], [20, 26], [25, 27]], bob: 0 },
+  { back: [[25, 34], [22, 41]], front: [[32, 35], [36, 42]], armBack: [[27, 20], [21, 15]], armFront: [[30, 19], [21, 15]], bat: [[21, 15], [6, 22]], bob: 0 },
   // high five: front hand up and forward
   { ...legs.stand, armBack: [[21, 23], [21, 27]], armFront: [[35, 15], [39, 9]], bob: 0, prop: false },
   // cheer: both arms up, then a little jump
@@ -127,12 +151,13 @@ const POSES = [
   { ...legs.stand, armBack: [[21, 23], [21, 27]], armFront: [[33, 15], [38, 11]], bob: 0, prop: false },
 ];
 export const TAGS = [
-  { name: 'idle', from: 0, to: 1, duration: 500 },
-  { name: 'run', from: 2, to: 5, duration: 100 },
-  { name: 'swing', from: 6, to: 9, duration: 110 },
-  { name: 'highfive', from: 10, to: 10, duration: 400 },
-  { name: 'cheer', from: 11, to: 12, duration: 200 },
-  { name: 'wave', from: 13, to: 14, duration: 250 },
+  { name: 'idle', from: 0, to: 3, duration: 250 },
+  { name: 'blink', from: 4, to: 4, duration: 250 },
+  { name: 'run', from: 5, to: 8, duration: 100 },
+  { name: 'swing', from: 9, to: 12, duration: 110 },
+  { name: 'highfive', from: 13, to: 13, duration: 400 },
+  { name: 'cheer', from: 14, to: 15, duration: 200 },
+  { name: 'wave', from: 16, to: 17, duration: 250 },
 ];
 
 // --- Limbs ---------------------------------------------------------------------------------------------------
@@ -188,7 +213,11 @@ export function drawPlayer(c, ox, oy, pose, look) {
   leg(c, ox, oy, [21, 28 + b], pose.back, look.pants.far, look.pants.shade);
   c.map(ox + 16, oy + 16 + b, TORSO, torsoKey(look));
   leg(c, ox, oy, [26, 28 + b], pose.front, look.pants.main, look.pants.shade);
-  drawHead(c, ox + 12, oy + 2 + b, look);
+  // the bigger head (F6) sits further left, so it stays centred on the body, and lower on the shoulders (short neck)
+  const big = (look.headScale ?? 1) > 1;
+  drawHead(c, ox + (big ? 10 : 12), oy + 2 + b, { ...look, blink: pose.blink });
+  // the trail of a fast bat, in front of the body: a pale arc that gets brighter towards the bat
+  if (pose.trail) pose.trail.forEach(([x, y], i) => c.rect(ox + x, oy + y, 2, 2, i < 2 ? 'navyLight' : 'navyPale'));
   if (pose.bat) {
     const [[x0, y0], [x1, y1]] = pose.bat;
     c.line(ox + x0, oy + y0, ox + x1, oy + y1, 'wood', 3);
@@ -199,7 +228,7 @@ export function drawPlayer(c, ox, oy, pose, look) {
   if (look.accessory === 'pencil' || (look.accessory && !pose.bat && pose.prop !== false)) {
     accessory(c, ox, oy, b, pose.armFront[1], look.accessory);
   }
-  c.outline('navyDark', { x: ox, y: oy, w: SIZE, h: SIZE });
+  c.outlineByRamp({ x: ox, y: oy, w: SIZE, h: SIZE });
 }
 
 // Aseprite-style JSON (array format) for a sheet: open the PNG + JSON in Aseprite to edit the frames.
@@ -239,6 +268,7 @@ export async function runner(out) {
       pants: { main: 'white', shade: 'greyLight', far: 'skyLight' },
       glove: 'white',
       accessory: u.accessory,
+      headScale: 1.2,
     };
     POSES.forEach((pose, i) => drawPlayer(c, i * SIZE, u.row * SIZE, pose, look));
   }

@@ -20,7 +20,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 500
+      "duration": 250
     },
     {
       "filename": "runner 1.aseprite",
@@ -42,7 +42,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 500
+      "duration": 250
     },
     {
       "filename": "runner 2.aseprite",
@@ -64,7 +64,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 100
+      "duration": 250
     },
     {
       "filename": "runner 3.aseprite",
@@ -86,7 +86,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 100
+      "duration": 250
     },
     {
       "filename": "runner 4.aseprite",
@@ -108,7 +108,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 100
+      "duration": 250
     },
     {
       "filename": "runner 5.aseprite",
@@ -152,7 +152,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 110
+      "duration": 100
     },
     {
       "filename": "runner 7.aseprite",
@@ -174,7 +174,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 110
+      "duration": 100
     },
     {
       "filename": "runner 8.aseprite",
@@ -196,7 +196,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 110
+      "duration": 100
     },
     {
       "filename": "runner 9.aseprite",
@@ -240,7 +240,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 400
+      "duration": 110
     },
     {
       "filename": "runner 11.aseprite",
@@ -262,7 +262,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 200
+      "duration": 110
     },
     {
       "filename": "runner 12.aseprite",
@@ -284,7 +284,7 @@
         "w": 48,
         "h": 48
       },
-      "duration": 200
+      "duration": 110
     },
     {
       "filename": "runner 13.aseprite",
@@ -306,12 +306,78 @@
         "w": 48,
         "h": 48
       },
-      "duration": 250
+      "duration": 400
     },
     {
       "filename": "runner 14.aseprite",
       "frame": {
         "x": 672,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 200
+    },
+    {
+      "filename": "runner 15.aseprite",
+      "frame": {
+        "x": 720,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 200
+    },
+    {
+      "filename": "runner 16.aseprite",
+      "frame": {
+        "x": 768,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 48
+      },
+      "duration": 250
+    },
+    {
+      "filename": "runner 17.aseprite",
+      "frame": {
+        "x": 816,
         "y": 0,
         "w": 48,
         "h": 48
@@ -336,7 +402,7 @@
     "image": "runner.png",
     "format": "RGBA8888",
     "size": {
-      "w": 720,
+      "w": 864,
       "h": 144
     },
     "scale": "1",
@@ -344,37 +410,43 @@
       {
         "name": "idle",
         "from": 0,
-        "to": 1,
+        "to": 3,
+        "direction": "forward"
+      },
+      {
+        "name": "blink",
+        "from": 4,
+        "to": 4,
         "direction": "forward"
       },
       {
         "name": "run",
-        "from": 2,
-        "to": 5,
+        "from": 5,
+        "to": 8,
         "direction": "forward"
       },
       {
         "name": "swing",
-        "from": 6,
-        "to": 9,
-        "direction": "forward"
-      },
-      {
-        "name": "highfive",
-        "from": 10,
-        "to": 10,
-        "direction": "forward"
-      },
-      {
-        "name": "cheer",
-        "from": 11,
+        "from": 9,
         "to": 12,
         "direction": "forward"
       },
       {
-        "name": "wave",
+        "name": "highfive",
         "from": 13,
-        "to": 14,
+        "to": 13,
+        "direction": "forward"
+      },
+      {
+        "name": "cheer",
+        "from": 14,
+        "to": 15,
+        "direction": "forward"
+      },
+      {
+        "name": "wave",
+        "from": 16,
+        "to": 17,
         "direction": "forward"
       }
     ]

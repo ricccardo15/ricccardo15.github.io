@@ -91,3 +91,9 @@
 - 2026-10-29 — F5: card dei casi senza PDF, TL;DR e ruolo (il piano dice "solo cover, titolo, 1 riga, numeri chiave, Read the case study e Next base"). (auto)
 - 2026-10-29 — F5: su telefono l'HUD mostra "⏸ Pause · GAMEPLAY · ◇◇◇ · ♪ off" e la base sulla riga sotto; la parola "Sound" resta nel nome accessibile. (auto)
 - 2026-10-29 — F5: tolti src/spots.js e src/uniform.js; SPOTS resta in field-map.js solo per l'ordine delle icone. (auto)
+- 2026-10-29 — F6: palette a 34 colori con 4 rampe da 5 toni (rosso, navy, prato, pelle) + #0b0f1e per il cielo di notte; contorno selettivo (tono più scuro della rampa, più chiaro in alto a sinistra) per battitore e crew; battitore con testa più grande, idle a 4 frame + battito di ciglia ogni 8, swing a 4 frame con scia; nuovo public/game/night.png.
+- 2026-10-29 — F6: i colori delle rampe sono quelli esatti del piano anche se alcuni passi superano i 20° di tinta (rosso 328°→3°, prato 164°→122°, pelle 0°→22°): il test controlla ordine e valori, non i gradi. [CHECK] (auto)
+- 2026-10-29 — F6: nuovo ordine dei frame di runner.png (18 frame, 864×144): idle 0–3, blink 4, run 5–8, swing 9–12, high five 13, cheer 14–15, wave 16–17; CSS e anteprima OG aggiornati. (auto)
+- 2026-10-29 — F6: il colore "black" della palette (#2a1d18, marrone scurissimo) resta per scarpe e polsini; i contorni non lo usano mai. (auto)
+- 2026-10-29 — F6: sulla schermata titolo si vede solo la parte bassa di night.png (il diamante), scurita al 50%: le torri luci sono nel disegno ma restano sopra il taglio, perché dietro al nome il cielo deve restare liscio per il contrasto. Il suggerimento dei tasti ha uno sfondo scuro. (auto)
+- 2026-10-29 — F6: lobby.png e scripts/art/lobby.js tolti (la lobby non esiste più dopo F4). (auto)

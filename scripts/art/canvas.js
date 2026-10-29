@@ -1,6 +1,6 @@
 // Tiny pixel canvas used by the art scripts: set pixels by palette name, then save as PNG.
 import sharp from 'sharp';
-import { PALETTE } from '../../src/palette.js';
+import { PALETTE, RAMPS } from '../../src/palette.js';
 import { GLYPHS } from './title.js';
 
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -51,6 +51,42 @@ export function canvas(width, height) {
     for (const [x, y] of add) set(x, y, color);
   };
 
+  // Selective outline (F6): every empty pixel next to the drawing takes the darkest tone of the ramp of the part it
+  // touches, one tone lighter on the lit side (light comes from the top left, so the outline above and to the left of a
+  // part is lighter). Colours outside the four ramps use OUTLINE below. Never pure black.
+  const outlineByRamp = (area = { x: 0, y: 0, w: width, h: height }) => {
+    const add = [];
+    for (let y = area.y; y < area.y + area.h; y++) {
+      for (let x = area.x; x < area.x + area.w; x++) {
+        if (isSet(x, y)) continue;
+        // neighbours below and to the right = this pixel is on the lit side of that part
+        for (const [dx, dy, lit] of [[0, 1, true], [1, 0, true], [0, -1, false], [-1, 0, false]]) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < area.x || ny < area.y || nx >= area.x + area.w || ny >= area.y + area.h || !isSet(nx, ny)) continue;
+          const [dark, light] = outlineOf(nameAt(nx, ny));
+          add.push([x, y, lit ? light : dark]);
+          break;
+        }
+      }
+    }
+    for (const [x, y, color] of add) set(x, y, color);
+  };
+  const nameAt = (x, y) => {
+    const i = (y * width + x) * 4;
+    return BY_RGB.get(`${data[i]},${data[i + 1]},${data[i + 2]}`);
+  };
+
+  // Swap colours by name over the whole picture (the night version of the field, F6).
+  const remap = (swap) => {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (!isSet(x, y)) continue;
+        const to = swap(nameAt(x, y), x, y);
+        if (to) set(x, y, to);
+      }
+    }
+  };
+
   // Text in the 5×7 pixel font of the title (scripts/art/title.js), `scale` pixels per font pixel; letters are 6 pixels apart.
   const text = (str, x, y, color, scale = 1) => {
     [...str.toUpperCase()].forEach((ch, n) => GLYPHS[ch].split('|').forEach((row, j) => [...row].forEach((p, i) => {
@@ -62,8 +98,20 @@ export function canvas(width, height) {
   // Lossless WebP at `scale`× with nearest neighbour: sharp pixels and exactly the palette colours.
   const webp = (file, scale = 1) => sharp(data, { raw: { width, height, channels: 4 } })
     .resize(width * scale, height * scale, { kernel: 'nearest' }).webp({ lossless: true }).toFile(file);
-  return { width, height, set, isSet, rect, line, map, outline, text, png, webp };
+  return { width, height, set, isSet, rect, line, map, outline, outlineByRamp, remap, nameAt, text, png, webp };
 }
+
+const BY_RGB = new Map(Object.entries(PALETTE).map(([name, hex]) => [rgb(hex).join(), name]));
+// [outline, outline on the lit side] for every colour: its ramp's darkest tone, or a dark tone of the same family.
+const OUTLINE = {
+  ...Object.fromEntries(Object.values(RAMPS).flatMap((ramp) => ramp.map((name) => [name, [ramp[0], ramp[1]]]))),
+  sky: ['navyDark', 'navy'], skyLight: ['navyMid', 'navyLight'],
+  white: ['navyMid', 'navyLight'], greyLight: ['greyDark', 'grey'], grey: ['greyDark', 'greyDark'], greyDark: ['navyDark', 'navy'],
+  black: ['skinDeep', 'hair'], hair: ['skinDeep', 'black'], wood: ['skinDeep', 'hair'],
+  dirt: ['skinDeep', 'dirtDark'], dirtDark: ['skinDeep', 'wood'], dirtLight: ['dirtDark', 'dirt'],
+  yellow: ['wood', 'dirtDark'], night: ['navyDark', 'navyDark'],
+};
+const outlineOf = (name) => OUTLINE[name] ?? ['navyDark', 'navy'];
 
 // Same "random" numbers on every run, so the art never changes unless the code does.
 export function seeded(seed = 1) {

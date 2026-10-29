@@ -288,9 +288,8 @@ h3 { font-size: 1.25rem; }
   width: calc(var(--cell) * var(--s) * 1px);
   height: calc(var(--cell) * var(--s) * 1px);
   image-rendering: pixelated;
-  animation: idle 1s steps(2, jump-none) infinite;
 }
-.runner, .batter { --frames: 15; --rows: 3; }
+.runner, .batter { --frames: 18; --rows: 3; animation: idle 2s steps(1, end) infinite; }
 .crew-sprite { --frames: 8; --rows: 4; }
 .sprite {
   --s: var(--fs);
@@ -317,19 +316,27 @@ h3 { font-size: 1.25rem; }
   background-repeat: no-repeat;
 }
 
-/* Runner frames: idle 0–1 · run 2–5 · swing 6–9 · high five 10 · cheer 11–12 · wave 13–14 */
+/* Runner frames (F6): idle 0–3 · blink 4 · run 5–8 · swing 9–12 · high five 13 · cheer 14–15 · wave 16–17 */
 .is-running .runner { animation: run .4s steps(4, jump-none) infinite; }
-.runner.is-batting { animation: none; background-position-x: calc(var(--step) * 6); }
+.runner.is-batting { animation: none; background-position-x: calc(var(--step) * 9); }
 .runner.is-swinging { animation: swing .44s steps(4, jump-none) 1 forwards; }
-.runner.is-highfive { animation: none; background-position-x: calc(var(--step) * 10); }
+.runner.is-highfive { animation: none; background-position-x: calc(var(--step) * 13); }
 .runner.is-cheer { animation: cheer .4s steps(2, jump-none) infinite; }
 .runner.is-wave { animation: wave .5s steps(2, jump-none) infinite; }
-/* `, 0` = the second background layer (the sky of the big batter) stays put; sprites have one layer and ignore it. */
-@keyframes idle { from { background-position-x: 0, 0; } to { background-position-x: var(--step), 0; } }
-@keyframes run { from { background-position-x: calc(var(--step) * 2); } to { background-position-x: calc(var(--step) * 5); } }
-@keyframes swing { from { background-position-x: calc(var(--step) * 6), 0; } to { background-position-x: calc(var(--step) * 9), 0; } }
-@keyframes cheer { from { background-position-x: calc(var(--step) * 11); } to { background-position-x: calc(var(--step) * 12); } }
-@keyframes wave { from { background-position-x: calc(var(--step) * 13); } to { background-position-x: calc(var(--step) * 14); } }
+/* Idle: the breath (frames 0 1 2 3) twice, the second time with a blink on the last frame (4): one blink every 8 frames. */
+@keyframes idle {
+  0%, 50% { background-position-x: 0; }
+  12.5%, 62.5% { background-position-x: var(--step); }
+  25%, 75% { background-position-x: calc(var(--step) * 2); }
+  37.5% { background-position-x: calc(var(--step) * 3); }
+  87.5%, 100% { background-position-x: calc(var(--step) * 4); }
+}
+@keyframes crew-idle { from { background-position-x: 0; } to { background-position-x: var(--step); } }
+.crew-sprite { animation: crew-idle 1s steps(2, jump-none) infinite; }
+@keyframes run { from { background-position-x: calc(var(--step) * 5); } to { background-position-x: calc(var(--step) * 8); } }
+@keyframes swing { from { background-position-x: calc(var(--step) * 9); } to { background-position-x: calc(var(--step) * 12); } }
+@keyframes cheer { from { background-position-x: calc(var(--step) * 14); } to { background-position-x: calc(var(--step) * 15); } }
+@keyframes wave { from { background-position-x: calc(var(--step) * 16); } to { background-position-x: calc(var(--step) * 17); } }
 /* Crew frames: idle 0–1 · high five 2 · cheer 3–4 · pitch 5–7 */
 .crew-sprite.is-highfive { animation: none; background-position-x: calc(var(--step) * 2); }
 .crew-sprite.is-cheer { animation: crew-cheer .4s steps(2, jump-none) infinite; }
@@ -564,6 +571,7 @@ th { background: var(--ink); color: var(--bg); }
 /* 480×270 at 3×, only its lower two thirds (the infield): the sky above stays the night of the page. */
 .title-stadium { position: absolute; left: 50%; bottom: 0; z-index: 0; width: 1440px; max-width: none; height: 540px; object-fit: cover; object-position: bottom; transform: translateX(-50%); image-rendering: pixelated; pointer-events: none; }
 .title-stadium[src$="field.png"] { filter: brightness(.25) saturate(.7); }
+.title-stadium[src$="night.png"] { height: 405px; filter: brightness(.5); } /* the night picture (F6): only the infield, darker behind the text */
 @media (max-width: 699px) { .title-stadium { display: none; } } /* phones: the menu and the projects need the room */
 .title-grid { position: relative; z-index: 1; display: grid; gap: 3rem; max-width: 72rem; }
 @media (min-width: 1000px) {
@@ -591,7 +599,7 @@ th { background: var(--ink); color: var(--bg); }
   content: "▶" / ""; position: absolute; left: 1.15rem; top: 1.05rem; /* / "": the cursor is not read as part of the link's name */ color: var(--yellow); font-size: 1.25rem; line-height: 1;
 }
 .menu-item:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
-.menu-hint { margin: 1.25rem 0 0; font-family: var(--font-mono); font-size: .875rem; letter-spacing: .04em; color: var(--muted); }
+.menu-hint { display: inline-block; position: relative; margin: 1.25rem 0 0; padding: .25rem .5rem; background: var(--night); font-family: var(--font-mono); font-size: .875rem; letter-spacing: .04em; color: var(--muted); }
 .menu-hint kbd { border-color: var(--line); background: var(--card); color: var(--ink); }
 @media (hover: none) and (pointer: coarse) {
   .menu-hint { display: none !important; } /* no arrow keys on a touch screen */
@@ -737,7 +745,7 @@ th { background: var(--ink); color: var(--bg); }
 .uniform-tile[aria-pressed="true"] .tile-name::before { content: "▶ " / ""; color: var(--yellow); }
 .uniform-tile:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 /* Portrait: the head of the 48 px frame (a 40×30 window at 1.5×) */
-.portrait { width: 40px; height: 30px; border: 1px solid var(--line); background: url("/game/runner.png") -14px calc(var(--row) * -72px) / 1080px 216px no-repeat, #1b2a4a; image-rendering: pixelated; }
+.portrait { width: 40px; height: 30px; border: 1px solid var(--line); background: url("/game/runner.png") -14px calc(var(--row) * -72px) / 1296px 216px no-repeat, #1b2a4a; image-rendering: pixelated; }
 .pick-skip { display: inline-flex; align-items: center; gap: .35em; min-height: 44px; margin-left: auto; color: var(--ink); }
 @media (max-width: 699px) {
   .uniform-pick { gap: .4rem .5rem; padding: .5rem; }

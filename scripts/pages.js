@@ -154,7 +154,7 @@ async function ogHome(L) {
   const SCALE = 3, CROP = { left: 120, top: 180 };
   const home = STOPS.find((s) => s.id === 'home');
   const batter = await sharp(root('public/game/runner.png'))
-    .extract({ left: 6 * 48, top: 0, width: 48, height: 48 }) // swing stance, Researcher uniform
+    .extract({ left: 9 * 48, top: 0, width: 48, height: 48 }) // swing: the load, Researcher uniform (F6 sheet)
     .resize(48 * SCALE, 48 * SCALE, { kernel: 'nearest' })
     .toBuffer();
   const field = await sharp(root('public/game/field.png'))
